@@ -1,9 +1,10 @@
 ﻿
 using System.ComponentModel.DataAnnotations; // Cần cho RowVersion
+using Bookstore.Domain.Interfaces;
 
 namespace Bookstore.Domain.Entities
 {
-    public class Book : BaseEntity
+    public class Book : BaseEntity, ISoftDeleteEntity
     {
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
@@ -19,10 +20,5 @@ namespace Bookstore.Domain.Entities
 
         [Timestamp] // For SQL Server RowVersion -> concurrency control
         public byte[] RowVersion { get; set; } = null!;
-
-        // Navigation properties (optional for now)
-        // public virtual Author Author { get; set; }
-        // public virtual Category Category { get; set; }
-        // ... (Reviews, OrderDetails, CartItems, WishlistItems...)
     }
 }

@@ -1,4 +1,6 @@
-﻿using Bookstore.Infrastructure.Persistence;
+﻿using Bookstore.Domain.Interfaces.Repositories;
+using Bookstore.Infrastructure.Persistence;
+using Bookstore.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -18,6 +20,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 maxRetryDelay: TimeSpan.FromSeconds(30),
                 errorNumbersToAdd: null);
         }));
+// ----- Register Repositories -----
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>)); 
+builder.Services.AddScoped<IUserRepository, UserRepository>(); 
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); 
+builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();  
+
 builder.Services.AddControllers();
 // ----- Configure API Versioning -----
 builder.Services.AddApiVersioning(options =>
