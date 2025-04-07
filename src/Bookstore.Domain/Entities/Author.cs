@@ -5,8 +5,6 @@ namespace Bookstore.Domain.Entities
     {
         public string Name { get; set; } = null!;
         public string? Biography { get; set; }
-
-        // Navigation property (optional for now)
-        // public virtual ICollection<Book> Books { get; set; } = new List<Book>();
+        public virtual ICollection<Book> Books { get; set; } = new List<Book>();
     }
 }

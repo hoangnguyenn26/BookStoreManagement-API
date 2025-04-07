@@ -20,5 +20,7 @@ namespace Bookstore.Domain.Entities
 
         [Timestamp] // For SQL Server RowVersion -> concurrency control
         public byte[] RowVersion { get; set; } = null!;
+        public virtual Author Author { get; set; }
+        public virtual Category Category { get; set; }
     }
 }
