@@ -52,6 +52,37 @@ namespace Bookstore.Api.Controllers.v1
             return Ok(userDtos);
         }
 
+        [HttpGet("{id:guid}")] // Thêm tham số route 'id' kiểu guid
+        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<UserDto>> GetUserById(Guid id, CancellationToken cancellationToken)
+        {
+            var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+
+            if (user == null) // Kiểm tra IsDeleted nếu User có hỗ trợ soft delete
+            {
+                return NotFound(); // Trả về 404 nếu không tìm thấy
+            }
+
+            // --- Mapping thủ công (Tạm thời) ---
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                IsActive = user.IsActive
+            };
+            // --- Kết thúc Mapping thủ công ---
+
+            // --- Sử dụng AutoMapper (Sau này) ---
+            // var userDto = _mapper.Map<UserDto>(user);
+            // --- Kết thúc AutoMapper ---
+
+            return Ok(userDto);
+        }
         // Các Actions khác (GET by Id, POST, PUT, DELETE) sẽ được thêm sau
     }
 }

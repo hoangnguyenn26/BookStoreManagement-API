@@ -38,16 +38,14 @@ namespace Bookstore.Infrastructure.Persistence
 
                 // Mối quan hệ với User
                 entity.HasOne(ur => ur.User)
-                      .WithMany() // Nếu không cần nav prop trong User thì để trống WithMany()
-                                  // .WithMany(u => u.UserRoles) // Nếu có nav prop ICollection<UserRole> UserRoles trong User
+                      .WithMany(u => u.UserRoles) //nav prop ICollection<UserRole> UserRoles trong User
                       .HasForeignKey(ur => ur.UserId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Cascade); // Xóa UserRole nếu User bị xóa
 
                 // Mối quan hệ với Role
                 entity.HasOne(ur => ur.Role)
-                      .WithMany() // Tương tự, nếu không cần nav prop trong Role
-                                  // .WithMany(r => r.UserRoles) // Nếu có nav prop ICollection<UserRole> UserRoles trong Role
+                      .WithMany(r => r.UserRoles) //  nav prop ICollection<UserRole> UserRoles trong Role
                       .HasForeignKey(ur => ur.RoleId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Cascade); // Xóa UserRole nếu Role bị xóa
@@ -169,11 +167,6 @@ namespace Bookstore.Infrastructure.Persistence
                 if (entityEntry.State == EntityState.Added)
                 {
                     ((BaseEntity)entityEntry.Entity).CreatedAtUtc = DateTime.UtcNow;
-                    // Đảm bảo Id được tạo nếu chưa có (Guid.NewGuid() đã làm điều này trong BaseEntity)
-                    // if (((BaseEntity)entityEntry.Entity).Id == Guid.Empty)
-                    // {
-                    //     ((BaseEntity)entityEntry.Entity).Id = Guid.NewGuid();
-                    // }
                 }
             }
 
@@ -190,8 +183,6 @@ namespace Bookstore.Infrastructure.Persistence
                 new Role { Id = AdminRoleId, Name = "Admin", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
                 new Role { Id = UserRoleId, Name = "User", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate }
             );
-
-            // Nếu bạn seed User Admin, cũng phải dùng Guid tĩnh và DateTime tĩnh
         }
     }
 }
