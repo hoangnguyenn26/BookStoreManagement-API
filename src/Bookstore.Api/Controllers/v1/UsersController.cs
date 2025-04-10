@@ -1,6 +1,7 @@
 ﻿
 using Bookstore.Application.Dtos; 
-using Bookstore.Domain.Interfaces.Repositories; 
+using Bookstore.Domain.Interfaces.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 // using Microsoft.AspNetCore.Authorization; // Sẽ dùng sau
 
@@ -9,6 +10,7 @@ namespace Bookstore.Api.Controllers.v1
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiVersion("1.0")]
+    [Authorize]
     // [Authorize] // Sẽ thêm sau khi implement Auth
     public class UsersController : ControllerBase
     {

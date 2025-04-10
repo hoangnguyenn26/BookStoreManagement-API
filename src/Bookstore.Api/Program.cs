@@ -1,7 +1,9 @@
 ﻿using Bookstore.Application.Settings; // Namespace chứa JwtSettings
 using Bookstore.Domain.Interfaces.Repositories; // Namespace chứa Interfaces Repository
+using Bookstore.Domain.Interfaces.Services;
 using Bookstore.Infrastructure.Persistence; // Namespace chứa DbContext
 using Bookstore.Infrastructure.Repositories; // Namespace chứa Implementations Repository
+using Bookstore.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApiExplorer; // Cần cho Swagger + Versioning
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +44,7 @@ builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); // Giả sử đã tạo
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();   // Giả sử đã tạo
 
+builder.Services.AddScoped<ITokenService, TokenService>(); // Đăng ký Token Service
 
 // ----- Configure Authentication -----
 // Cấu hình hệ thống xác thực sử dụng JWT Bearer tokens
