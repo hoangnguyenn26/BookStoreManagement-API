@@ -31,7 +31,7 @@ namespace Bookstore.Api.Controllers.v1
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers(CancellationToken cancellationToken)
         {
             // Sử dụng phương thức từ Repository (dùng ListAsync hoặc GetAllAsync nếu bạn implement)
-            var users = await _userRepository.ListAsync(cancellationToken: cancellationToken);
+            var users = await _userRepository.GetAllAsync(cancellationToken: cancellationToken);
 
             // --- Mapping thủ công (Tạm thời trước khi dùng AutoMapper) ---
             var userDtos = users.Select(user => new UserDto

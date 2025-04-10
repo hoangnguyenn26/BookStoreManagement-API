@@ -8,23 +8,15 @@ namespace Bookstore.Domain.Interfaces.Repositories
     {
         Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-        // Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default); // Đơn giản nhất
+        Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default); // Đơn giản nhất
 
-        // Phiên bản GetAllAsync linh hoạt hơn (tùy chọn, có thể thêm sau nếu cần)
-        Task<IReadOnlyList<T>> ListAsync(Expression<Func<T, bool>>? filter = null,
-                                      Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-                                      string? includeProperties = null, // Ví dụ: "Category,Author"
-                                      bool isTracking = false, // Mặc định không theo dõi thay đổi cho truy vấn đọc
-                                      CancellationToken cancellationToken = default);
 
         Task<T> AddAsync(T entity, CancellationToken cancellationToken = default);
 
-        // Update và Delete thường không cần async trong cách dùng EF Core phổ biến
-        // vì chúng chỉ thay đổi trạng thái của entity trong context.
-        // Nhưng để interface nhất quán, ta có thể vẫn để Task (dù Task.CompletedTask)
-        Task UpdateAsync(T entity, CancellationToken cancellationToken = default); // Hoặc void Update(T entity);
 
-        Task DeleteAsync(T entity, CancellationToken cancellationToken = default); // Hoặc void Delete(T entity);
+        Task UpdateAsync(T entity, CancellationToken cancellationToken = default);
+
+        Task DeleteAsync(T entity, CancellationToken cancellationToken = default); 
 
         Task DeleteAsync(Guid id, CancellationToken cancellationToken = default); // Xóa theo Id
     }

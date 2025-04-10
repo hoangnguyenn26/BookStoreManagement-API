@@ -23,45 +23,6 @@ namespace Bookstore.Infrastructure.Repositories
             return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
         }
 
-        public virtual async Task<IReadOnlyList<T>> ListAsync(
-            Expression<Func<T, bool>>? filter = null,
-            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-            string? includeProperties = null,
-            bool isTracking = false,
-            CancellationToken cancellationToken = default)
-        {
-            IQueryable<T> query = _dbSet;
-
-            // Apply filter
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            // Apply includes
-            if (!string.IsNullOrWhiteSpace(includeProperties))
-            {
-                foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    query = query.Include(includeProperty.Trim());
-                }
-            }
-
-            // Apply orderBy
-            if (orderBy != null)
-            {
-                query = orderBy(query);
-            }
-
-            // Apply tracking
-            if (!isTracking)
-            {
-                query = query.AsNoTracking(); // Quan trọng: Tắt tracking cho các truy vấn chỉ đọc
-            }
-
-            return await query.ToListAsync(cancellationToken);
-        }
-
 
         public virtual async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
         {
@@ -91,21 +52,21 @@ namespace Bookstore.Infrastructure.Repositories
         public virtual Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
         {
             // Kiểm tra xem entity có hỗ trợ Soft Delete không
-            if (entity is ISoftDeleteEntity softDeleteEntity) // Giả sử có interface ISoftDeleteEntity { bool IsDeleted { get; set; } }
+            if (entity is ISoftDeleteEntity softDeleteEntity)
             {
                 softDeleteEntity.IsDeleted = true;
-                _context.Entry(entity).State = EntityState.Modified; // Đánh dấu là Modified để SaveChanges lưu cờ IsDeleted
+                _context.Entry(entity).State = EntityState.Modified;
             }
             else
             {
-                // Nếu không hỗ trợ soft delete, xóa vật lý
                 _dbSet.Remove(entity);
             }
-            return Task.CompletedTask; // Không cần thao tác I/O bất đồng bộ ở đây
+            return Task.CompletedTask;
         }
 
-        // (Optional) Interface cho Soft Delete
-        // namespace Bookstore.Domain.Interfaces { public interface ISoftDeleteEntity { bool IsDeleted { get; set; } } }
-        // Các Entity Book, Category cần implement ISoftDeleteEntity
+        public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbSet.AsNoTracking().ToListAsync(cancellationToken);
+        }
     }
 }

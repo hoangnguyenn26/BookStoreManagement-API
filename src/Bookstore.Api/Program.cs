@@ -1,9 +1,14 @@
-﻿using Bookstore.Application.Settings; // Namespace chứa JwtSettings
+﻿using Bookstore.Application.Interfaces;
+using Bookstore.Application.Interfaces.Services;
+using Bookstore.Application.Services;
+using Bookstore.Application.Settings; // Namespace chứa JwtSettings
+using Bookstore.Application.Validators.Categories;
 using Bookstore.Domain.Interfaces.Repositories; // Namespace chứa Interfaces Repository
 using Bookstore.Domain.Interfaces.Services;
 using Bookstore.Infrastructure.Persistence; // Namespace chứa DbContext
 using Bookstore.Infrastructure.Repositories; // Namespace chứa Implementations Repository
 using Bookstore.Infrastructure.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApiExplorer; // Cần cho Swagger + Versioning
 using Microsoft.EntityFrameworkCore;
@@ -36,15 +41,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 errorNumbersToAdd: null);
         }));
 
-// ----- Register Repositories -----
-// Đăng ký các repository để có thể inject vào services/controllers
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IBookRepository, BookRepository>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); // Giả sử đã tạo
-builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();   // Giả sử đã tạo
 
-builder.Services.AddScoped<ITokenService, TokenService>(); // Đăng ký Token Service
+// ----- Register UnitOfWork -----
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>(); 
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 // ----- Configure Authentication -----
 // Cấu hình hệ thống xác thực sử dụng JWT Bearer tokens
@@ -137,6 +138,9 @@ else
 // ----- Configure Controllers -----
 builder.Services.AddControllers();
 
+// ----- Configure FluentValidation -----
+// Tự động tìm và đăng ký tất cả validators trong Assembly chứa CreateCategoryDtoValidator
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryDtoValidator>();
 
 // ----- Configure Swagger/OpenAPI -----
 builder.Services.AddEndpointsApiExplorer();
