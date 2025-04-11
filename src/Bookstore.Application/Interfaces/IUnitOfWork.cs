@@ -1,5 +1,5 @@
 ﻿// src/Bookstore.Application/Interfaces/IUnitOfWork.cs
-using Bookstore.Domain.Interfaces.Repositories; // Namespace chứa các repo interfaces
+using Bookstore.Domain.Interfaces.Repositories; 
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +12,7 @@ namespace Bookstore.Application.Interfaces
         IUserRepository UserRepository { get; }
         IBookRepository BookRepository { get; }
         IAuthorRepository AuthorRepository { get; }
+        IInventoryLogRepository InventoryLogRepository { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

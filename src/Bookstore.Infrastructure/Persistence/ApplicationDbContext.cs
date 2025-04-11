@@ -7,15 +7,15 @@ namespace Bookstore.Infrastructure.Persistence
 {
     public class ApplicationDbContext : DbContext
     {
-        private static readonly Guid AdminRoleId = new Guid("E1F3E5D4-1111-4F6F-9C5C-9B8D3A5B2A01"); // Thay bằng Guid bạn tự tạo
-        private static readonly Guid UserRoleId = new Guid("A2E4F6A8-2222-4D8E-8A4B-8A7C2B4E1F02"); // Thay bằng Guid bạn tự tạo
-        // Constructor cần thiết để DI hoạt động
+        private static readonly Guid AdminRoleId = new Guid("E1F3E5D4-1111-4F6F-9C5C-9B8D3A5B2A01"); 
+        private static readonly Guid UserRoleId = new Guid("A2E4F6A8-2222-4D8E-8A4B-8A7C2B4E1F02"); 
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
 
-        // Khai báo các DbSet cho các Entities cốt lõi đã tạo ở Ngày 1
+        // Khai báo các DbSet cho các Entities
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Role> Roles { get; set; } = null!;
         public DbSet<Book> Books { get; set; } = null!;
@@ -25,11 +25,12 @@ namespace Bookstore.Infrastructure.Persistence
         public DbSet<Address> Addresses { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderDetail> OrderDetails { get; set; } = null!;
-        // Thêm các DbSet khác khi bạn tạo Entities mới (ví dụ: Orders, Addresses...)
+        public DbSet<InventoryLog> InventoryLogs { get; set; } = null!;
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(builder); // Gọi base trước
+            base.OnModelCreating(builder);
             // ----- Cấu hình UserRole (Many-to-Many) -----
             builder.Entity<UserRole>(entity =>
             {
@@ -38,24 +39,24 @@ namespace Bookstore.Infrastructure.Persistence
 
                 // Mối quan hệ với User
                 entity.HasOne(ur => ur.User)
-                      .WithMany(u => u.UserRoles) //nav prop ICollection<UserRole> UserRoles trong User
+                      .WithMany(u => u.UserRoles) 
                       .HasForeignKey(ur => ur.UserId)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Cascade); // Xóa UserRole nếu User bị xóa
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 // Mối quan hệ với Role
                 entity.HasOne(ur => ur.Role)
-                      .WithMany(r => r.UserRoles) //  nav prop ICollection<UserRole> UserRoles trong Role
+                      .WithMany(r => r.UserRoles)
                       .HasForeignKey(ur => ur.RoleId)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Cascade); // Xóa UserRole nếu Role bị xóa
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ----- Cấu hình Address (One-to-Many với User) -----
             builder.Entity<Address>(entity =>
             {
                 entity.HasOne(a => a.User)
-                      .WithMany(u => u.Addresses) // Giả sử có ICollection<Address> Addresses trong User
+                      .WithMany(u => u.Addresses) 
                       .HasForeignKey(a => a.UserId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Cascade); // Xóa địa chỉ nếu User bị xóa
@@ -66,14 +67,13 @@ namespace Bookstore.Infrastructure.Persistence
             {
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.RowVersion).IsRowVersion();
-                entity.Property(e => e.Status).HasConversion<byte>(); // Lưu Enum dưới dạng byte
+                entity.Property(e => e.Status).HasConversion<byte>(); 
 
                 entity.HasOne(o => o.User)
-                      .WithMany(u => u.Orders) // Giả sử có ICollection<Order> Orders trong User
+                      .WithMany(u => u.Orders)
                       .HasForeignKey(o => o.UserId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Restrict); // Ngăn xóa User nếu họ có Orders (hành vi phổ biến)
-                // Không cần cấu hình HasMany cho OrderDetails ở đây nếu đã cấu hình trong OrderDetail
             });
 
             // ----- Cấu hình OrderDetail (Many-to-One với Order, Many-to-One với Book) -----
@@ -83,14 +83,13 @@ namespace Bookstore.Infrastructure.Persistence
                 entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
 
                 entity.HasOne(od => od.Order)
-                      .WithMany(o => o.OrderDetails) // Cần ICollection<OrderDetail> OrderDetails trong Order
+                      .WithMany(o => o.OrderDetails) 
                       .HasForeignKey(od => od.OrderId)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Cascade); // Xóa OrderDetail nếu Order bị xóa
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(od => od.Book)
-                      .WithMany() // Không cần nav prop ngược lại từ Book về OrderDetail thường là không cần thiết
-                                  // .WithMany(b => b.OrderDetails) // Nếu cần
+                      .WithMany()
                       .HasForeignKey(od => od.BookId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Restrict); // Ngăn xóa Book nếu nó nằm trong OrderDetail (trừ khi dùng Soft Delete)
@@ -107,13 +106,13 @@ namespace Bookstore.Infrastructure.Persistence
                 entity.HasQueryFilter(b => !b.IsDeleted);
 
                 entity.HasOne(d => d.Category)
-                      .WithMany(p => p.Books) // Giả sử có ICollection<Book> Books trong Category
+                      .WithMany(p => p.Books)
                       .HasForeignKey(d => d.CategoryId)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Restrict); // Ngăn xóa Category nếu có Book thuộc về nó (trừ khi dùng Soft Delete)
+                      .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(d => d.Author)
-                      .WithMany(p => p.Books) // Giả sử có ICollection<Book> Books trong Author
+                      .WithMany(p => p.Books) 
                       .HasForeignKey(d => d.AuthorId)
                       .OnDelete(DeleteBehavior.SetNull); // Nếu Author bị xóa, AuthorId trong Book thành NULL
             });
@@ -123,9 +122,9 @@ namespace Bookstore.Infrastructure.Persistence
                 // Cấu hình Soft Delete Filter
                 entity.HasQueryFilter(c => !c.IsDeleted);
 
-                // Cấu hình mối quan hệ tự tham chiếu cho ParentCategory (nếu có)
+                // Cấu hình mối quan hệ tự tham chiếu cho ParentCategory 
                 entity.HasOne(c => c.ParentCategory)
-                      .WithMany(c => c.SubCategories) // Giả sử có ICollection<Category> SubCategories trong Category
+                      .WithMany(c => c.SubCategories) 
                       .HasForeignKey(c => c.ParentCategoryId)
                       .OnDelete(DeleteBehavior.Restrict); // Ngăn xóa danh mục cha nếu có danh mục con
             });
@@ -137,17 +136,30 @@ namespace Bookstore.Infrastructure.Persistence
                 entity.HasIndex(e => e.Email).IsUnique();
                 entity.Property(e => e.FirstName).HasMaxLength(100);
                 entity.Property(e => e.LastName).HasMaxLength(100);
-                // Không cần cấu hình các HasMany ở đây nếu đã cấu hình ở phía 'Many' (Address, Order...)
             });
-
-
-            // ----- (Thêm cấu hình cho các entity khác nếu bạn đã tạo: CartItem, WishlistItem, Promotion, Review, InventoryLog) -----
-
-
-            // Áp dụng cấu hình từ các lớp riêng (Cách làm tốt hơn sau này)
+            // ----- Cấu hình InventoryLog -----
+            builder.Entity<InventoryLog>(entity =>
+            {
+                entity.Property(e => e.Reason).HasConversion<byte>();
+                entity.HasOne(il => il.Book)
+                      .WithMany() 
+                      .HasForeignKey(il => il.BookId)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Cascade); 
+                entity.HasOne(il => il.Order)
+                      .WithMany() 
+                      .HasForeignKey(il => il.OrderId)
+                      .IsRequired(false) 
+                      .OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(il => il.User)
+                      .WithMany()
+                      .HasForeignKey(il => il.UserId)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.SetNull); // Nếu User bị xóa, set UserId trong log thành NULL
+            });
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-            SeedData(builder); // Gọi SeedData (đảm bảo nó vẫn dùng giá trị tĩnh)
+            SeedData(builder); 
         }
 
 

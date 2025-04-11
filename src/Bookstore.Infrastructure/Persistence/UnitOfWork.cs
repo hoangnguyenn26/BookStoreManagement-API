@@ -16,6 +16,7 @@ namespace Bookstore.Infrastructure.Persistence;
         private Lazy<IUserRepository> _userRepository;
         private Lazy<IBookRepository> _bookRepository;
         private Lazy<IAuthorRepository> _authorRepository;
+        private Lazy<IInventoryLogRepository> _inventoryLogRepository;
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -25,13 +26,14 @@ namespace Bookstore.Infrastructure.Persistence;
             _userRepository = new Lazy<IUserRepository>(() => new UserRepository(_context));
             _bookRepository = new Lazy<IBookRepository>(() => new BookRepository(_context));
             _authorRepository = new Lazy<IAuthorRepository>(() => new AuthorRepository(_context));
+            _inventoryLogRepository = new Lazy<IInventoryLogRepository>(() => new InventoryLogRepository(_context));
         }
 
         public ICategoryRepository CategoryRepository => _categoryRepository.Value;
         public IUserRepository UserRepository => _userRepository.Value;
         public IBookRepository BookRepository => _bookRepository.Value;
         public IAuthorRepository AuthorRepository => _authorRepository.Value;
-      
+        public IInventoryLogRepository InventoryLogRepository => _inventoryLogRepository.Value;
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await _context.SaveChangesAsync(cancellationToken);
