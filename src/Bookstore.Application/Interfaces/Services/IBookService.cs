@@ -1,0 +1,18 @@
+﻿
+using Bookstore.Application.Dtos.Books;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Bookstore.Application.Interfaces.Services
+{
+    public interface IBookService
+    {
+        Task<IEnumerable<BookDto>> GetAllBooksAsync(CancellationToken cancellationToken = default);
+        Task<BookDto?> GetBookByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<BookDto> CreateBookAsync(CreateBookDto createBookDto, CancellationToken cancellationToken = default);
+        Task<bool> UpdateBookAsync(Guid id, UpdateBookDto updateBookDto, CancellationToken cancellationToken = default);
+        Task<bool> DeleteBookAsync(Guid id, CancellationToken cancellationToken = default); 
+    }
+}

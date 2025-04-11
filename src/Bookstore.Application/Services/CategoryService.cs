@@ -3,13 +3,12 @@ using Bookstore.Application.Dtos;
 using Bookstore.Application.Interfaces;
 using Bookstore.Application.Interfaces.Services;
 using Bookstore.Domain.Entities;
-using Bookstore.Domain.Interfaces.Repositories; // Namespace chứa ICategoryRepository
+using Bookstore.Domain.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Linq; // Cần cho Select (manual mapping)
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-// using Bookstore.Application.Exceptions; // Có thể tạo custom exceptions sau
 
 namespace Bookstore.Application.Services
 {
@@ -17,7 +16,7 @@ namespace Bookstore.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public CategoryService(IUnitOfWork unitOfWork /*, IMapper mapper*/)
+        public CategoryService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }

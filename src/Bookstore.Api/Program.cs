@@ -46,6 +46,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>(); 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IBookService, BookService>();
 
 // ----- Configure Authentication -----
 // Cấu hình hệ thống xác thực sử dụng JWT Bearer tokens

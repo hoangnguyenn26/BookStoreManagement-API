@@ -17,7 +17,45 @@ namespace Bookstore.Infrastructure.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dbSet = _context.Set<T>();
         }
+        public virtual async Task<IReadOnlyList<T>> ListAsync(
+           Expression<Func<T, bool>>? filter = null,
+           Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+           string? includeProperties = null, 
+           bool isTracking = false,
+           CancellationToken cancellationToken = default)
+        {
+            IQueryable<T> query = _dbSet;
 
+            // 1. Áp dụng Tracking (Mặc định là NoTracking cho hiệu năng đọc)
+            if (!isTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
+            // 2. Áp dụng Filter (WHERE clause)
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            // 3. Áp dụng Includes (Eager Loading)
+            if (!string.IsNullOrWhiteSpace(includeProperties))
+            {
+                foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty.Trim());
+                }
+            }
+
+            // 4. Áp dụng OrderBy (ORDER BY clause)
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            // 5. Thực thi truy vấn và trả về kết quả List
+            return await query.ToListAsync(cancellationToken);
+        }
         public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _dbSet.FindAsync(new object[] { id }, cancellationToken);

@@ -1,15 +1,20 @@
-﻿// src/Bookstore.Domain/Interfaces/Repositories/IGenericRepository.cs
-using Bookstore.Domain.Entities; // Namespace chứa BaseEntity
-using System.Linq.Expressions; // Cần cho Expression
+﻿
+using Bookstore.Domain.Entities;
+using System.Linq.Expressions; 
 
 namespace Bookstore.Domain.Interfaces.Repositories
 {
-    public interface IGenericRepository<T> where T : BaseEntity // Ràng buộc T phải là lớp kế thừa BaseEntity
+    public interface IGenericRepository<T> where T : BaseEntity 
     {
         Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
         Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default); // Đơn giản nhất
-
+        Task<IReadOnlyList<T>> ListAsync(
+            Expression<Func<T, bool>>? filter = null, // Điều kiện lọc (WHERE)
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, // Sắp xếp (ORDER BY)
+            string? includeProperties = null, // Các navigation property cần include
+            bool isTracking = false, // Có theo dõi thay đổi không
+            CancellationToken cancellationToken = default);
 
         Task<T> AddAsync(T entity, CancellationToken cancellationToken = default);
 
