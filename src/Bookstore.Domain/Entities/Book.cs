@@ -9,7 +9,7 @@ namespace Bookstore.Domain.Entities
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
         public string? ISBN { get; set; }
-        public Guid? AuthorId { get; set; } // Nullable nếu tác giả có thể không xác định hoặc bị xóa
+        public Guid? AuthorId { get; set; } 
         public string? Publisher { get; set; }
         public int? PublicationYear { get; set; }
         public string? CoverImageUrl { get; set; }

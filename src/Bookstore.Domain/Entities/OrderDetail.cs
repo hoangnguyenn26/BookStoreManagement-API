@@ -4,11 +4,11 @@ namespace Bookstore.Domain.Entities
     // Không cần BaseEntity nếu Id không cần các trường Audit riêng
     public class OrderDetail
     {
-        public Guid Id { get; set; } = Guid.NewGuid(); // Có thể dùng Guid hoặc Composite Key (OrderId, BookId)
+        public Guid Id { get; set; } = Guid.NewGuid(); 
         public Guid OrderId { get; set; }
         public Guid BookId { get; set; }
         public int Quantity { get; set; }
-        public decimal UnitPrice { get; set; } // Giá tại thời điểm mua
+        public decimal UnitPrice { get; set; } 
 
         // Navigation properties
         public virtual Order Order { get; set; } = null!;

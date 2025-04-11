@@ -11,7 +11,7 @@ namespace Bookstore.Domain.Entities
         public string? PhoneNumber { get; set; }
         public bool IsActive { get; set; } = true;
 
-         public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
         public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     }

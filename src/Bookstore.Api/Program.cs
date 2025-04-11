@@ -1,34 +1,28 @@
 ﻿using Bookstore.Application.Interfaces;
 using Bookstore.Application.Interfaces.Services;
 using Bookstore.Application.Services;
-using Bookstore.Application.Settings; // Namespace chứa JwtSettings
-using Bookstore.Application.Validators.Categories;
-using Bookstore.Domain.Interfaces.Repositories; // Namespace chứa Interfaces Repository
+using Bookstore.Application.Settings;
+using Bookstore.Application.Validators.Categories; 
 using Bookstore.Domain.Interfaces.Services;
-using Bookstore.Infrastructure.Persistence; // Namespace chứa DbContext
-using Bookstore.Infrastructure.Repositories; // Namespace chứa Implementations Repository
-using Bookstore.Infrastructure.Services;
-using FluentValidation;
+using Bookstore.Infrastructure.Persistence; 
+using Bookstore.Infrastructure.Repositories; 
+using Bookstore.Infrastructure.Services; 
+using FluentValidation; 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc.ApiExplorer; // Cần cho Swagger + Versioning
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Reflection; // Cần cho Assembly
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Đọc cấu hình JWT từ User Secrets hoặc appsettings
+// --- Bind JwtSettings from configuration ---
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-// Lấy instance của JwtSettings để sử dụng trong cấu hình Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
                   ?? throw new InvalidOperationException("JwtSettings is not configured correctly in user secrets or appsettings.");
 
-
-
-// Add services to the container.
 
 // ----- Configure DbContext -----
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -41,15 +35,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 errorNumbersToAdd: null);
         }));
 
-
-// ----- Register UnitOfWork -----
+// ----- Register UnitOfWork & Services -----
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>(); 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBookService, BookService>();
 
+
+
+
 // ----- Configure Authentication -----
-// Cấu hình hệ thống xác thực sử dụng JWT Bearer tokens
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -89,114 +84,165 @@ builder.Services.AddVersionedApiExplorer(options =>
 
 
 // ----- Configure CORS -----
-var swaggerUiOrigin = builder.Configuration["SwaggerUIOrigin"] ?? "https://localhost:5244"; // Lấy URL Swagger từ config hoặc mặc định
-var developmentOrigins = new string[] { swaggerUiOrigin }; // Có thể thêm các origin khác nếu cần
+string corsPolicyDevelopment = "AllowSwaggerAndDevClients"; 
+string corsPolicyProduction = "AllowAppClients"; 
 
-if (builder.Environment.IsDevelopment())
+builder.Services.AddCors(options =>
 {
-    // Cho phép origin của Swagger UI trong môi trường Development
-    builder.Services.AddCors(options =>
+    options.AddPolicy(corsPolicyDevelopment, policy =>
     {
-        options.AddPolicy("AllowSwagger", policy =>
+        var developmentOrigins = new List<string>();
+        var launchSettingsPath = Path.Combine(Directory.GetCurrentDirectory(), "Properties", "launchSettings.json");
+        if (File.Exists(launchSettingsPath))
         {
-            // Lấy các URL từ launchSettings.json để đảm bảo CORS hoạt động với cả HTTP và HTTPS
-            var launchSettingsPath = Path.Combine(Directory.GetCurrentDirectory(), "Properties", "launchSettings.json");
-            if (File.Exists(launchSettingsPath))
+            try
             {
-                try
+                var launchSettingsJson = File.ReadAllText(launchSettingsPath);
+                using var launchSettings = System.Text.Json.JsonDocument.Parse(launchSettingsJson);
+                var profiles = launchSettings.RootElement.GetProperty("profiles");
+                var urls = profiles.EnumerateObject()
+                                   .SelectMany(p => p.Value.TryGetProperty("applicationUrl", out var appUrl) ? appUrl.GetString()?.Split(';') ?? Array.Empty<string>() : Array.Empty<string>())
+                                   .Where(url => !string.IsNullOrWhiteSpace(url) && (url.StartsWith("http://") || url.StartsWith("https://")))
+                                   .Select(url => url.TrimEnd('/'))
+                                   .Distinct()
+                                   .ToList();
+                if (urls.Any())
                 {
-                    var launchSettingsJson = File.ReadAllText(launchSettingsPath);
-                    var launchSettings = System.Text.Json.JsonDocument.Parse(launchSettingsJson);
-                    var profiles = launchSettings.RootElement.GetProperty("profiles");
-                    var urls = profiles.EnumerateObject()
-                                       .SelectMany(p => p.Value.TryGetProperty("applicationUrl", out var appUrl) ? appUrl.GetString()?.Split(';') ?? Array.Empty<string>() : Array.Empty<string>())
-                                       .Where(url => !string.IsNullOrWhiteSpace(url))
-                                       .Select(url => url.TrimEnd('/')) // Loại bỏ dấu / cuối URL nếu có
-                                       .Distinct()
-                                       .ToArray();
-                    if (urls.Any())
-                    {
-                        developmentOrigins = urls;
-                    }
-                }
-                catch
-                {
-                    // Bỏ qua nếu không đọc được launchSettings
+                    developmentOrigins.AddRange(urls);
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Could not read launchSettings.json for CORS origins. Using defaults. Error: {ex.Message}");
+                developmentOrigins.Add("https://localhost:7001");
+                developmentOrigins.Add("http://localhost:7000"); 
+            }
+        }
+        else
+        {
+            developmentOrigins.Add("https://localhost:7001"); 
+            developmentOrigins.Add("http://localhost:7000"); 
+        }
 
-            policy.WithOrigins(developmentOrigins) // Cho phép các origin này
-                  .AllowAnyHeader() // Cho phép mọi header
-                  .AllowAnyMethod(); // Cho phép mọi phương thức HTTP
-        });
+        Console.WriteLine("Development CORS Origins: " + string.Join(", ", developmentOrigins)); // Log để kiểm tra
+        policy.WithOrigins(developmentOrigins.ToArray())
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
-}
-else
-{
 
-}
+    options.AddPolicy(corsPolicyProduction, policy =>
+    {
+        policy.AllowAnyOrigin() 
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 
 // ----- Configure Controllers -----
 builder.Services.AddControllers();
 
 // ----- Configure FluentValidation -----
-// Tự động tìm và đăng ký tất cả validators trong Assembly chứa CreateCategoryDtoValidator
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryDtoValidator>();
+
 
 // ----- Configure Swagger/OpenAPI -----
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    // Cấu hình thông tin chung cho tài liệu API v1
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1.0",
         Title = "Bookstore Management API",
         Description = "API for managing the Bookstore application",
     });
+
+    // --- Cấu hình để Swagger hiểu JWT Authentication ---
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter JWT with Bearer into field (e.g., Bearer {token})",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement {
+    {
+        new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = "Bearer"
+            },
+            Name = "Bearer",
+            In = ParameterLocation.Header,
+        },
+        new List<string>()
+        }
+    });
+
+    // --- Tích hợp XML Comments ---
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+    if (File.Exists(xmlPath)) 
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
 });
 
 
-// Build aplication host
+// Build application host
 var app = builder.Build();
 
 
-// Configure the HTTP request pipeline (Middleware). 
+// Configure the HTTP request pipeline (Middleware).
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        // Lấy danh sách các phiên bản API để tạo endpoint trong Swagger UI
         var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-        foreach (var description in provider.ApiVersionDescriptions.Reverse())
+        foreach (var description in provider.ApiVersionDescriptions.Reverse()) 
         {
             options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
                 description.GroupName.ToUpperInvariant());
         }
+        options.RoutePrefix = string.Empty; 
     });
-    app.UseDeveloperExceptionPage();
+    app.UseDeveloperExceptionPage(); 
 }
 else
 {
-    app.UseHsts();
+    app.UseExceptionHandler(appBuilder =>
+    {
+        appBuilder.Run(async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new { Message = "An unexpected server error occurred. Please try again later." });
+        });
+    });
+    app.UseHsts(); 
 }
 
 app.UseHttpsRedirection();
-app.UseRouting();
+app.UseRouting(); 
 
 // ----- Áp dụng chính sách CORS -----
 if (app.Environment.IsDevelopment())
 {
-    app.UseCors("AllowSwagger");
+    app.UseCors(corsPolicyDevelopment);
 }
 else
 {
+    app.UseCors(corsPolicyProduction); 
 }
 
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
+app.UseAuthentication(); 
+app.UseAuthorization(); 
 
-// Chạy ứng dụng
+app.MapControllers(); 
+
 app.Run();

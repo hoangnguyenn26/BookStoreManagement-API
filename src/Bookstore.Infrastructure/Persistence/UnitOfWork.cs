@@ -17,8 +17,10 @@ namespace Bookstore.Infrastructure.Persistence;
         private Lazy<IBookRepository> _bookRepository;
         private Lazy<IAuthorRepository> _authorRepository;
         private Lazy<IInventoryLogRepository> _inventoryLogRepository;
+        private Lazy<IRoleRepository> _roleRepository;
 
-        public UnitOfWork(ApplicationDbContext context)
+
+    public UnitOfWork(ApplicationDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
@@ -27,14 +29,16 @@ namespace Bookstore.Infrastructure.Persistence;
             _bookRepository = new Lazy<IBookRepository>(() => new BookRepository(_context));
             _authorRepository = new Lazy<IAuthorRepository>(() => new AuthorRepository(_context));
             _inventoryLogRepository = new Lazy<IInventoryLogRepository>(() => new InventoryLogRepository(_context));
-        }
+            _roleRepository = new Lazy<IRoleRepository>(() => new RoleRepository(_context));
+    }
 
         public ICategoryRepository CategoryRepository => _categoryRepository.Value;
         public IUserRepository UserRepository => _userRepository.Value;
         public IBookRepository BookRepository => _bookRepository.Value;
         public IAuthorRepository AuthorRepository => _authorRepository.Value;
         public IInventoryLogRepository InventoryLogRepository => _inventoryLogRepository.Value;
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public IRoleRepository RoleRepository => _roleRepository.Value; 
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await _context.SaveChangesAsync(cancellationToken);
         }

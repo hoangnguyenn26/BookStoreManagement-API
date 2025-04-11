@@ -8,12 +8,12 @@ namespace Bookstore.Domain.Interfaces.Repositories
     {
         Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-        Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default); // Đơn giản nhất
+        Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default); 
         Task<IReadOnlyList<T>> ListAsync(
-            Expression<Func<T, bool>>? filter = null, // Điều kiện lọc (WHERE)
-            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, // Sắp xếp (ORDER BY)
-            string? includeProperties = null, // Các navigation property cần include
-            bool isTracking = false, // Có theo dõi thay đổi không
+            Expression<Func<T, bool>>? filter = null, 
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            string? includeProperties = null,
+            bool isTracking = false,
             CancellationToken cancellationToken = default);
 
         Task<T> AddAsync(T entity, CancellationToken cancellationToken = default);

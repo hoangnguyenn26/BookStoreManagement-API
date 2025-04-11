@@ -1,27 +1,25 @@
-﻿// src/Bookstore.Api/Controllers/v1/AuthController.cs
+﻿
 using Bookstore.Application.Dtos;
 using Bookstore.Domain.Entities;
-using Bookstore.Domain.Interfaces.Repositories; // Cần IUserRepository, IRoleRepository (hoặc DbContext trực tiếp cho role)
+using Bookstore.Domain.Interfaces.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // Cần cho DbContext nếu dùng trực tiếp
+using Microsoft.EntityFrameworkCore;
 using Bookstore.Infrastructure.Persistence;
-using Bookstore.Domain.Interfaces.Services; // Namespace DbContext
+using Bookstore.Domain.Interfaces.Services;
+using Bookstore.Application.Interfaces;
 
 namespace Bookstore.Api.Controllers.v1
 {
     [ApiController]
-    [Route("api/[controller]")] // Không cần versioning cho Auth thường là chấp nhận được
-    // [ApiVersion("1.0")] // Hoặc vẫn để versioning nếu muốn
+    [Route("api/[controller]")] 
     public class AuthController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ApplicationDbContext _context;
-        private readonly ITokenService _tokenService;// Inject DbContext để lấy Role (hoặc tạo IRoleRepository)
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ITokenService _tokenService;
 
-        public AuthController(IUserRepository userRepository, ApplicationDbContext context, ITokenService tokenService)
+        public AuthController(IUnitOfWork unitOfWork, ITokenService tokenService)
         {
-            _userRepository = userRepository;
-            _context = context;
+            _unitOfWork = unitOfWork;
             _tokenService = tokenService;
         }
 
@@ -31,38 +29,24 @@ namespace Bookstore.Api.Controllers.v1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerDto, CancellationToken cancellationToken)
         {
-            // --- Validation Cơ bản ---
-            // ModelState đã tự động được kiểm tra nhờ [ApiController]
-            // if (!ModelState.IsValid)
-            // {
-            //     return BadRequest(ModelState);
-            // }
-
-            // --- Kiểm tra User/Email đã tồn tại chưa ---
-            var existingUserByUsername = await _userRepository.GetByUsernameAsync(registerDto.UserName, cancellationToken);
+            var existingUserByUsername = await _unitOfWork.UserRepository.GetByUsernameAsync(registerDto.UserName, cancellationToken);
             if (existingUserByUsername != null)
             {
-                // Trả về lỗi chung chung để tránh lộ thông tin user nào đã tồn tại
                 return BadRequest(new { Errors = new[] { "Username or Email already exists." } });
             }
 
-            var existingUserByEmail = await _userRepository.GetByEmailAsync(registerDto.Email, cancellationToken);
+            var existingUserByEmail = await _unitOfWork.UserRepository.GetByEmailAsync(registerDto.Email, cancellationToken);
             if (existingUserByEmail != null)
             {
                 return BadRequest(new { Errors = new[] { "Username or Email already exists." } });
             }
 
-            // --- Lấy Role "User" ---
-            var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User", cancellationToken);
+            var userRole = await _unitOfWork.RoleRepository.GetByNameAsync("User", cancellationToken);
             if (userRole == null)
             {
-                // Lỗi nghiêm trọng: Role "User" không tồn tại trong CSDL (cần được seed)
-                // Log lỗi này và trả về lỗi server
-                // Log.Error("Critical: 'User' role not found in database during registration.");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
             }
 
-            // --- Tạo Entity User mới ---
             var newUser = new User
             {
                 UserName = registerDto.UserName,
@@ -70,30 +54,18 @@ namespace Bookstore.Api.Controllers.v1
                 FirstName = registerDto.FirstName,
                 LastName = registerDto.LastName,
                 PhoneNumber = registerDto.PhoneNumber,
-                IsActive = true, // Mặc định là active
-                // Hash mật khẩu
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password)
+                IsActive = true, 
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
+                UserRoles = new List<UserRole> { new UserRole { RoleId = userRole.Id } }
             };
+            newUser.UserRoles.Add(new UserRole { Role = userRole });
 
-            // --- Thêm User và UserRole vào Context và Lưu ---
-            // Sử dụng Transaction để đảm bảo cả hai được lưu hoặc không lưu gì cả
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
             try
             {
-                await _userRepository.AddAsync(newUser, cancellationToken); // AddAsync chỉ thêm vào context, chưa lưu DB
-                await _context.SaveChangesAsync(cancellationToken); // Lưu User để có UserId
+                await _unitOfWork.UserRepository.AddAsync(newUser, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-                // Tạo bản ghi UserRole
-                var newUserRole = new UserRole { UserId = newUser.Id, RoleId = userRole.Id };
-                _context.UserRoles.Add(newUserRole);
-                await _context.SaveChangesAsync(cancellationToken); // Lưu UserRole
-
-                await transaction.CommitAsync(cancellationToken); // Hoàn tất transaction
-
-                // --- Chuẩn bị Response ---
-                // Không trả về mật khẩu hoặc thông tin nhạy cảm
-                // Có thể trả về UserDto hoặc chỉ là thông báo thành công
-                var userDto = new UserDto // Tạo UserDto thủ công
+                var userDto = new UserDto 
                 {
                     Id = newUser.Id,
                     UserName = newUser.UserName,
@@ -104,15 +76,10 @@ namespace Bookstore.Api.Controllers.v1
                     IsActive = newUser.IsActive
                 };
 
-                // Trả về 201 Created với thông tin user (hoặc URL để lấy user)
                 return CreatedAtAction(nameof(UsersController.GetUserById), "Users", new { id = newUser.Id, version = "1.0" }, userDto);
-                // return Ok(new { Message = "User registered successfully." }); // Hoặc đơn giản hơn
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync(cancellationToken);
-                // Log lỗi chi tiết (ex)
-                // Log.Error(ex, "Error occurred during user registration for {Username}", registerDto.UserName);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred during registration.");
             }
         }
@@ -120,56 +87,39 @@ namespace Bookstore.Api.Controllers.v1
         // POST: api/auth/login
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)] // Sai input
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // Sai login/pass hoặc user inactive
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)] 
         public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginRequestDto loginDto, CancellationToken cancellationToken)
         {
             // --- Tìm User ---
-            // Thử tìm bằng Email trước (phổ biến hơn)
-            var user = await _userRepository.GetByEmailAsync(loginDto.LoginIdentifier, cancellationToken);
-            // Nếu không thấy bằng Email, thử tìm bằng Username
+            var user = await _unitOfWork.UserRepository.GetByEmailAsync(loginDto.LoginIdentifier, cancellationToken);
             if (user == null)
             {
-                user = await _userRepository.GetByUsernameAsync(loginDto.LoginIdentifier, cancellationToken);
+                user = await _unitOfWork.UserRepository.GetByUsernameAsync(loginDto.LoginIdentifier, cancellationToken);
             }
 
-            // --- Kiểm tra User tồn tại và Active ---
             if (user == null || !user.IsActive)
             {
-                // Không tìm thấy user hoặc user bị khóa -> Unauthorized
-                return Unauthorized(new { Message = "Invalid login attempt." }); // Trả lỗi chung chung
+                return Unauthorized(new { Message = "Invalid login attempt." }); 
             }
 
-            // --- Kiểm tra Mật khẩu ---
-            // Sử dụng BCrypt để so sánh mật khẩu nhập vào với hash trong CSDL
+
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash);
             if (!isPasswordValid)
             {
-                return Unauthorized(new { Message = "Invalid login attempt." }); // Sai mật khẩu -> Unauthorized
+                return Unauthorized(new { Message = "Invalid login attempt." });
             }
 
-            // --- Lấy Roles của User ---
-            // Cần join UserRoles và Roles
-            var userRoles = await _context.UserRoles
-                                        .Where(ur => ur.UserId == user.Id)
-                                        .Include(ur => ur.Role) // Include thông tin Role
-                                        .Select(ur => ur.Role.Name) // Chỉ lấy tên Role
-                                        .ToListAsync(cancellationToken);
+            var userRoles = await _unitOfWork.RoleRepository.GetRolesByUserIdAsync(user.Id, cancellationToken);
 
             if (userRoles == null || !userRoles.Any())
             {
-                // Log lỗi: User không có role nào được gán?
-                // Log.Warning("User {UserId} logged in but has no roles assigned.", user.Id);
-                // Vẫn có thể cho đăng nhập nếu logic cho phép, hoặc trả lỗi nếu role là bắt buộc
-                // return StatusCode(StatusCodes.Status500InternalServerError, "User role configuration error.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "User role configuration error.");
             }
 
+            var tokenString = _tokenService.CreateToken(user, userRoles?.ToList() ?? new List<string>());
+            var expiration = DateTime.UtcNow.AddMinutes(60);
 
-            // --- Tạo JWT Token ---
-            var tokenString = _tokenService.CreateToken(user, userRoles ?? new List<string>()); // Truyền user và list tên role
-            var expiration = DateTime.UtcNow.AddMinutes(60); // Lấy expiration từ JwtSettings sẽ chính xác hơn
-
-            // --- Tạo User DTO cho Response ---
             var userDto = new UserDto
             {
                 Id = user.Id,
@@ -179,10 +129,8 @@ namespace Bookstore.Api.Controllers.v1
                 LastName = user.LastName,
                 PhoneNumber = user.PhoneNumber,
                 IsActive = user.IsActive
-                // Roles = userRoles ?? new List<string>() // Có thể thêm roles vào UserDto nếu muốn
             };
 
-            // --- Trả về Response ---
             return Ok(new LoginResponseDto
             {
                 Token = tokenString,

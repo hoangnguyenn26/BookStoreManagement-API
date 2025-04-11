@@ -15,7 +15,7 @@ namespace Bookstore.Application.Dtos
 
         [Required]
         [DataType(DataType.Password)]
-        [StringLength(100, MinimumLength = 6)] // Điều chỉnh độ dài tối thiểu/tối đa nếu cần
+        [StringLength(100, MinimumLength = 6)] 
         public string Password { get; set; } = null!;
 
         [Required]
