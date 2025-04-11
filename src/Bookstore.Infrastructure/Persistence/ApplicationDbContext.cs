@@ -187,13 +187,39 @@ namespace Bookstore.Infrastructure.Persistence
 
         private static void SeedData(ModelBuilder builder)
         {
-            // --- Định nghĩa một DateTime tĩnh ---
-            var seedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc); // Hoặc một ngày cố định khác
+            // --- Định nghĩa các Guid tĩnh cho Seed Data ---
+            Guid adminRoleId = new Guid("E1F3E5D4-1111-4F6F-9C5C-9B8D3A5B2A01"); // Guid của Role Admin đã có
+            Guid userRoleId = new Guid("A2E4F6A8-2222-4D8E-8A4B-8A7C2B4E1F02"); // Guid của Role User đã có
+            Guid adminUserId = new Guid("F54527EB-F806-40DB-BF76-C7B0E5FA6D39"); 
 
-            // Seed Roles sử dụng Guid và DateTime tĩnh
+            // --- Định nghĩa một DateTime tĩnh ---
+            var seedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            // Seed Roles 
             builder.Entity<Role>().HasData(
-                new Role { Id = AdminRoleId, Name = "Admin", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
-                new Role { Id = UserRoleId, Name = "User", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate }
+                new Role { Id = adminRoleId, Name = "Admin", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new Role { Id = userRoleId, Name = "User", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate }
+            );
+
+            // --- Seed Admin User ---
+            builder.Entity<User>().HasData(
+                new User
+                {
+                    Id = adminUserId, 
+                    UserName = "admin",
+                    Email = "admin@bookstore.com",
+                    PasswordHash = "$2a$12$PCb6JuQsMqxNkxzSLh1EaOaQBbtDy0wwOdu5xkSu7nbJ31KB8yRAe",
+                    FirstName = "Admin",
+                    LastName = "User",
+                    IsActive = true,
+                    CreatedAtUtc = seedDate,
+                    UpdatedAtUtc = seedDate
+                }
+            );
+
+            // --- Seed UserRole cho Admin User ---
+            builder.Entity<UserRole>().HasData(
+                new UserRole { UserId = adminUserId, RoleId = adminRoleId } // Liên kết User Admin với Role Admin
             );
         }
     }
