@@ -7,8 +7,8 @@ namespace Bookstore.Infrastructure.Persistence
 {
     public class ApplicationDbContext : DbContext
     {
-        private static readonly Guid AdminRoleId = new Guid("E1F3E5D4-1111-4F6F-9C5C-9B8D3A5B2A01"); 
-        private static readonly Guid UserRoleId = new Guid("A2E4F6A8-2222-4D8E-8A4B-8A7C2B4E1F02"); 
+        private static readonly Guid AdminRoleId = new Guid("E1F3E5D4-1111-4F6F-9C5C-9B8D3A5B2A01");
+        private static readonly Guid UserRoleId = new Guid("A2E4F6A8-2222-4D8E-8A4B-8A7C2B4E1F02");
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -27,6 +27,7 @@ namespace Bookstore.Infrastructure.Persistence
         public DbSet<OrderDetail> OrderDetails { get; set; } = null!;
         public DbSet<InventoryLog> InventoryLogs { get; set; } = null!;
         public DbSet<WishlistItem> WishlistItems { get; set; } = null!;
+        public DbSet<CartItem> CartItems { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -40,7 +41,7 @@ namespace Bookstore.Infrastructure.Persistence
 
                 // Mối quan hệ với User
                 entity.HasOne(ur => ur.User)
-                      .WithMany(u => u.UserRoles) 
+                      .WithMany(u => u.UserRoles)
                       .HasForeignKey(ur => ur.UserId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Cascade);
@@ -57,7 +58,7 @@ namespace Bookstore.Infrastructure.Persistence
             builder.Entity<Address>(entity =>
             {
                 entity.HasOne(a => a.User)
-                      .WithMany(u => u.Addresses) 
+                      .WithMany(u => u.Addresses)
                       .HasForeignKey(a => a.UserId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Cascade); // Xóa địa chỉ nếu User bị xóa
@@ -68,7 +69,7 @@ namespace Bookstore.Infrastructure.Persistence
             {
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.RowVersion).IsRowVersion();
-                entity.Property(e => e.Status).HasConversion<byte>(); 
+                entity.Property(e => e.Status).HasConversion<byte>();
 
                 entity.HasOne(o => o.User)
                       .WithMany(u => u.Orders)
@@ -83,7 +84,7 @@ namespace Bookstore.Infrastructure.Persistence
                 entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
 
                 entity.HasOne(od => od.Order)
-                      .WithMany(o => o.OrderDetails) 
+                      .WithMany(o => o.OrderDetails)
                       .HasForeignKey(od => od.OrderId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Cascade);
@@ -112,7 +113,7 @@ namespace Bookstore.Infrastructure.Persistence
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(d => d.Author)
-                      .WithMany(p => p.Books) 
+                      .WithMany(p => p.Books)
                       .HasForeignKey(d => d.AuthorId)
                       .OnDelete(DeleteBehavior.SetNull); // Nếu Author bị xóa, AuthorId trong Book thành NULL
             });
@@ -124,7 +125,7 @@ namespace Bookstore.Infrastructure.Persistence
 
                 // Cấu hình mối quan hệ tự tham chiếu cho ParentCategory 
                 entity.HasOne(c => c.ParentCategory)
-                      .WithMany(c => c.SubCategories) 
+                      .WithMany(c => c.SubCategories)
                       .HasForeignKey(c => c.ParentCategoryId)
                       .OnDelete(DeleteBehavior.Restrict); // Ngăn xóa danh mục cha nếu có danh mục con
             });
@@ -142,14 +143,14 @@ namespace Bookstore.Infrastructure.Persistence
             {
                 entity.Property(e => e.Reason).HasConversion<byte>();
                 entity.HasOne(il => il.Book)
-                      .WithMany() 
+                      .WithMany()
                       .HasForeignKey(il => il.BookId)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Cascade); 
+                      .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(il => il.Order)
-                      .WithMany() 
+                      .WithMany()
                       .HasForeignKey(il => il.OrderId)
-                      .IsRequired(false) 
+                      .IsRequired(false)
                       .OnDelete(DeleteBehavior.SetNull);
                 entity.HasOne(il => il.User)
                       .WithMany()
@@ -161,13 +162,13 @@ namespace Bookstore.Infrastructure.Persistence
             // ----- Cấu hình WishlistItem -----
             builder.Entity<WishlistItem>(entity =>
             {
-                entity.HasIndex(wi => new { wi.UserId, wi.BookId }).IsUnique(); 
+                entity.HasIndex(wi => new { wi.UserId, wi.BookId }).IsUnique();
 
                 entity.HasOne(wi => wi.User)
                       .WithMany()
                       .HasForeignKey(wi => wi.UserId)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Cascade); 
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(wi => wi.Book)
                       .WithMany()
@@ -176,9 +177,29 @@ namespace Bookstore.Infrastructure.Persistence
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
+            builder.Entity<CartItem>(entity =>
+            {
+                entity.HasKey(ci => new { ci.UserId, ci.BookId });
+                entity.Property(ci => ci.Quantity).IsRequired();
+                entity.ToTable(t => t.HasCheckConstraint("CK_CartItems_Quantity", "[Quantity] > 0"));
+
+                entity.HasOne(ci => ci.User)
+                      .WithMany()
+                      .HasForeignKey(ci => ci.UserId)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Mối quan hệ với Book
+                entity.HasOne(ci => ci.Book)
+                      .WithMany()
+                      .HasForeignKey(ci => ci.BookId)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-            SeedData(builder); 
+            SeedData(builder);
         }
 
 
@@ -207,9 +228,9 @@ namespace Bookstore.Infrastructure.Persistence
         private static void SeedData(ModelBuilder builder)
         {
             // --- Định nghĩa các Guid tĩnh cho Seed Data ---
-            Guid adminRoleId = new Guid("E1F3E5D4-1111-4F6F-9C5C-9B8D3A5B2A01"); 
-            Guid userRoleId = new Guid("A2E4F6A8-2222-4D8E-8A4B-8A7C2B4E1F02"); 
-            Guid adminUserId = new Guid("F54527EB-F806-40DB-BF76-C7B0E5FA6D39"); 
+            Guid adminRoleId = new Guid("E1F3E5D4-1111-4F6F-9C5C-9B8D3A5B2A01");
+            Guid userRoleId = new Guid("A2E4F6A8-2222-4D8E-8A4B-8A7C2B4E1F02");
+            Guid adminUserId = new Guid("F54527EB-F806-40DB-BF76-C7B0E5FA6D39");
 
             // --- Định nghĩa một DateTime tĩnh ---
             var seedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -224,7 +245,7 @@ namespace Bookstore.Infrastructure.Persistence
             builder.Entity<User>().HasData(
                 new User
                 {
-                    Id = adminUserId, 
+                    Id = adminUserId,
                     UserName = "admin",
                     Email = "admin@bookstore.com",
                     PasswordHash = "$2a$12$PCb6JuQsMqxNkxzSLh1EaOaQBbtDy0wwOdu5xkSu7nbJ31KB8yRAe",
@@ -238,7 +259,7 @@ namespace Bookstore.Infrastructure.Persistence
 
             // --- Seed UserRole cho Admin User ---
             builder.Entity<UserRole>().HasData(
-                new UserRole { UserId = adminUserId, RoleId = adminRoleId } 
+                new UserRole { UserId = adminUserId, RoleId = adminRoleId }
             );
         }
     }
