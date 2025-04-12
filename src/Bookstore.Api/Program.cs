@@ -42,7 +42,8 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBookService, BookService>();
 
 
-
+// ----- Register AutoMapper -----
+builder.Services.AddAutoMapper(typeof(Bookstore.Application.Mappings.MappingProfile).Assembly);
 
 // ----- Configure Authentication -----
 builder.Services.AddAuthentication(options =>

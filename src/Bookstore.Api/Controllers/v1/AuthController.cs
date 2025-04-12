@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Bookstore.Infrastructure.Persistence;
 using Bookstore.Domain.Interfaces.Services;
 using Bookstore.Application.Interfaces;
+using AutoMapper;
 
 namespace Bookstore.Api.Controllers.v1
 {
@@ -16,11 +17,13 @@ namespace Bookstore.Api.Controllers.v1
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenService _tokenService;
+        private readonly IMapper _mapper;
 
-        public AuthController(IUnitOfWork unitOfWork, ITokenService tokenService)
+        public AuthController(IUnitOfWork unitOfWork, ITokenService tokenService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _tokenService = tokenService;
+            _mapper = mapper;
         }
 
         // POST: api/auth/register
@@ -120,16 +123,7 @@ namespace Bookstore.Api.Controllers.v1
             var tokenString = _tokenService.CreateToken(user, userRoles?.ToList() ?? new List<string>());
             var expiration = DateTime.UtcNow.AddMinutes(60);
 
-            var userDto = new UserDto
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                PhoneNumber = user.PhoneNumber,
-                IsActive = user.IsActive
-            };
+            var userDto = _mapper.Map<UserDto>(user);
 
             return Ok(new LoginResponseDto
             {

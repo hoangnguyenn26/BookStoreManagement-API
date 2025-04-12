@@ -1,4 +1,5 @@
 ﻿
+using AutoMapper;
 using Bookstore.Application.Dtos;
 using Bookstore.Application.Interfaces;
 using Bookstore.Application.Interfaces.Services;
@@ -15,32 +16,22 @@ namespace Bookstore.Application.Services
     public class CategoryService : ICategoryService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public CategoryService(IUnitOfWork unitOfWork)
+        public CategoryService(IUnitOfWork unitOfWork, IMapper mapper) 
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper)); 
         }
 
         public async Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto createCategoryDto, CancellationToken cancellationToken = default)
         {
-            var categoryEntity = new Category
-            {
-                Name = createCategoryDto.Name,
-                Description = createCategoryDto.Description,
-                ParentCategoryId = createCategoryDto.ParentCategoryId,
-                IsDeleted = false // Mặc định khi tạo mới
-            };
+            var categoryEntity = _mapper.Map<Category>(createCategoryDto);
+
             var createdCategory = await _unitOfWork.CategoryRepository.AddAsync(categoryEntity, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var categoryDto = new CategoryDto
-            {
-                Id = createdCategory.Id,
-                Name = createdCategory.Name,
-                Description = createdCategory.Description,
-                ParentCategoryId = createdCategory.ParentCategoryId
-            };
-            return categoryDto;
+            return _mapper.Map<CategoryDto>(createdCategory);
         }
 
         public async Task<bool> DeleteCategoryAsync(Guid id, CancellationToken cancellationToken = default)
@@ -56,43 +47,25 @@ namespace Bookstore.Application.Services
 
         public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync(CancellationToken cancellationToken = default)
         {
-            var categories = await _unitOfWork.CategoryRepository.GetAllAsync(cancellationToken: cancellationToken);
-            return categories.Select(category => new CategoryDto
-            {
-                Id = category.Id,
-                Name = category.Name,
-                Description = category.Description,
-                ParentCategoryId = category.ParentCategoryId
-            }).ToList();
+            var categories = await _unitOfWork.CategoryRepository.ListAsync(cancellationToken: cancellationToken);
+            return _mapper.Map<IEnumerable<CategoryDto>>(categories);
         }
 
         public async Task<CategoryDto?> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id, cancellationToken);
             if (category == null || category.IsDeleted) return null;
-            return new CategoryDto
-            {
-                Id = category.Id,
-                Name = category.Name,
-                Description = category.Description,
-                ParentCategoryId = category.ParentCategoryId
-            };
+            return _mapper.Map<CategoryDto>(category);
         }
 
         public async Task<bool> UpdateCategoryAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken cancellationToken = default)
         {
             var categoryToUpdate = await _unitOfWork.CategoryRepository.GetByIdAsync(id, cancellationToken);
-            if (categoryToUpdate == null || categoryToUpdate.IsDeleted)
-            {
-                return false; 
-            }
-            categoryToUpdate.Name = updateCategoryDto.Name;
-            categoryToUpdate.Description = updateCategoryDto.Description;
-            categoryToUpdate.ParentCategoryId = updateCategoryDto.ParentCategoryId;
+            if (categoryToUpdate == null || categoryToUpdate.IsDeleted) return false;
+            _mapper.Map(updateCategoryDto, categoryToUpdate);
 
-            await _unitOfWork.CategoryRepository.UpdateAsync(categoryToUpdate, cancellationToken); // Chỉ đánh dấu Modified
-            await _unitOfWork.SaveChangesAsync(cancellationToken); // <-- Gọi SaveChanges ở đây
-
+            await _unitOfWork.CategoryRepository.UpdateAsync(categoryToUpdate, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             return true;
         }
     }

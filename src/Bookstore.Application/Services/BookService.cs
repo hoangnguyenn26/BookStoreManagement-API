@@ -1,4 +1,5 @@
 ﻿
+using AutoMapper;
 using Bookstore.Application.Dtos.Books;
 using Bookstore.Application.Interfaces; // Namespace chứa IUnitOfWork
 using Bookstore.Application.Interfaces.Services;
@@ -14,10 +15,12 @@ namespace Bookstore.Application.Services
     public class BookService : IBookService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public BookService(IUnitOfWork unitOfWork)
+        public BookService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _mapper = mapper;
         }
 
         public async Task<BookDto> CreateBookAsync(CreateBookDto createBookDto, CancellationToken cancellationToken = default)
@@ -35,19 +38,7 @@ namespace Bookstore.Application.Services
                     throw new KeyNotFoundException($"Author with Id '{createBookDto.AuthorId.Value}' not found.");
                 }
             }
-            var bookEntity = new Book
-            {
-                Title = createBookDto.Title,
-                Description = createBookDto.Description,
-                ISBN = createBookDto.ISBN,
-                AuthorId = createBookDto.AuthorId,
-                Publisher = createBookDto.Publisher,
-                PublicationYear = createBookDto.PublicationYear,
-                Price = createBookDto.Price,
-                StockQuantity = createBookDto.StockQuantity >= 0 ? createBookDto.StockQuantity : 0, // Đảm bảo không âm
-                CategoryId = createBookDto.CategoryId,
-                IsDeleted = false
-            };
+            var bookEntity = _mapper.Map<Book>(createBookDto);
 
             var createdBook = await _unitOfWork.BookRepository.AddAsync(bookEntity, cancellationToken);
             var initialLog = new InventoryLog
@@ -61,8 +52,7 @@ namespace Bookstore.Application.Services
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var bookDto = MapBookToDto(createdBook); 
-            return bookDto;
+            return _mapper.Map<BookDto>(createdBook);
         }
 
         public async Task<bool> DeleteBookAsync(Guid id, CancellationToken cancellationToken = default)
@@ -82,7 +72,7 @@ namespace Bookstore.Application.Services
         {
             var books = await _unitOfWork.BookRepository.GetAllAsync(
                 cancellationToken: cancellationToken);
-            return books.Select(MapBookToDto).ToList();
+            return _mapper.Map<IEnumerable<BookDto>>(books);
         }
 
         public async Task<BookDto?> GetBookByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -91,15 +81,13 @@ namespace Bookstore.Application.Services
                 filter: b => b.Id == id,
                 isTracking: false, 
                 cancellationToken: cancellationToken)
-                .ContinueWith(t => t.Result.FirstOrDefault(), cancellationToken); // Lấy phần tử đầu tiên
+                .ContinueWith(t => t.Result.FirstOrDefault(), cancellationToken); 
 
             if (book == null) 
             {
                 return null;
             }
-
-            // --- Mapping thủ công ---
-            return MapBookToDto(book);
+            return _mapper.Map<BookDto>(book);
         }
 
         public async Task<bool> UpdateBookAsync(Guid id, UpdateBookDto updateBookDto, CancellationToken cancellationToken = default)
@@ -110,7 +98,6 @@ namespace Bookstore.Application.Services
                 return false;
             }
 
-            // --- (Optional) Kiểm tra logic nghiệp vụ ---
             var categoryExists = await _unitOfWork.CategoryRepository.GetByIdAsync(updateBookDto.CategoryId, cancellationToken);
             if (categoryExists == null || categoryExists.IsDeleted)
             {
@@ -125,19 +112,9 @@ namespace Bookstore.Application.Services
                 }
             }
 
-            // --- Mapping thủ công DTO -> Entity đã tải ---
             int stockChange = updateBookDto.StockQuantity - bookToUpdate.StockQuantity; // Tính toán sự thay đổi tồn kho
 
-            bookToUpdate.Title = updateBookDto.Title;
-            bookToUpdate.Description = updateBookDto.Description;
-            bookToUpdate.ISBN = updateBookDto.ISBN;
-            bookToUpdate.AuthorId = updateBookDto.AuthorId;
-            bookToUpdate.Publisher = updateBookDto.Publisher;
-            bookToUpdate.PublicationYear = updateBookDto.PublicationYear;
-            bookToUpdate.Price = updateBookDto.Price;
-            bookToUpdate.StockQuantity = updateBookDto.StockQuantity >= 0 ? updateBookDto.StockQuantity : 0;
-            bookToUpdate.CategoryId = updateBookDto.CategoryId;
-            // UpdatedAtUtc tự động cập nhật
+            _mapper.Map(updateBookDto, bookToUpdate);
 
             await _unitOfWork.BookRepository.UpdateAsync(bookToUpdate, cancellationToken);
 
@@ -148,12 +125,10 @@ namespace Bookstore.Application.Services
                 {
                     BookId = bookToUpdate.Id,
                     ChangeQuantity = stockChange,
-                    // Lý do cần xác định rõ hơn, ví dụ: điều chỉnh thủ công
                     Reason = Domain.Enums.InventoryReason.Adjustment,
                     TimestampUtc = DateTime.UtcNow
-                    // UserId của Admin thực hiện
                 };
-                await _unitOfWork.InventoryLogRepository.AddAsync(stockLog, cancellationToken); // Giả sử có IInventoryLogRepository
+                await _unitOfWork.InventoryLogRepository.AddAsync(stockLog, cancellationToken); 
             }
 
 
@@ -161,25 +136,5 @@ namespace Bookstore.Application.Services
             return true;
         }
 
-        // Helper function for mapping (để tránh lặp code)
-        private static BookDto MapBookToDto(Book book)
-        {
-            return new BookDto
-            {
-                Id = book.Id,
-                Title = book.Title,
-                Description = book.Description,
-                ISBN = book.ISBN,
-                AuthorId = book.AuthorId,
-                // Author = book.Author != null ? new AuthorDto { Id = book.Author.Id, Name = book.Author.Name } : null, // Nếu include và có AuthorDto
-                Publisher = book.Publisher,
-                PublicationYear = book.PublicationYear,
-                CoverImageUrl = book.CoverImageUrl,
-                Price = book.Price,
-                StockQuantity = book.StockQuantity,
-                CategoryId = book.CategoryId,
-                // Category = book.Category != null ? new CategoryDto { Id = book.Category.Id, Name = book.Category.Name } : null // Nếu include và có CategoryDto
-            };
-        }
     }
 }
