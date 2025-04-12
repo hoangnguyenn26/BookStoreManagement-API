@@ -25,20 +25,16 @@ namespace Bookstore.Infrastructure.Repositories
            CancellationToken cancellationToken = default)
         {
             IQueryable<T> query = _dbSet;
-
-            // 1. Áp dụng Tracking (Mặc định là NoTracking cho hiệu năng đọc)
             if (!isTracking)
             {
                 query = query.AsNoTracking();
             }
 
-            // 2. Áp dụng Filter (WHERE clause)
             if (filter != null)
             {
                 query = query.Where(filter);
             }
 
-            // 3. Áp dụng Includes (Eager Loading)
             if (!string.IsNullOrWhiteSpace(includeProperties))
             {
                 foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
@@ -47,13 +43,11 @@ namespace Bookstore.Infrastructure.Repositories
                 }
             }
 
-            // 4. Áp dụng OrderBy (ORDER BY clause)
             if (orderBy != null)
             {
                 query = orderBy(query);
             }
 
-            // 5. Thực thi truy vấn và trả về kết quả List
             return await query.ToListAsync(cancellationToken);
         }
         public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -65,16 +59,13 @@ namespace Bookstore.Infrastructure.Repositories
         public virtual async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
         {
             await _dbSet.AddAsync(entity, cancellationToken);
-            // ID và CreatedAtUtc/UpdatedAtUtc được xử lý bởi BaseEntity và SaveChangesAsync override
             return entity;
         }
 
         public virtual Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
         {
-            // Chỉ cần đánh dấu trạng thái là Modified, SaveChangesAsync sẽ xử lý
             _context.Entry(entity).State = EntityState.Modified;
-            // Cập nhật UpdatedAtUtc sẽ được xử lý trong SaveChangesAsync override
-            return Task.CompletedTask; // Không cần thao tác I/O bất đồng bộ ở đây
+            return Task.CompletedTask;
         }
 
         public virtual async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -84,12 +75,10 @@ namespace Bookstore.Infrastructure.Repositories
             {
                 await DeleteAsync(entity, cancellationToken);
             }
-            // Có thể throw exception nếu không tìm thấy entity
         }
 
         public virtual Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
         {
-            // Kiểm tra xem entity có hỗ trợ Soft Delete không
             if (entity is ISoftDeleteEntity softDeleteEntity)
             {
                 softDeleteEntity.IsDeleted = true;

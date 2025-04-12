@@ -28,7 +28,7 @@ namespace Bookstore.Infrastructure.Repositories
         {
             return await _context.InventoryLogs
                                  .Where(log => log.BookId == bookId)
-                                 .OrderByDescending(log => log.TimestampUtc) // Sắp xếp mới nhất lên trước
+                                 .OrderByDescending(log => log.TimestampUtc) 
                                  .AsNoTracking()
                                  .ToListAsync(cancellationToken);
         }

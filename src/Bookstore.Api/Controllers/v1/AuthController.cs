@@ -68,16 +68,7 @@ namespace Bookstore.Api.Controllers.v1
                 await _unitOfWork.UserRepository.AddAsync(newUser, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-                var userDto = new UserDto 
-                {
-                    Id = newUser.Id,
-                    UserName = newUser.UserName,
-                    Email = newUser.Email,
-                    FirstName = newUser.FirstName,
-                    LastName = newUser.LastName,
-                    PhoneNumber = newUser.PhoneNumber,
-                    IsActive = newUser.IsActive
-                };
+                var userDto = _mapper.Map<UserDto>(newUser);
 
                 return CreatedAtAction(nameof(UsersController.GetUserById), "Users", new { id = newUser.Id, version = "1.0" }, userDto);
             }

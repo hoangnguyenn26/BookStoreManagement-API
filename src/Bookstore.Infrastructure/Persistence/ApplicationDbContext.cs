@@ -73,13 +73,12 @@ namespace Bookstore.Infrastructure.Persistence
                       .WithMany(u => u.Orders)
                       .HasForeignKey(o => o.UserId)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Restrict); // Ngăn xóa User nếu họ có Orders (hành vi phổ biến)
+                      .OnDelete(DeleteBehavior.Restrict); // Ngăn xóa User nếu họ có Orders
             });
 
             // ----- Cấu hình OrderDetail (Many-to-One với Order, Many-to-One với Book) -----
             builder.Entity<OrderDetail>(entity =>
             {
-                // entity.HasKey(od => new { od.OrderId, od.BookId }); // Nếu dùng khóa chính kết hợp
                 entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
 
                 entity.HasOne(od => od.Order)
@@ -92,7 +91,7 @@ namespace Bookstore.Infrastructure.Persistence
                       .WithMany()
                       .HasForeignKey(od => od.BookId)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Restrict); // Ngăn xóa Book nếu nó nằm trong OrderDetail (trừ khi dùng Soft Delete)
+                      .OnDelete(DeleteBehavior.Restrict); // Ngăn xóa Book nếu nó nằm trong OrderDetail
             });
 
 
@@ -163,7 +162,7 @@ namespace Bookstore.Infrastructure.Persistence
         }
 
 
-        // (Tùy chọn) Ghi đè SaveChangesAsync để cập nhật UpdatedAtUtc tự động
+        // Ghi đè SaveChangesAsync để cập nhật UpdatedAtUtc tự động
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             var entries = ChangeTracker
@@ -188,8 +187,8 @@ namespace Bookstore.Infrastructure.Persistence
         private static void SeedData(ModelBuilder builder)
         {
             // --- Định nghĩa các Guid tĩnh cho Seed Data ---
-            Guid adminRoleId = new Guid("E1F3E5D4-1111-4F6F-9C5C-9B8D3A5B2A01"); // Guid của Role Admin đã có
-            Guid userRoleId = new Guid("A2E4F6A8-2222-4D8E-8A4B-8A7C2B4E1F02"); // Guid của Role User đã có
+            Guid adminRoleId = new Guid("E1F3E5D4-1111-4F6F-9C5C-9B8D3A5B2A01"); 
+            Guid userRoleId = new Guid("A2E4F6A8-2222-4D8E-8A4B-8A7C2B4E1F02"); 
             Guid adminUserId = new Guid("F54527EB-F806-40DB-BF76-C7B0E5FA6D39"); 
 
             // --- Định nghĩa một DateTime tĩnh ---
@@ -219,7 +218,7 @@ namespace Bookstore.Infrastructure.Persistence
 
             // --- Seed UserRole cho Admin User ---
             builder.Entity<UserRole>().HasData(
-                new UserRole { UserId = adminUserId, RoleId = adminRoleId } // Liên kết User Admin với Role Admin
+                new UserRole { UserId = adminUserId, RoleId = adminRoleId } 
             );
         }
     }
