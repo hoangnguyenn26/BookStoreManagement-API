@@ -26,6 +26,7 @@ namespace Bookstore.Infrastructure.Persistence
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderDetail> OrderDetails { get; set; } = null!;
         public DbSet<InventoryLog> InventoryLogs { get; set; } = null!;
+        public DbSet<WishlistItem> WishlistItems { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -156,6 +157,25 @@ namespace Bookstore.Infrastructure.Persistence
                       .IsRequired(false)
                       .OnDelete(DeleteBehavior.SetNull); // Nếu User bị xóa, set UserId trong log thành NULL
             });
+
+            // ----- Cấu hình WishlistItem -----
+            builder.Entity<WishlistItem>(entity =>
+            {
+                entity.HasIndex(wi => new { wi.UserId, wi.BookId }).IsUnique(); 
+
+                entity.HasOne(wi => wi.User)
+                      .WithMany()
+                      .HasForeignKey(wi => wi.UserId)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Cascade); 
+
+                entity.HasOne(wi => wi.Book)
+                      .WithMany()
+                      .HasForeignKey(wi => wi.BookId)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
             SeedData(builder); 
