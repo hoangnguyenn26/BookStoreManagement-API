@@ -1,4 +1,4 @@
-﻿// src/Bookstore.Application/Dtos/LoginRequestDto.cs
+﻿
 using System.ComponentModel.DataAnnotations;
 
 namespace Bookstore.Application.Dtos

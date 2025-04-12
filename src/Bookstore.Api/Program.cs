@@ -2,12 +2,11 @@
 using Bookstore.Application.Interfaces.Services;
 using Bookstore.Application.Services;
 using Bookstore.Application.Settings;
-using Bookstore.Application.Validators.Categories; 
+using Bookstore.Application.Validators.Categories;
 using Bookstore.Domain.Interfaces.Services;
-using Bookstore.Infrastructure.Persistence; 
-using Bookstore.Infrastructure.Repositories; 
-using Bookstore.Infrastructure.Services; 
-using FluentValidation; 
+using Bookstore.Infrastructure.Persistence;
+using Bookstore.Infrastructure.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +39,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IWishlistService, WishlistService>();
 
 
 // ----- Register AutoMapper -----
@@ -85,8 +85,8 @@ builder.Services.AddVersionedApiExplorer(options =>
 
 
 // ----- Configure CORS -----
-string corsPolicyDevelopment = "AllowSwaggerAndDevClients"; 
-string corsPolicyProduction = "AllowAppClients"; 
+string corsPolicyDevelopment = "AllowSwaggerAndDevClients";
+string corsPolicyProduction = "AllowAppClients";
 
 builder.Services.AddCors(options =>
 {
@@ -116,13 +116,13 @@ builder.Services.AddCors(options =>
             {
                 Console.WriteLine($"Warning: Could not read launchSettings.json for CORS origins. Using defaults. Error: {ex.Message}");
                 developmentOrigins.Add("https://localhost:7001");
-                developmentOrigins.Add("http://localhost:7000"); 
+                developmentOrigins.Add("http://localhost:7000");
             }
         }
         else
         {
-            developmentOrigins.Add("https://localhost:7001"); 
-            developmentOrigins.Add("http://localhost:7000"); 
+            developmentOrigins.Add("https://localhost:7001");
+            developmentOrigins.Add("http://localhost:7000");
         }
 
         Console.WriteLine("Development CORS Origins: " + string.Join(", ", developmentOrigins)); // Log để kiểm tra
@@ -133,7 +133,7 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy(corsPolicyProduction, policy =>
     {
-        policy.AllowAnyOrigin() 
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -187,7 +187,7 @@ builder.Services.AddSwaggerGen(options =>
     // --- Tích hợp XML Comments ---
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
-    if (File.Exists(xmlPath)) 
+    if (File.Exists(xmlPath))
     {
         options.IncludeXmlComments(xmlPath);
     }
@@ -205,14 +205,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-        foreach (var description in provider.ApiVersionDescriptions.Reverse()) 
+        foreach (var description in provider.ApiVersionDescriptions.Reverse())
         {
             options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
                 description.GroupName.ToUpperInvariant());
         }
-        options.RoutePrefix = string.Empty; 
+        options.RoutePrefix = string.Empty;
     });
-    app.UseDeveloperExceptionPage(); 
+    app.UseDeveloperExceptionPage();
 }
 else
 {
@@ -225,11 +225,11 @@ else
             await context.Response.WriteAsJsonAsync(new { Message = "An unexpected server error occurred. Please try again later." });
         });
     });
-    app.UseHsts(); 
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-app.UseRouting(); 
+app.UseRouting();
 
 // ----- Áp dụng chính sách CORS -----
 if (app.Environment.IsDevelopment())
@@ -238,12 +238,12 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseCors(corsPolicyProduction); 
+    app.UseCors(corsPolicyProduction);
 }
 
-app.UseAuthentication(); 
-app.UseAuthorization(); 
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.MapControllers(); 
+app.MapControllers();
 
 app.Run();

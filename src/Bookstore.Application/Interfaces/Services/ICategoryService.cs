@@ -1,9 +1,5 @@
 ﻿// src/Bookstore.Application/Interfaces/Services/ICategoryService.cs
 using Bookstore.Application.Dtos; // Namespace chứa DTOs
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Bookstore.Application.Interfaces.Services
 {

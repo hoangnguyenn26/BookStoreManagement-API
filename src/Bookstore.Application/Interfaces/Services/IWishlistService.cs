@@ -1,9 +1,6 @@
 ﻿
-using Bookstore.Application.Dtos.Wishlists; 
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using Bookstore.Application.Dtos.Wishlists;
+
 
 namespace Bookstore.Application.Interfaces.Services
 {

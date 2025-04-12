@@ -4,11 +4,6 @@ using Bookstore.Application.Dtos.Books;
 using Bookstore.Application.Interfaces; // Namespace chứa IUnitOfWork
 using Bookstore.Application.Interfaces.Services;
 using Bookstore.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Bookstore.Application.Services
 {
@@ -79,11 +74,11 @@ namespace Bookstore.Application.Services
         {
             var book = await _unitOfWork.BookRepository.ListAsync(
                 filter: b => b.Id == id,
-                isTracking: false, 
+                isTracking: false,
                 cancellationToken: cancellationToken)
-                .ContinueWith(t => t.Result.FirstOrDefault(), cancellationToken); 
+                .ContinueWith(t => t.Result.FirstOrDefault(), cancellationToken);
 
-            if (book == null) 
+            if (book == null)
             {
                 return null;
             }
@@ -128,7 +123,7 @@ namespace Bookstore.Application.Services
                     Reason = Domain.Enums.InventoryReason.Adjustment,
                     TimestampUtc = DateTime.UtcNow
                 };
-                await _unitOfWork.InventoryLogRepository.AddAsync(stockLog, cancellationToken); 
+                await _unitOfWork.InventoryLogRepository.AddAsync(stockLog, cancellationToken);
             }
 
 
