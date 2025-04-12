@@ -2,6 +2,7 @@
 using AutoMapper;
 using Bookstore.Application.Dtos;
 using Bookstore.Application.Dtos.Books;
+using Bookstore.Application.Dtos.Carts;
 using Bookstore.Application.Dtos.Wishlists;
 using Bookstore.Domain.Entities;
 
@@ -25,7 +26,8 @@ namespace Bookstore.Application.Mappings
             CreateMap<User, UserDto>();
             // ----- Wishlist Mappings -----
             CreateMap<WishlistItem, WishlistItemDto>();
-
+            // ----- Cart Mappings -----
+            CreateMap<CartItem, CartItemDto>();
         }
     }
 }

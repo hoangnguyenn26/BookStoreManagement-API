@@ -1,8 +1,5 @@
 ﻿// src/Bookstore.Application/Interfaces/IUnitOfWork.cs
-using Bookstore.Domain.Interfaces.Repositories; 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using Bookstore.Domain.Interfaces.Repositories;
 
 namespace Bookstore.Application.Interfaces
 {
@@ -15,6 +12,7 @@ namespace Bookstore.Application.Interfaces
         IInventoryLogRepository InventoryLogRepository { get; }
         IRoleRepository RoleRepository { get; }
         IWishlistRepository WishlistRepository { get; }
+        ICartRepository CartRepository { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
