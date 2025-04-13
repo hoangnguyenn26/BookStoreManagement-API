@@ -20,7 +20,7 @@ namespace Bookstore.Infrastructure.Repositories
         public virtual async Task<IReadOnlyList<T>> ListAsync(
            Expression<Func<T, bool>>? filter = null,
            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-           string? includeProperties = null, 
+           string? includeProperties = null,
            bool isTracking = false,
            CancellationToken cancellationToken = default)
         {

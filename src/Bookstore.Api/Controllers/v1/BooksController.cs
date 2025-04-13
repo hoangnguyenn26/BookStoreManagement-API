@@ -20,7 +20,7 @@ namespace Bookstore.Api.Controllers.v1
 
         // GET: api/v1/books
         [HttpGet]
-        [AllowAnonymous] 
+        [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<BookDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks(CancellationToken cancellationToken)
         {
@@ -45,7 +45,7 @@ namespace Bookstore.Api.Controllers.v1
 
         // POST: api/v1/books
         [HttpPost]
-        [Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(BookDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<BookDto>> CreateBook([FromBody] CreateBookDto createBookDto, CancellationToken cancellationToken)
@@ -60,7 +60,7 @@ namespace Bookstore.Api.Controllers.v1
             {
                 return BadRequest(new { Message = ex.Message });
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the book.");
             }

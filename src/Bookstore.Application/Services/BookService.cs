@@ -58,7 +58,7 @@ namespace Bookstore.Application.Services
                 return false;
             }
 
-            await _unitOfWork.BookRepository.DeleteAsync(bookToDelete, cancellationToken); // Soft Delete
+            await _unitOfWork.BookRepository.DeleteAsync(bookToDelete, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             return true;
         }
