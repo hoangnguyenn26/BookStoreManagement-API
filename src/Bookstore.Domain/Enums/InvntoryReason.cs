@@ -3,10 +3,13 @@ namespace Bookstore.Domain.Enums
 {
     public enum InventoryReason : byte
     {
-        StockIn = 0,        // Nhập kho
-        Sale = 1,           // Bán hàng
-        OrderCancellation = 2,// Hủy đơn hàng (hoàn kho)
-        Adjustment = 3,     // Điều chỉnh khác (hỏng, mất,...)
-        InitialStock = 4    // Số lượng ban đầu (khi thêm sách mới)
+        StockReceipt = 0,    // Nhập kho từ NCC
+        OnlineSale = 1,      // Bán hàng Online
+        InStoreSale = 2,     // Bán hàng tại quầy
+        OrderCancellation = 3,// Hủy đơn hàng (hoàn kho)
+        Return = 4,          // Khách trả hàng (hoàn kho)
+        Adjustment = 5,      // Điều chỉnh khác (hỏng, mất,...)
+        InitialStock = 6     // Tồn kho ban đầu
     }
+
 }

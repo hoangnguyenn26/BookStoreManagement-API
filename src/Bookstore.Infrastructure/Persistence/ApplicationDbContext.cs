@@ -1,5 +1,6 @@
 ﻿
 using Bookstore.Domain.Entities;
+using Bookstore.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection; // Cần cho Assembly
 
@@ -28,7 +29,10 @@ namespace Bookstore.Infrastructure.Persistence
         public DbSet<InventoryLog> InventoryLogs { get; set; } = null!;
         public DbSet<WishlistItem> WishlistItems { get; set; } = null!;
         public DbSet<CartItem> CartItems { get; set; } = null!;
-
+        public DbSet<Supplier> Suppliers { get; set; } = null!;
+        public DbSet<StockReceipt> StockReceipts { get; set; } = null!;
+        public DbSet<StockReceiptDetail> StockReceiptDetails { get; set; } = null!;
+        public DbSet<OrderShippingAddress> OrderShippingAddresses { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -68,14 +72,25 @@ namespace Bookstore.Infrastructure.Persistence
             builder.Entity<Order>(entity =>
             {
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.RowVersion).IsRowVersion();
                 entity.Property(e => e.Status).HasConversion<byte>();
+                entity.Property(e => e.OrderType).HasConversion<byte>();
+                entity.Property(e => e.PaymentMethod).HasConversion<byte>();
+                entity.Property(e => e.PaymentStatus).HasConversion<string>().HasMaxLength(50).HasDefaultValue(PaymentStatus.Pending);
+                entity.Property(e => e.DeliveryMethod).HasConversion<byte>();
+                entity.Property(e => e.InvoiceNumber).HasMaxLength(50);
+                entity.HasIndex(e => e.InvoiceNumber).IsUnique().HasFilter("[InvoiceNumber] IS NOT NULL"); // Index unique nếu không null
 
                 entity.HasOne(o => o.User)
                       .WithMany(u => u.Orders)
                       .HasForeignKey(o => o.UserId)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Restrict); // Ngăn xóa User nếu họ có Orders
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(o => o.OrderShippingAddress)
+                      .WithMany()
+                      .HasForeignKey(o => o.OrderShippingAddressId)
+                      .IsRequired(false) // Cho phép NULL
+                      .OnDelete(DeleteBehavior.SetNull);
             });
 
             // ----- Cấu hình OrderDetail (Many-to-One với Order, Many-to-One với Book) -----
@@ -101,7 +116,6 @@ namespace Bookstore.Infrastructure.Persistence
             builder.Entity<Book>(entity =>
             {
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.RowVersion).IsRowVersion();
 
                 // Cấu hình Soft Delete Filter (Rất quan trọng!)
                 entity.HasQueryFilter(b => !b.IsDeleted);
@@ -157,6 +171,11 @@ namespace Bookstore.Infrastructure.Persistence
                       .HasForeignKey(il => il.UserId)
                       .IsRequired(false)
                       .OnDelete(DeleteBehavior.SetNull); // Nếu User bị xóa, set UserId trong log thành NULL
+                entity.HasOne(il => il.StockReceipt)
+                      .WithMany()
+                      .HasForeignKey(il => il.StockReceiptId)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.SetNull); // Nếu phiếu nhập bị xóa, chỉ set null trong log
             });
 
             // ----- Cấu hình WishlistItem -----
@@ -195,6 +214,54 @@ namespace Bookstore.Infrastructure.Persistence
                       .HasForeignKey(ci => ci.BookId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<Supplier>(entity =>
+            {
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.HasIndex(e => e.Name);
+                entity.Property(e => e.Email).HasMaxLength(256);
+                entity.HasIndex(e => e.Email).IsUnique().HasFilter("[Email] IS NOT NULL");
+                entity.Property(e => e.Phone).HasMaxLength(50);
+                entity.Property(e => e.Address).HasMaxLength(500);
+            });
+
+            builder.Entity<StockReceipt>(entity =>
+            {
+                entity.HasOne(sr => sr.Supplier)
+                      .WithMany()
+                      .HasForeignKey(sr => sr.SupplierId)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            builder.Entity<StockReceiptDetail>(entity =>
+            {
+                entity.Property(e => e.PurchasePrice).HasColumnType("decimal(18,2)");
+                entity.ToTable(t => t.HasCheckConstraint("CK_StockReceiptDetails_QuantityReceived", "[QuantityReceived] > 0"));
+
+                entity.HasOne(srd => srd.StockReceipt)
+                      .WithMany(sr => sr.StockReceiptDetails)
+                      .HasForeignKey(srd => srd.StockReceiptId)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Cascade); // Xóa chi tiết nếu phiếu nhập bị xóa
+
+                entity.HasOne(srd => srd.Book)
+                      .WithMany()
+                      .HasForeignKey(srd => srd.BookId)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict); // Không cho xóa sách nếu đã có lịch sử nhập
+            });
+
+            builder.Entity<OrderShippingAddress>(entity =>
+            {
+                entity.HasKey(e => e.Id); // Đảm bảo có khóa chính
+                entity.Property(e => e.Street).IsRequired().HasMaxLength(256);
+                entity.Property(e => e.Village).HasMaxLength(100);
+                entity.Property(e => e.District).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.City).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.RecipientName).HasMaxLength(200);
+                entity.Property(e => e.PhoneNumber).HasMaxLength(20);
             });
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
