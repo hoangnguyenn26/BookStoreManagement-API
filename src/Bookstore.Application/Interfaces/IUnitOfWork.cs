@@ -13,6 +13,7 @@ namespace Bookstore.Application.Interfaces
         IRoleRepository RoleRepository { get; }
         IWishlistRepository WishlistRepository { get; }
         ICartRepository CartRepository { get; }
+        IAddressRepository AddressRepository { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

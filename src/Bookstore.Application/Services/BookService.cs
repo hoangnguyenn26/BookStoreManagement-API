@@ -41,7 +41,8 @@ namespace Bookstore.Application.Services
                 BookId = createdBook.Id,
                 ChangeQuantity = createdBook.StockQuantity,
                 Reason = Domain.Enums.InventoryReason.InitialStock,
-                TimestampUtc = DateTime.UtcNow
+                TimestampUtc = DateTime.UtcNow,
+                StockReceiptId = null
             };
             await _unitOfWork.InventoryLogRepository.AddAsync(initialLog, cancellationToken);
 

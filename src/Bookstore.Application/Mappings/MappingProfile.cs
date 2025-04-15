@@ -1,6 +1,7 @@
 ﻿
 using AutoMapper;
 using Bookstore.Application.Dtos;
+using Bookstore.Application.Dtos.Addresses;
 using Bookstore.Application.Dtos.Books;
 using Bookstore.Application.Dtos.Carts;
 using Bookstore.Application.Dtos.Wishlists;
@@ -24,10 +25,17 @@ namespace Bookstore.Application.Mappings
 
             // ----- User Mappings -----
             CreateMap<User, UserDto>();
+
             // ----- Wishlist Mappings -----
             CreateMap<WishlistItem, WishlistItemDto>();
+
             // ----- Cart Mappings -----
             CreateMap<CartItem, CartItemDto>();
+
+            // ----- Address Mappings -----
+            CreateMap<Address, AddressDto>();
+            CreateMap<CreateAddressDto, Address>();
+            CreateMap<UpdateAddressDto, Address>();
         }
     }
 }

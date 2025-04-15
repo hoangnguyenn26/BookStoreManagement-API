@@ -61,11 +61,21 @@ namespace Bookstore.Infrastructure.Persistence
             // ----- Cấu hình Address (One-to-Many với User) -----
             builder.Entity<Address>(entity =>
             {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Street).IsRequired().HasMaxLength(256);
+                entity.Property(e => e.Village).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.District).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.City).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.IsDefault).IsRequired();
+
+                // Mối quan hệ với User
                 entity.HasOne(a => a.User)
                       .WithMany(u => u.Addresses)
                       .HasForeignKey(a => a.UserId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Cascade); // Xóa địa chỉ nếu User bị xóa
+
             });
 
             // ----- Cấu hình Order (One-to-Many với User, One-to-Many với OrderDetail) -----

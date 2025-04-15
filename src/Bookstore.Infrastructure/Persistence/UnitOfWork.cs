@@ -17,6 +17,7 @@ public class UnitOfWork : IUnitOfWork
     private Lazy<IRoleRepository> _roleRepository;
     private Lazy<IWishlistRepository> _wishlistRepository;
     private Lazy<ICartRepository> _cartRepository;
+    private Lazy<IAddressRepository> _addressRepository;
 
 
     public UnitOfWork(ApplicationDbContext context)
@@ -31,6 +32,7 @@ public class UnitOfWork : IUnitOfWork
         _roleRepository = new Lazy<IRoleRepository>(() => new RoleRepository(_context));
         _wishlistRepository = new Lazy<IWishlistRepository>(() => new WishlistRepository(_context));
         _cartRepository = new Lazy<ICartRepository>(() => new CartRepository(_context));
+        _addressRepository = new Lazy<IAddressRepository>(() => new AddressRepository(_context));
     }
 
     public ICategoryRepository CategoryRepository => _categoryRepository.Value;
@@ -41,6 +43,7 @@ public class UnitOfWork : IUnitOfWork
     public IRoleRepository RoleRepository => _roleRepository.Value;
     public IWishlistRepository WishlistRepository => _wishlistRepository.Value;
     public ICartRepository CartRepository => _cartRepository.Value;
+    public IAddressRepository AddressRepository => _addressRepository.Value;
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.SaveChangesAsync(cancellationToken);
