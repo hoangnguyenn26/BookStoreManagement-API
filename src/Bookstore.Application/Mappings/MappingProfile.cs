@@ -47,6 +47,8 @@ namespace Bookstore.Application.Mappings
             CreateMap<Order, OrderSummaryDto>()
                  .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Guest"))
                  .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.OrderDetails.Sum(od => od.Quantity))); // Tính tổng số lượng item
+
+
         }
     }
 }

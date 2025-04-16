@@ -75,6 +75,39 @@ namespace Bookstore.Api.Controllers.v1
             }
         }
 
+        // GET: api/v1/orders
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<OrderSummaryDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<IEnumerable<OrderSummaryDto>>> GetMyOrders(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            CancellationToken cancellationToken = default)
+        {
+            var userId = GetUserIdFromClaims(); // Lấy userId của người dùng đang đăng nhập
+            var orders = await _orderService.GetUserOrdersAsync(userId, page, pageSize, cancellationToken);
+            // TODO: Thêm thông tin phân trang vào Header hoặc Response Body nếu cần
+            return Ok(orders);
+        }
+
+        // GET: api/v1/orders/{orderId}
+        [HttpGet("{orderId:guid}")]
+        [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<OrderDto>> GetMyOrderById(Guid orderId, CancellationToken cancellationToken)
+        {
+            var userId = GetUserIdFromClaims();
+            var order = await _orderService.GetOrderByIdForUserAsync(userId, orderId, cancellationToken);
+
+            if (order == null)
+            {
+                return NotFound(new { Message = $"Order with Id '{orderId}' not found or you don't have permission." });
+            }
+
+            return Ok(order);
+        }
+
         // Các action GET, PUT (cancel) sẽ được thêm ở các ngày sau
     }
 }

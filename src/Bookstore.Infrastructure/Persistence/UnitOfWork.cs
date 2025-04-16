@@ -4,12 +4,10 @@ using Bookstore.Domain.Interfaces.Repositories;
 using Bookstore.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
 
-
 namespace Bookstore.Infrastructure.Persistence;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _context;
-    private IDbContextTransaction? _currentTransaction;
     // Sử dụng Lazy<T> để khởi tạo repo chỉ khi cần (tùy chọn)
     private Lazy<ICategoryRepository> _categoryRepository;
     private Lazy<IUserRepository> _userRepository;
@@ -56,45 +54,39 @@ public class UnitOfWork : IUnitOfWork
     {
         return await _context.SaveChangesAsync(cancellationToken);
     }
-    public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+
+    public async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        if (_currentTransaction != null) return;
-        _currentTransaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        return await _context.Database.BeginTransactionAsync(cancellationToken);
     }
-    public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+
+    public async Task CommitTransactionAsync(IDbContextTransaction transaction, CancellationToken cancellationToken = default)
     {
+        if (transaction == null) throw new ArgumentNullException(nameof(transaction));
+
         try
         {
-            await SaveChangesAsync(cancellationToken); // Đảm bảo SaveChanges được gọi trước khi commit
-            await _currentTransaction?.CommitAsync(cancellationToken)!;
+            await SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
         }
         catch
         {
-            await RollbackTransactionAsync(cancellationToken); // Rollback nếu commit lỗi
+            await RollbackTransactionAsync(transaction, cancellationToken);
             throw;
         }
-        finally
-        {
-            if (_currentTransaction != null)
-            {
-                await _currentTransaction.DisposeAsync();
-                _currentTransaction = null;
-            }
-        }
     }
-    public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+
+    public async Task RollbackTransactionAsync(IDbContextTransaction transaction, CancellationToken cancellationToken = default)
     {
+        if (transaction == null) throw new ArgumentNullException(nameof(transaction));
+
         try
         {
-            await _currentTransaction?.RollbackAsync(cancellationToken)!;
+            await transaction.RollbackAsync(cancellationToken);
         }
         finally
         {
-            if (_currentTransaction != null)
-            {
-                await _currentTransaction.DisposeAsync();
-                _currentTransaction = null;
-            }
+            // Không cần Dispose transaction ở đây, khối using trong Service sẽ làm điều đó
         }
     }
 

@@ -5,7 +5,7 @@ namespace Bookstore.Domain.Entities
     {
         public Guid UserId { get; set; }
         public string Street { get; set; } = null!;
-        public string? Village { get; set; }
+        public string Village { get; set; } = null!;
         public string District { get; set; } = null!;
         public string City { get; set; } = null!;
 

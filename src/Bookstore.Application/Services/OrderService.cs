@@ -5,6 +5,8 @@ using Bookstore.Application.Interfaces.Services;
 using Bookstore.Domain.Entities;
 using Bookstore.Domain.Enums;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
+
 
 namespace Bookstore.Application.Services
 {
@@ -14,10 +16,11 @@ namespace Bookstore.Application.Services
         private readonly IMapper _mapper;
         private readonly ILogger<OrderService> _logger;
 
-        public OrderService(IUnitOfWork unitOfWork, IMapper mapper)
+        public OrderService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<OrderService> logger)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<OrderDto> CreateOnlineOrderAsync(Guid userId, CreateOrderRequestDto createOrderDto, CancellationToken cancellationToken = default)
@@ -32,6 +35,7 @@ namespace Bookstore.Application.Services
                 var cartItems = (await _unitOfWork.CartRepository.GetCartByUserIdAsync(userId, cancellationToken)).ToList();
                 if (!cartItems.Any())
                 {
+                    _logger.LogWarning("User {UserId} attempted to create order with an empty cart.", userId);
                     throw new ValidationException("Cannot create order from an empty cart.");
                 }
 
@@ -98,7 +102,7 @@ namespace Bookstore.Application.Services
                 {
                     UserId = userId,
                     OrderDate = DateTime.UtcNow,
-                    Status = OrderStatus.Pending, // Trạng thái ban đầu
+                    Status = OrderStatus.Pending,
                     TotalAmount = finalTotalAmount,
                     OrderShippingAddress = orderShippingAddress,
                     OrderType = OrderType.Online,
@@ -146,7 +150,7 @@ namespace Bookstore.Application.Services
                 }
 
                 // 11. Commit Transaction
-                await _unitOfWork.CommitTransactionAsync(cancellationToken); // Giả sử có hàm này trong UoW
+                await _unitOfWork.CommitTransactionAsync(transaction, cancellationToken);
 
                 _logger.LogInformation("Successfully created online order {OrderId} for User {UserId}", order.Id, userId);
 
@@ -159,9 +163,62 @@ namespace Bookstore.Application.Services
             {
                 _logger.LogError(ex, "Error occurred while creating online order for User {UserId}", userId);
                 // Rollback Transaction nếu có lỗi
-                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                await _unitOfWork.RollbackTransactionAsync(transaction, cancellationToken);
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<OrderSummaryDto>> GetUserOrdersAsync(Guid userId, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Fetching orders for User: {UserId}, Page: {Page}, PageSize: {PageSize}", userId, page, pageSize);
+            var orders = await _unitOfWork.OrderRepository.GetOrdersByUserIdAsync(userId, page, pageSize, cancellationToken);
+            // AutoMapper sẽ xử lý tính ItemCount nhờ cấu hình và Include trong Repo
+            return _mapper.Map<IEnumerable<OrderSummaryDto>>(orders);
+        }
+
+        public async Task<OrderDto?> GetOrderByIdForUserAsync(Guid userId, Guid orderId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Fetching order details {OrderId} for User: {UserId}", orderId, userId);
+            var order = await _unitOfWork.OrderRepository.GetOrderWithDetailsByIdAsync(orderId, cancellationToken);
+
+            // Kiểm tra đơn hàng tồn tại VÀ thuộc về đúng User
+            if (order == null || order.UserId != userId)
+            {
+                _logger.LogWarning("Order {OrderId} not found or does not belong to User {UserId}", orderId, userId);
+                return null; // Hoặc throw NotFoundException
+            }
+
+            return _mapper.Map<OrderDto>(order);
+        }
+
+        public async Task<IEnumerable<OrderSummaryDto>> GetAllOrdersForAdminAsync(int page = 1, int pageSize = 10, string? statusFilter = null, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Fetching all orders for Admin. Page: {Page}, PageSize: {PageSize}, StatusFilter: {StatusFilter}", page, pageSize, statusFilter ?? "None");
+
+            // Xây dựng biểu thức lọc (filter expression) nếu có statusFilter
+            Expression<Func<Order, bool>>? filter = null;
+            if (!string.IsNullOrWhiteSpace(statusFilter) && Enum.TryParse<OrderStatus>(statusFilter, true, out var status)) // Thử parse string thành Enum (không phân biệt hoa thường)
+            {
+                filter = o => o.Status == status;
+            }
+
+            var orders = await _unitOfWork.OrderRepository.GetAllOrdersAsync(filter, page, pageSize, cancellationToken);
+            return _mapper.Map<IEnumerable<OrderSummaryDto>>(orders);
+        }
+
+        public async Task<OrderDto?> GetOrderByIdForAdminAsync(Guid orderId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Fetching order details {OrderId} for Admin", orderId);
+            var order = await _unitOfWork.OrderRepository.GetOrderWithDetailsByIdAsync(orderId, cancellationToken);
+
+            if (order == null)
+            {
+                _logger.LogWarning("Order {OrderId} not found for Admin request.", orderId);
+                return null; // Hoặc throw NotFoundException
+            }
+
+            // Admin có quyền xem mọi đơn hàng nên không cần kiểm tra UserId
+            return _mapper.Map<OrderDto>(order);
         }
 
         // Implement các phương thức khác của IOrderService (GetUserOrdersAsync, ...) ở các ngày tiếp theo

@@ -13,8 +13,13 @@ namespace Bookstore.Infrastructure.Repositories
 
         public async Task<IEnumerable<Order>> GetAllOrdersAsync(Expression<Func<Order, bool>>? filter = null, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            IQueryable<Order> query = _dbSet.Include(o => o.User)
-                                            .Include(o => o.OrderShippingAddress);
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
+
+            IQueryable<Order> query = _dbSet
+                .Include(o => o.User) // Include User để lấy UserName cho SummaryDto
+                .Include(o => o.OrderDetails); // Include để tính ItemCount
 
             if (filter != null)
             {
@@ -30,26 +35,35 @@ namespace Bookstore.Infrastructure.Repositories
 
         public async Task<Order?> GetOrderWithDetailsByIdAsync(Guid orderId, CancellationToken cancellationToken = default)
         {
-            // Include các thông tin cần thiết khi xem chi tiết đơn hàng
             return await _dbSet
+                .Where(o => o.Id == orderId)
                 .Include(o => o.User)
                 .Include(o => o.OrderShippingAddress)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Book)
+                        .ThenInclude(b => b.Author)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<Order>> GetOrdersByUserIdAsync(Guid userId, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
+
             return await _dbSet
                 .Where(o => o.UserId == userId)
-                .Include(o => o.OrderShippingAddress)
+                .Include(o => o.OrderDetails) // <-- Include để tính ItemCount
                 .OrderByDescending(o => o.OrderDate)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
+
+
+
+
     }
 }

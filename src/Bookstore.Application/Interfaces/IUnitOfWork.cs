@@ -1,6 +1,5 @@
-﻿// src/Bookstore.Application/Interfaces/IUnitOfWork.cs
-using Bookstore.Domain.Interfaces.Repositories;
-
+﻿using Bookstore.Domain.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore.Storage;
 namespace Bookstore.Application.Interfaces
 {
     public interface IUnitOfWork : IDisposable
@@ -16,9 +15,9 @@ namespace Bookstore.Application.Interfaces
         IAddressRepository AddressRepository { get; }
         IOrderRepository OrderRepository { get; }
         IOrderShippingAddressRepository OrderShippingAddressRepository { get; }
-        Task BeginTransactionAsync(CancellationToken cancellationToken = default);
-        Task CommitTransactionAsync(CancellationToken cancellationToken = default);
-        Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
+        Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+        Task CommitTransactionAsync(IDbContextTransaction transaction, CancellationToken cancellationToken = default);
+        Task RollbackTransactionAsync(IDbContextTransaction transaction, CancellationToken cancellationToken = default);
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

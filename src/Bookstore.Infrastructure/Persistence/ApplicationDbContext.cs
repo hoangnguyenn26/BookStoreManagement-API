@@ -81,6 +81,7 @@ namespace Bookstore.Infrastructure.Persistence
             // ----- Cấu hình Order (One-to-Many với User, One-to-Many với OrderDetail) -----
             builder.Entity<Order>(entity =>
             {
+
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.Status).HasConversion<byte>();
                 entity.Property(e => e.OrderType).HasConversion<byte>();
@@ -93,13 +94,13 @@ namespace Bookstore.Infrastructure.Persistence
                 entity.HasOne(o => o.User)
                       .WithMany(u => u.Orders)
                       .HasForeignKey(o => o.UserId)
-                      .IsRequired()
+                      .IsRequired(false)
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(o => o.OrderShippingAddress)
                       .WithMany()
                       .HasForeignKey(o => o.OrderShippingAddressId)
-                      .IsRequired(false) // Cho phép NULL
+                      .IsRequired(false)
                       .OnDelete(DeleteBehavior.SetNull);
             });
 
