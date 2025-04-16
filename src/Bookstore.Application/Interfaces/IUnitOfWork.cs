@@ -14,6 +14,8 @@ namespace Bookstore.Application.Interfaces
         IWishlistRepository WishlistRepository { get; }
         ICartRepository CartRepository { get; }
         IAddressRepository AddressRepository { get; }
+        IOrderRepository OrderRepository { get; }
+        IOrderShippingAddressRepository OrderShippingAddressRepository { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
