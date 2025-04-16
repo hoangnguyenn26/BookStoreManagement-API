@@ -168,6 +168,121 @@ namespace Bookstore.Application.Services
             }
         }
 
+        public async Task<bool> UpdateOrderStatusAsync(Guid orderId, OrderStatus newStatus, Guid adminUserId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Admin {AdminUserId} attempting to update status for Order {OrderId} to {NewStatus}", adminUserId, orderId, newStatus);
+
+            // Lấy order kèm chi tiết để xử lý hoàn kho nếu hủy
+            // **Quan trọng:** Cần bật tracking ở đây vì sẽ cập nhật Order và Book
+            var order = await _unitOfWork.OrderRepository.ListAsync(
+                            filter: o => o.Id == orderId,
+                            includeProperties: "OrderDetails.Book", // Include đủ để hoàn kho
+                            isTracking: true, // <<-- Bật Tracking
+                            cancellationToken: cancellationToken)
+                            .ContinueWith(t => t.Result.FirstOrDefault(), cancellationToken);
+
+
+            if (order == null)
+            {
+                _logger.LogWarning("Order {OrderId} not found for status update attempt by Admin {AdminUserId}", orderId, adminUserId);
+                return false; // Hoặc throw NotFoundException
+            }
+
+            var originalStatus = order.Status;
+
+            // --- Xử lý hoàn kho nếu trạng thái mới là Cancelled ---
+            if (newStatus == OrderStatus.Cancelled && originalStatus != OrderStatus.Cancelled)
+            {
+                _logger.LogInformation("Order {OrderId} status changed to Cancelled. Processing stock replenishment.", orderId);
+                await ReplenishStockAndLogAsync(order, adminUserId, InventoryReason.OrderCancellation, cancellationToken);
+            }
+
+            // Cập nhật trạng thái và thời gian
+            order.Status = newStatus;
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Successfully updated status for Order {OrderId} to {NewStatus} by Admin {AdminUserId}", orderId, newStatus, adminUserId);
+            return true;
+        }
+
+        public async Task<bool> CancelOrderAsync(Guid userId, Guid orderId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("User {UserId} attempting to cancel Order {OrderId}", userId, orderId);
+
+            var order = await _unitOfWork.OrderRepository.ListAsync(
+                            filter: o => o.Id == orderId,
+                            includeProperties: "OrderDetails.Book",
+                            isTracking: true,
+                            cancellationToken: cancellationToken)
+                            .ContinueWith(t => t.Result.FirstOrDefault(), cancellationToken);
+
+            if (order == null || order.UserId != userId)
+            {
+                _logger.LogWarning("Order {OrderId} not found or does not belong to User {UserId} for cancellation attempt.", orderId, userId);
+                return false;
+            }
+
+            // Kiểm tra trạng thái hiện tại có cho phép User hủy không (Ví dụ: chỉ Pending)
+            if (order.Status != OrderStatus.Pending)
+            {
+                _logger.LogWarning("User {UserId} attempted to cancel Order {OrderId} which has status {Status}. Cancellation denied.", userId, orderId, order.Status);
+                throw new ValidationException($"Order cannot be cancelled because its current status is '{order.Status}'.");
+            }
+
+            // --- Thực hiện hủy, hoàn kho và log ---
+            await ReplenishStockAndLogAsync(order, userId, InventoryReason.OrderCancellation, cancellationToken);
+
+            order.Status = OrderStatus.Cancelled;
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("User {UserId} successfully cancelled Order {OrderId}", userId, orderId);
+            return true;
+        }
+
+        // --- Hàm Helper để xử lý hoàn kho và ghi log ---
+        private async Task ReplenishStockAndLogAsync(Order order, Guid actionUserId, InventoryReason reason, CancellationToken cancellationToken)
+        {
+            if (order.OrderDetails == null || !order.OrderDetails.Any())
+            {
+                _logger.LogWarning("Order {OrderId} has no details for stock replenishment.", order.Id);
+                return;
+            }
+
+            var booksToUpdate = new List<Book>();
+            var logsToAdd = new List<InventoryLog>();
+            var timestamp = DateTime.UtcNow;
+
+            foreach (var detail in order.OrderDetails)
+            {
+                var book = detail.Book;
+                if (book == null)
+                {
+                    _logger.LogWarning("Book data missing for OrderDetail (BookId: {BookId}) in Order {OrderId} during stock replenishment.", detail.BookId, order.Id);
+                    continue;
+                }
+
+                // Tăng lại số lượng tồn kho
+                book.StockQuantity += detail.Quantity;
+                booksToUpdate.Add(book);
+
+                // Tạo log hoàn kho
+                var log = new InventoryLog
+                {
+                    BookId = book.Id,
+                    ChangeQuantity = detail.Quantity,
+                    Reason = reason,
+                    TimestampUtc = timestamp,
+                    OrderId = order.Id,
+                    UserId = actionUserId
+                };
+                logsToAdd.Add(log);
+            }
+            if (logsToAdd.Any())
+            {
+                foreach (var log in logsToAdd) { await _unitOfWork.InventoryLogRepository.AddAsync(log, cancellationToken); }
+            }
+
+        }
+
         public async Task<IEnumerable<OrderSummaryDto>> GetUserOrdersAsync(Guid userId, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Fetching orders for User: {UserId}, Page: {Page}, PageSize: {PageSize}", userId, page, pageSize);
@@ -220,8 +335,5 @@ namespace Bookstore.Application.Services
             // Admin có quyền xem mọi đơn hàng nên không cần kiểm tra UserId
             return _mapper.Map<OrderDto>(order);
         }
-
-        // Implement các phương thức khác của IOrderService (GetUserOrdersAsync, ...) ở các ngày tiếp theo
-        // ... (GetOrderByIdForUserAsync, GetAllOrdersForAdminAsync, GetOrderByIdForAdminAsync)
     }
 }

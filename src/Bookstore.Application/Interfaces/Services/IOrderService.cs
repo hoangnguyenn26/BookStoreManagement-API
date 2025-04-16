@@ -1,5 +1,6 @@
 ﻿
 using Bookstore.Application.Dtos.Orders;
+using Bookstore.Domain.Enums;
 
 namespace Bookstore.Application.Interfaces.Services
 {
@@ -21,9 +22,9 @@ namespace Bookstore.Application.Interfaces.Services
         Task<OrderDto?> GetOrderByIdForAdminAsync(Guid orderId, CancellationToken cancellationToken = default);
 
         // Cập nhật trạng thái đơn hàng (Admin)
-        // Task<bool> UpdateOrderStatusAsync(Guid orderId, OrderStatus newStatus, Guid adminUserId, CancellationToken cancellationToken = default); // Sẽ implement sau
+        Task<bool> UpdateOrderStatusAsync(Guid orderId, OrderStatus newStatus, Guid adminUserId, CancellationToken cancellationToken = default);
 
         // Hủy đơn hàng (User)
-        // Task<bool> CancelOrderAsync(Guid userId, Guid orderId, CancellationToken cancellationToken = default); // Sẽ implement sau
+        Task<bool> CancelOrderAsync(Guid userId, Guid orderId, CancellationToken cancellationToken = default);
     }
 }

@@ -48,10 +48,8 @@ namespace Bookstore.Api.Controllers.v1
 
                 // Trả về 201 Created với action để lấy đơn hàng vừa tạo
                 // Cần tạo action GetOrderByIdForUser trước (Ngày 25)
-                // return CreatedAtAction(nameof(GetOrderByIdForUser), new { orderId = createdOrder.Id, version = \"1.0\" }, createdOrder);
+                return CreatedAtAction(nameof(GetMyOrderById), new { orderId = createdOrder.Id, version = "1.0" }, createdOrder);
 
-                // Tạm thời trả về Ok hoặc Created với object
-                return StatusCode(StatusCodes.Status201Created, createdOrder);
             }
             catch (ValidationException ex)
             {
@@ -108,6 +106,38 @@ namespace Bookstore.Api.Controllers.v1
             return Ok(order);
         }
 
-        // Các action GET, PUT (cancel) sẽ được thêm ở các ngày sau
+        // PUT: api/v1/orders/{orderId}/cancel
+        [HttpPut("{orderId:guid}/cancel")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> CancelMyOrder(Guid orderId, CancellationToken cancellationToken)
+        {
+            var userId = GetUserIdFromClaims();
+            try
+            {
+                var success = await _orderService.CancelOrderAsync(userId, orderId, cancellationToken);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { Message = "Order not found or you don't have permission." });
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized cancellation attempt for order {OrderId}", orderId);
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error cancelling order {OrderId} for user {UserId}", orderId, userId);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while cancelling the order.");
+            }
+        }
     }
 }
