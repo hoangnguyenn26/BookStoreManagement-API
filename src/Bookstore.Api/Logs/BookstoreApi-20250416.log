@@ -1,0 +1,5 @@
+2025-04-16 14:39:43.267 +07:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7264
+2025-04-16 14:39:43.295 +07:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5244
+2025-04-16 14:39:43.373 +07:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-04-16 14:39:43.375 +07:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-04-16 14:39:43.376 +07:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: C:\Users\Nguyn\Desktop\Đồ án tốt nghiệp\BookStoreManagement\src\Bookstore.Api
