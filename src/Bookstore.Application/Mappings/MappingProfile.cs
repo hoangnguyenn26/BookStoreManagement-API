@@ -9,6 +9,7 @@ using Bookstore.Application.Dtos.Promotions;
 using Bookstore.Application.Dtos.Wishlists;
 using Bookstore.Domain.Entities;
 
+
 namespace Bookstore.Application.Mappings
 {
     public class MappingProfile : Profile
@@ -38,16 +39,23 @@ namespace Bookstore.Application.Mappings
             CreateMap<Address, AddressDto>();
             CreateMap<CreateAddressDto, Address>();
             CreateMap<UpdateAddressDto, Address>();
-            // ----- Order Mappings -----
+
+            // ----- OrderShippingAddress Mapping -----
+            // Map từ Address (địa chỉ gốc của user) sang OrderShippingAddress
+            CreateMap<Address, OrderShippingAddress>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore()); // Bỏ qua Id khi map vì sẽ tạo Id mới
+
+            // Map từ OrderShippingAddress sang AddressDto (để hiển thị trong OrderDto)
             CreateMap<OrderShippingAddress, AddressDto>();
+
+            // ----- Order Mappings -----
             CreateMap<OrderDetail, OrderDetailDto>();
             CreateMap<Order, OrderDto>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Guest")) // Lấy UserName nếu User được Include
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Guest"))
                 .ForMember(dest => dest.ShippingAddress, opt => opt.MapFrom(src => src.OrderShippingAddress));
-
             CreateMap<Order, OrderSummaryDto>()
                  .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Guest"))
-                 .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.OrderDetails.Sum(od => od.Quantity))); // Tính tổng số lượng item
+                 .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.OrderDetails.Sum(od => od.Quantity)));
 
             // ----- Promotion Mappings -----
             CreateMap<Promotion, PromotionDto>();
