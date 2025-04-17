@@ -33,6 +33,7 @@ namespace Bookstore.Infrastructure.Persistence
         public DbSet<StockReceipt> StockReceipts { get; set; } = null!;
         public DbSet<StockReceiptDetail> StockReceiptDetails { get; set; } = null!;
         public DbSet<OrderShippingAddress> OrderShippingAddresses { get; set; } = null!;
+        public DbSet<Promotion> Promotions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -273,6 +274,43 @@ namespace Bookstore.Infrastructure.Persistence
                 entity.Property(e => e.City).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.RecipientName).HasMaxLength(200);
                 entity.Property(e => e.PhoneNumber).HasMaxLength(20);
+            });
+
+            // ----- Cấu hình Promotion -----
+            builder.Entity<Promotion>(entity =>
+            {
+                // Khóa chính Id đã được kế thừa từ BaseEntity và tự cấu hình
+
+                entity.Property(e => e.Code)
+                      .IsRequired()
+                      .HasMaxLength(50);
+
+                entity.HasIndex(e => e.Code)
+                      .IsUnique();
+
+                entity.Property(e => e.Description).HasMaxLength(256);
+
+                entity.Property(e => e.DiscountPercentage)
+                      .HasColumnType("decimal(5, 2)");
+
+                entity.Property(e => e.DiscountAmount)
+                      .HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.StartDate).IsRequired();
+
+                entity.Property(e => e.CurrentUsage).IsRequired().HasDefaultValue(0);
+
+                entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
+                entity.ToTable(t => t.HasCheckConstraint("CK_Promotions_DiscountType",
+                    "([DiscountPercentage] IS NOT NULL AND [DiscountAmount] IS NULL) OR ([DiscountPercentage] IS NULL AND [DiscountAmount] IS NOT NULL) OR ([DiscountPercentage] IS NULL AND [DiscountAmount] IS NULL)"));
+                entity.ToTable(t => t.HasCheckConstraint("CK_Promotions_Percentage",
+                    "[DiscountPercentage] IS NULL OR ([DiscountPercentage] > 0 AND [DiscountPercentage] <= 100)"));
+                entity.ToTable(t => t.HasCheckConstraint("CK_Promotions_Amount",
+                    "[DiscountAmount] IS NULL OR [DiscountAmount] > 0"));
+                entity.ToTable(t => t.HasCheckConstraint("CK_Promotions_Usage",
+                    "[CurrentUsage] >= 0 AND ([MaxUsage] IS NULL OR [CurrentUsage] <= [MaxUsage])"));
+                entity.ToTable(t => t.HasCheckConstraint("CK_Promotions_Dates",
+                    "[EndDate] IS NULL OR [EndDate] >= [StartDate]"));
             });
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

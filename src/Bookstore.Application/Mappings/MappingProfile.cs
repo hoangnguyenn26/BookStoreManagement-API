@@ -5,6 +5,7 @@ using Bookstore.Application.Dtos.Addresses;
 using Bookstore.Application.Dtos.Books;
 using Bookstore.Application.Dtos.Carts;
 using Bookstore.Application.Dtos.Orders;
+using Bookstore.Application.Dtos.Promotions;
 using Bookstore.Application.Dtos.Wishlists;
 using Bookstore.Domain.Entities;
 
@@ -48,7 +49,10 @@ namespace Bookstore.Application.Mappings
                  .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Guest"))
                  .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.OrderDetails.Sum(od => od.Quantity))); // Tính tổng số lượng item
 
-
+            // ----- Promotion Mappings -----
+            CreateMap<Promotion, PromotionDto>();
+            CreateMap<CreatePromotionDto, Promotion>();
+            CreateMap<UpdatePromotionDto, Promotion>();
         }
     }
 }

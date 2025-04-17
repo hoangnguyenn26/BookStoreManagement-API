@@ -1,0 +1,65 @@
+2025-04-17 17:21:07.837 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model) No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'Bookstore.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-04-17 17:21:08.075 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'CartItem'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-17 17:21:08.076 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'InventoryLog'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-17 17:21:08.076 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'OrderDetail'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-17 17:21:08.076 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'StockReceiptDetail'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-17 17:21:08.076 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'WishlistItem'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-17 17:21:43.047 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model) No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'Bookstore.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-04-17 17:21:43.148 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'CartItem'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-17 17:21:43.148 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'InventoryLog'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-17 17:21:43.148 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'OrderDetail'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-17 17:21:43.148 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'StockReceiptDetail'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-17 17:21:43.148 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'WishlistItem'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-17 17:21:43.696 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (12ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-04-17 17:21:43.720 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_getapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session', @LockMode = 'Exclusive';
+SELECT @result
+2025-04-17 17:21:43.769 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+BEGIN
+    CREATE TABLE [__EFMigrationsHistory] (
+        [MigrationId] nvarchar(150) NOT NULL,
+        [ProductVersion] nvarchar(32) NOT NULL,
+        CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+    );
+END;
+2025-04-17 17:21:43.775 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-04-17 17:21:43.776 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-04-17 17:21:43.783 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-04-17 17:21:43.822 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Promotions] (
+    [Id] uniqueidentifier NOT NULL,
+    [Code] nvarchar(50) NOT NULL,
+    [Description] nvarchar(256) NULL,
+    [DiscountPercentage] decimal(5,2) NULL,
+    [DiscountAmount] decimal(18,2) NULL,
+    [StartDate] datetime2 NOT NULL,
+    [EndDate] datetime2 NULL,
+    [MaxUsage] int NULL,
+    [CurrentUsage] int NOT NULL DEFAULT 0,
+    [IsActive] bit NOT NULL DEFAULT CAST(1 AS bit),
+    [CreatedAtUtc] datetime2 NOT NULL,
+    [UpdatedAtUtc] datetime2 NOT NULL,
+    CONSTRAINT [PK_Promotions] PRIMARY KEY ([Id]),
+    CONSTRAINT [CK_Promotions_Amount] CHECK ([DiscountAmount] IS NULL OR [DiscountAmount] > 0),
+    CONSTRAINT [CK_Promotions_Dates] CHECK ([EndDate] IS NULL OR [EndDate] >= [StartDate]),
+    CONSTRAINT [CK_Promotions_DiscountType] CHECK (([DiscountPercentage] IS NOT NULL AND [DiscountAmount] IS NULL) OR ([DiscountPercentage] IS NULL AND [DiscountAmount] IS NOT NULL) OR ([DiscountPercentage] IS NULL AND [DiscountAmount] IS NULL)),
+    CONSTRAINT [CK_Promotions_Percentage] CHECK ([DiscountPercentage] IS NULL OR ([DiscountPercentage] > 0 AND [DiscountPercentage] <= 100)),
+    CONSTRAINT [CK_Promotions_Usage] CHECK ([CurrentUsage] >= 0 AND ([MaxUsage] IS NULL OR [CurrentUsage] <= [MaxUsage]))
+);
+2025-04-17 17:21:43.825 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX [IX_Promotions_Code] ON [Promotions] ([Code]);
+2025-04-17 17:21:43.827 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20250417102109_AddPromotionEntityAndConfiguration', N'9.0.3');
+2025-04-17 17:21:43.830 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_releaseapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session';
+SELECT @result
