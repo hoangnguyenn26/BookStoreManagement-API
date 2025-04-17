@@ -56,7 +56,8 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
-
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 // ----- Register AutoMapper -----
 builder.Services.AddAutoMapper(typeof(Bookstore.Application.Mappings.MappingProfile).Assembly);
 

@@ -27,5 +27,12 @@ namespace Bookstore.Domain.Interfaces.Repositories
         Task DeleteAsync(T entity, CancellationToken cancellationToken = default);
 
         Task DeleteAsync(Guid id, CancellationToken cancellationToken = default); // Xóa theo Id
+        Task<int> CountAsync(Expression<Func<T, bool>>? filter = null, CancellationToken cancellationToken = default);
+        Task<decimal> SumAsync(
+            Expression<Func<T, decimal>> selector,     // <<-- Đưa tham số bắt buộc lên trước
+            Expression<Func<T, bool>>? filter = null, // <<-- Tham số tùy chọn ra sau
+            CancellationToken cancellationToken = default
+        );
+
     }
 }

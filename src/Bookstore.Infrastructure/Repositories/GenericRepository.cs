@@ -1,7 +1,7 @@
 ﻿using Bookstore.Domain.Entities;
 using Bookstore.Domain.Interfaces;
 using Bookstore.Domain.Interfaces.Repositories;
-using Bookstore.Infrastructure.Persistence; // Namespace DbContext
+using Bookstore.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -96,6 +96,25 @@ namespace Bookstore.Infrastructure.Repositories
         public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return await _dbSet.AsNoTracking().ToListAsync(cancellationToken);
+        }
+
+        public virtual async Task<int> CountAsync(Expression<Func<T, bool>>? filter = null, CancellationToken cancellationToken = default)
+        {
+            IQueryable<T> query = _dbSet;
+            if (filter != null) query = query.Where(filter);
+            return await query.CountAsync(cancellationToken);
+        }
+        public virtual async Task<decimal> SumAsync(
+             Expression<Func<T, decimal>> selector,
+             Expression<Func<T, bool>>? filter = null,
+             CancellationToken cancellationToken = default)
+        {
+            IQueryable<T> query = _dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return await query.SumAsync(selector, cancellationToken);
         }
     }
 }

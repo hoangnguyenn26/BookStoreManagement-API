@@ -27,7 +27,6 @@ namespace Bookstore.Application.Services
         {
 
             // --- Bắt đầu Transaction ---
-            // DbContext thường tự quản lý transaction khi SaveChanges, nhưng để chắc chắn, đặc biệt khi có nhiều thao tác, dùng transaction tường minh
             using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
             try
             {
@@ -60,8 +59,8 @@ namespace Bookstore.Application.Services
 
                 foreach (var item in cartItems)
                 {
-                    var book = item.Book; // Repo đã include Book
-                    if (book == null) // Kiểm tra đề phòng
+                    var book = item.Book;
+                    if (book == null)
                     {
                         _logger.LogError("CartItem for User {UserId} contains invalid BookId {BookId}", userId, item.BookId);
                         throw new InvalidOperationException($"Book data is missing for cart item (BookId: {item.BookId}).");
@@ -82,19 +81,14 @@ namespace Bookstore.Application.Services
                     };
                     orderDetails.Add(orderDetail);
 
-                    // Tính tổng tiền hàng
                     subTotal += orderDetail.Quantity * orderDetail.UnitPrice;
 
-                    // Giảm số lượng tồn kho 
                     book.StockQuantity -= item.Quantity;
-                    booksToUpdate.Add(book); // Thêm vào danh sách cần cập nhật
+                    booksToUpdate.Add(book);
                 }
 
                 // 5. Áp dụng Khuyến mãi
                 decimal discountAmount = 0;
-                // if (!string.IsNullOrWhiteSpace(createOrderDto.PromotionCode)) {
-                //     discountAmount = await _promotionService.ValidateAndApplyPromotionAsync(createOrderDto.PromotionCode, subTotal);
-                // }
                 decimal finalTotalAmount = subTotal - discountAmount;
 
                 // 6. Tạo bản ghi Order
@@ -162,7 +156,6 @@ namespace Bookstore.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while creating online order for User {UserId}", userId);
-                // Rollback Transaction nếu có lỗi
                 await _unitOfWork.RollbackTransactionAsync(transaction, cancellationToken);
                 throw;
             }
@@ -176,8 +169,8 @@ namespace Bookstore.Application.Services
             // **Quan trọng:** Cần bật tracking ở đây vì sẽ cập nhật Order và Book
             var order = await _unitOfWork.OrderRepository.ListAsync(
                             filter: o => o.Id == orderId,
-                            includeProperties: "OrderDetails.Book", // Include đủ để hoàn kho
-                            isTracking: true, // <<-- Bật Tracking
+                            includeProperties: "OrderDetails.Book",
+                            isTracking: true,
                             cancellationToken: cancellationToken)
                             .ContinueWith(t => t.Result.FirstOrDefault(), cancellationToken);
 
@@ -185,7 +178,7 @@ namespace Bookstore.Application.Services
             if (order == null)
             {
                 _logger.LogWarning("Order {OrderId} not found for status update attempt by Admin {AdminUserId}", orderId, adminUserId);
-                return false; // Hoặc throw NotFoundException
+                return false;
             }
 
             var originalStatus = order.Status;
@@ -197,7 +190,6 @@ namespace Bookstore.Application.Services
                 await ReplenishStockAndLogAsync(order, adminUserId, InventoryReason.OrderCancellation, cancellationToken);
             }
 
-            // Cập nhật trạng thái và thời gian
             order.Status = newStatus;
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Successfully updated status for Order {OrderId} to {NewStatus} by Admin {AdminUserId}", orderId, newStatus, adminUserId);
@@ -287,7 +279,6 @@ namespace Bookstore.Application.Services
         {
             _logger.LogInformation("Fetching orders for User: {UserId}, Page: {Page}, PageSize: {PageSize}", userId, page, pageSize);
             var orders = await _unitOfWork.OrderRepository.GetOrdersByUserIdAsync(userId, page, pageSize, cancellationToken);
-            // AutoMapper sẽ xử lý tính ItemCount nhờ cấu hình và Include trong Repo
             return _mapper.Map<IEnumerable<OrderSummaryDto>>(orders);
         }
 
@@ -300,7 +291,7 @@ namespace Bookstore.Application.Services
             if (order == null || order.UserId != userId)
             {
                 _logger.LogWarning("Order {OrderId} not found or does not belong to User {UserId}", orderId, userId);
-                return null; // Hoặc throw NotFoundException
+                return null;
             }
 
             return _mapper.Map<OrderDto>(order);
@@ -310,9 +301,8 @@ namespace Bookstore.Application.Services
         {
             _logger.LogInformation("Fetching all orders for Admin. Page: {Page}, PageSize: {PageSize}, StatusFilter: {StatusFilter}", page, pageSize, statusFilter ?? "None");
 
-            // Xây dựng biểu thức lọc (filter expression) nếu có statusFilter
             Expression<Func<Order, bool>>? filter = null;
-            if (!string.IsNullOrWhiteSpace(statusFilter) && Enum.TryParse<OrderStatus>(statusFilter, true, out var status)) // Thử parse string thành Enum (không phân biệt hoa thường)
+            if (!string.IsNullOrWhiteSpace(statusFilter) && Enum.TryParse<OrderStatus>(statusFilter, true, out var status))
             {
                 filter = o => o.Status == status;
             }
@@ -329,10 +319,8 @@ namespace Bookstore.Application.Services
             if (order == null)
             {
                 _logger.LogWarning("Order {OrderId} not found for Admin request.", orderId);
-                return null; // Hoặc throw NotFoundException
+                return null;
             }
-
-            // Admin có quyền xem mọi đơn hàng nên không cần kiểm tra UserId
             return _mapper.Map<OrderDto>(order);
         }
     }

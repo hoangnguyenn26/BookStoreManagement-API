@@ -2,8 +2,10 @@
 using AutoMapper;
 using Bookstore.Application.Dtos;
 using Bookstore.Application.Dtos.Addresses;
+using Bookstore.Application.Dtos.Admin.Reports;
 using Bookstore.Application.Dtos.Books;
 using Bookstore.Application.Dtos.Carts;
+using Bookstore.Application.Dtos.Dashboard;
 using Bookstore.Application.Dtos.Orders;
 using Bookstore.Application.Dtos.Promotions;
 using Bookstore.Application.Dtos.Reviews;
@@ -67,6 +69,19 @@ namespace Bookstore.Application.Mappings
             CreateMap<Review, ReviewDto>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Unknown User"));
             CreateMap<CreateReviewDto, Review>();
+
+            // ----- Dashboard Mappings -----
+            CreateMap<Book, BookSummaryDto>()
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author != null ? src.Author.Name : null));
+            CreateMap<Promotion, PromotionSummaryDto>();
+            CreateMap<Category, CategorySummaryDto>();
+
+            // ----- Report Mappings -----
+            CreateMap<Book, LowStockBookDto>()
+                 .ForMember(dest => dest.BookId, opt => opt.MapFrom(src => src.Id))
+                 .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Title))
+                 .ForMember(dest => dest.CurrentStockQuantity, opt => opt.MapFrom(src => src.StockQuantity))
+                 .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author != null ? src.Author.Name : null));
         }
     }
 }
