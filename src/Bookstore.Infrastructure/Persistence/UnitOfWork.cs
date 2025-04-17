@@ -21,7 +21,7 @@ public class UnitOfWork : IUnitOfWork
     private Lazy<IOrderRepository> _orderRepository;
     private Lazy<IOrderShippingAddressRepository> _orderShippingAddressRepository;
     private Lazy<IPromotionRepository> _promotionRepository;
-
+    private Lazy<IReviewRepository> _reviewRepository;
 
     public UnitOfWork(ApplicationDbContext context)
     {
@@ -39,6 +39,7 @@ public class UnitOfWork : IUnitOfWork
         _orderRepository = new Lazy<IOrderRepository>(() => new OrderRepository(_context));
         _orderShippingAddressRepository = new Lazy<IOrderShippingAddressRepository>(() => new OrderShippingAddressRepository(_context));
         _promotionRepository = new Lazy<IPromotionRepository>(() => new PromotionRepository(_context));
+        _reviewRepository = new Lazy<IReviewRepository>(() => new ReviewRepository(_context));
     }
 
     public ICategoryRepository CategoryRepository => _categoryRepository.Value;
@@ -53,6 +54,7 @@ public class UnitOfWork : IUnitOfWork
     public IOrderRepository OrderRepository => _orderRepository.Value;
     public IOrderShippingAddressRepository OrderShippingAddressRepository => _orderShippingAddressRepository.Value;
     public IPromotionRepository PromotionRepository => _promotionRepository.Value;
+    public IReviewRepository ReviewRepository => _reviewRepository.Value;
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.SaveChangesAsync(cancellationToken);

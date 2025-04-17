@@ -313,6 +313,30 @@ namespace Bookstore.Infrastructure.Persistence
                     "[EndDate] IS NULL OR [EndDate] >= [StartDate]"));
             });
 
+            // ----- Cấu hình Review -----
+            builder.Entity<Review>(entity =>
+            {
+                // Ràng buộc UNIQUE để mỗi User chỉ đánh giá 1 Book 1 lần
+                entity.HasIndex(r => new { r.UserId, r.BookId }).IsUnique();
+
+                entity.Property(r => r.Comment).HasMaxLength(1000);
+
+                entity.ToTable(t => t.HasCheckConstraint("CK_Reviews_Rating", "[Rating] >= 1 AND [Rating] <= 5"));
+                // Mối quan hệ với Book
+                entity.HasOne(r => r.Book)
+                      .WithMany()
+                      .HasForeignKey(r => r.BookId)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Mối quan hệ với User
+                entity.HasOne(r => r.User)
+                      .WithMany()
+                      .HasForeignKey(r => r.UserId)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Cascade); // Xóa Review nếu User bị xóa
+            });
+
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
             SeedData(builder);

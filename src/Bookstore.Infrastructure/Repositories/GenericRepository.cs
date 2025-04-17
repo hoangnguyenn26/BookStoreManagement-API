@@ -18,11 +18,13 @@ namespace Bookstore.Infrastructure.Repositories
             _dbSet = _context.Set<T>();
         }
         public virtual async Task<IReadOnlyList<T>> ListAsync(
-           Expression<Func<T, bool>>? filter = null,
-           Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-           string? includeProperties = null,
-           bool isTracking = false,
-           CancellationToken cancellationToken = default)
+            Expression<Func<T, bool>>? filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            string? includeProperties = null,
+            bool isTracking = false,
+            int? page = null,
+            int? pageSize = null,
+            CancellationToken cancellationToken = default)
         {
             IQueryable<T> query = _dbSet;
             if (!isTracking)

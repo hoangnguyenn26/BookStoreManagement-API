@@ -14,6 +14,9 @@ namespace Bookstore.Domain.Interfaces.Repositories
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             string? includeProperties = null,
             bool isTracking = false,
+            // ----- Thêm tham số phân trang -----
+            int? page = null,
+            int? pageSize = null,
             CancellationToken cancellationToken = default);
 
         Task<T> AddAsync(T entity, CancellationToken cancellationToken = default);

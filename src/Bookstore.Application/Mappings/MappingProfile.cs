@@ -6,6 +6,7 @@ using Bookstore.Application.Dtos.Books;
 using Bookstore.Application.Dtos.Carts;
 using Bookstore.Application.Dtos.Orders;
 using Bookstore.Application.Dtos.Promotions;
+using Bookstore.Application.Dtos.Reviews;
 using Bookstore.Application.Dtos.Wishlists;
 using Bookstore.Domain.Entities;
 
@@ -61,6 +62,11 @@ namespace Bookstore.Application.Mappings
             CreateMap<Promotion, PromotionDto>();
             CreateMap<CreatePromotionDto, Promotion>();
             CreateMap<UpdatePromotionDto, Promotion>();
+
+            // ----- Review Mappings -----
+            CreateMap<Review, ReviewDto>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Unknown User"));
+            CreateMap<CreateReviewDto, Review>();
         }
     }
 }
