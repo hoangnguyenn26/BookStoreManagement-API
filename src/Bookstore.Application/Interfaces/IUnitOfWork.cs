@@ -17,6 +17,7 @@ namespace Bookstore.Application.Interfaces
         IOrderShippingAddressRepository OrderShippingAddressRepository { get; }
         IPromotionRepository PromotionRepository { get; }
         IReviewRepository ReviewRepository { get; }
+        ISupplierRepository SupplierRepository { get; }
         Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
         Task CommitTransactionAsync(IDbContextTransaction transaction, CancellationToken cancellationToken = default);
         Task RollbackTransactionAsync(IDbContextTransaction transaction, CancellationToken cancellationToken = default);

@@ -667,3 +667,12 @@ WHERE [b].[IsDeleted] = CAST(0 AS bit)
 SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc]
 FROM [Books] AS [b]
 WHERE [b].[IsDeleted] = CAST(0 AS bit)
+2025-04-18 23:55:13.775 +07:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5244
+2025-04-18 23:55:13.880 +07:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-04-18 23:55:13.881 +07:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-04-18 23:55:13.882 +07:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: C:\Users\Nguyn\Desktop\Đồ án tốt nghiệp\BookStoreManagement\src\Bookstore.Api
+2025-04-18 23:55:14.911 +07:00 [WRN] (Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware) Failed to determine the https port for redirect.
+2025-04-18 23:56:36.846 +07:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5244
+2025-04-18 23:56:37.021 +07:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-04-18 23:56:37.024 +07:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-04-18 23:56:37.027 +07:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: C:\Users\Nguyn\Desktop\Đồ án tốt nghiệp\BookStoreManagement\src\Bookstore.Api

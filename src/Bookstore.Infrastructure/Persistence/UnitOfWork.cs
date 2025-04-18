@@ -8,7 +8,7 @@ namespace Bookstore.Infrastructure.Persistence;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _context;
-    // Sử dụng Lazy<T> để khởi tạo repo chỉ khi cần (tùy chọn)
+
     private Lazy<ICategoryRepository> _categoryRepository;
     private Lazy<IUserRepository> _userRepository;
     private Lazy<IBookRepository> _bookRepository;
@@ -22,6 +22,7 @@ public class UnitOfWork : IUnitOfWork
     private Lazy<IOrderShippingAddressRepository> _orderShippingAddressRepository;
     private Lazy<IPromotionRepository> _promotionRepository;
     private Lazy<IReviewRepository> _reviewRepository;
+    private Lazy<ISupplierRepository> _supplierRepository;
 
     public UnitOfWork(ApplicationDbContext context)
     {
@@ -40,6 +41,7 @@ public class UnitOfWork : IUnitOfWork
         _orderShippingAddressRepository = new Lazy<IOrderShippingAddressRepository>(() => new OrderShippingAddressRepository(_context));
         _promotionRepository = new Lazy<IPromotionRepository>(() => new PromotionRepository(_context));
         _reviewRepository = new Lazy<IReviewRepository>(() => new ReviewRepository(_context));
+        _supplierRepository = new Lazy<ISupplierRepository>(() => new SupplierRepository(_context));
     }
 
     public ICategoryRepository CategoryRepository => _categoryRepository.Value;
@@ -55,7 +57,7 @@ public class UnitOfWork : IUnitOfWork
     public IOrderShippingAddressRepository OrderShippingAddressRepository => _orderShippingAddressRepository.Value;
     public IPromotionRepository PromotionRepository => _promotionRepository.Value;
     public IReviewRepository ReviewRepository => _reviewRepository.Value;
-
+    public ISupplierRepository SupplierRepository => _supplierRepository.Value;
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.SaveChangesAsync(cancellationToken);
@@ -92,7 +94,6 @@ public class UnitOfWork : IUnitOfWork
         }
         finally
         {
-            // Không cần Dispose transaction ở đây, khối using trong Service sẽ làm điều đó
         }
     }
 

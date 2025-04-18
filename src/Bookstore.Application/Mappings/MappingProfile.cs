@@ -9,6 +9,7 @@ using Bookstore.Application.Dtos.Dashboard;
 using Bookstore.Application.Dtos.Orders;
 using Bookstore.Application.Dtos.Promotions;
 using Bookstore.Application.Dtos.Reviews;
+using Bookstore.Application.Dtos.Suppliers;
 using Bookstore.Application.Dtos.Wishlists;
 using Bookstore.Domain.Entities;
 
@@ -82,6 +83,11 @@ namespace Bookstore.Application.Mappings
                  .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Title))
                  .ForMember(dest => dest.CurrentStockQuantity, opt => opt.MapFrom(src => src.StockQuantity))
                  .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author != null ? src.Author.Name : null));
+
+            // ----- Supplier Mappings -----
+            CreateMap<Supplier, SupplierDto>();
+            CreateMap<CreateSupplierDto, Supplier>();
+            CreateMap<UpdateSupplierDto, Supplier>();
         }
     }
 }
