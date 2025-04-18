@@ -3,14 +3,13 @@ using Bookstore.Application.Dtos.Reviews;
 using Bookstore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Bookstore.Api.Controllers.v1
 {
     [ApiController]
     [Route("api/v{version:apiVersion}/books/{bookId:guid}/reviews")]
     [ApiVersion("1.0")]
-    public class ReviewsController : ControllerBase
+    public class ReviewsController : BaseApiController
     {
         private readonly IReviewService _reviewService;
         private readonly ILogger<ReviewsController> _logger;
@@ -21,20 +20,9 @@ namespace Bookstore.Api.Controllers.v1
             _logger = logger;
         }
 
-        // Helper lấy UserId
-        private Guid GetUserIdFromClaims()
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdClaim, out Guid userId))
-            {
-                throw new UnauthorizedAccessException("User identifier not found in token.");
-            }
-            return userId;
-        }
-
         // GET: api/v1/books/{bookId}/reviews
         [HttpGet]
-        [AllowAnonymous] // Ai cũng xem được reviews
+        [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<ReviewDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ReviewDto>>> GetBookReviews(
             Guid bookId,
@@ -48,7 +36,7 @@ namespace Bookstore.Api.Controllers.v1
 
         // POST: api/v1/books/{bookId}/reviews
         [HttpPost]
-        [Authorize] // Chỉ user đăng nhập mới được gửi review
+        [Authorize]
         [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -3,14 +3,13 @@ using Bookstore.Application.Dtos.Orders;
 using Bookstore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Bookstore.Api.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/orders")]
     [Authorize(Roles = "Admin")]
-    public class AdminOrdersController : ControllerBase
+    public class AdminOrdersController : BaseApiController
     {
         private readonly IOrderService _orderService;
         private readonly ILogger<AdminOrdersController> _logger;
@@ -21,21 +20,13 @@ namespace Bookstore.Api.Controllers.Admin
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        // Helper to get user id
-        private Guid GetUserIdFromClaims()
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdClaim, out Guid userId)) { throw new UnauthorizedAccessException(); }
-            return userId;
-        }
-
         // GET: api/admin/orders
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<OrderSummaryDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<OrderSummaryDto>>> GetAllOrders(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
-            [FromQuery] string? status = null, // Lọc theo tên của Enum Status
+            [FromQuery] string? status = null,
             CancellationToken cancellationToken = default)
         {
             var orders = await _orderService.GetAllOrdersForAdminAsync(page, pageSize, status, cancellationToken);
@@ -66,7 +57,6 @@ namespace Bookstore.Api.Controllers.Admin
         public async Task<IActionResult> UpdateOrderStatus(Guid orderId, [FromBody] UpdateOrderStatusDto statusDto, CancellationToken cancellationToken)
         {
             var adminUserId = GetUserIdFromClaims();
-
             try
             {
                 var success = await _orderService.UpdateOrderStatusAsync(orderId, statusDto.NewStatus, adminUserId, cancellationToken);

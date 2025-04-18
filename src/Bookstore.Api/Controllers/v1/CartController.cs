@@ -2,7 +2,6 @@
 using Bookstore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Bookstore.Api.Controllers.v1
 {
@@ -10,23 +9,13 @@ namespace Bookstore.Api.Controllers.v1
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiVersion("1.0")]
     [Authorize]
-    public class CartController : ControllerBase
+    public class CartController : BaseApiController
     {
         private readonly ICartService _cartService;
 
         public CartController(ICartService cartService)
         {
             _cartService = cartService ?? throw new ArgumentNullException(nameof(cartService));
-        }
-
-        private Guid GetUserIdFromClaims()
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdClaim, out Guid userId))
-            {
-                throw new UnauthorizedAccessException("User identifier not found in token.");
-            }
-            return userId;
         }
 
         // GET: api/v1/cart

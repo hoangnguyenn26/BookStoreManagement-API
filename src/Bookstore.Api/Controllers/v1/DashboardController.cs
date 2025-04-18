@@ -22,7 +22,7 @@ namespace Bookstore.Api.Controllers.v1
 
         // GET: api/v1/home/dashboard
         [HttpGet("dashboard")]
-        [AllowAnonymous] // Cho phép truy cập công khai
+        [AllowAnonymous]
         [ProducesResponseType(typeof(HomeDashboardDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<HomeDashboardDto>> GetHomeDashboard(CancellationToken cancellationToken)

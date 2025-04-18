@@ -3,7 +3,6 @@ using Bookstore.Application.Dtos.Addresses;
 using Bookstore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Bookstore.Api.Controllers.v1
 {
@@ -11,24 +10,13 @@ namespace Bookstore.Api.Controllers.v1
     [Route("api/v{version:apiVersion}/user/addresses")]
     [ApiVersion("1.0")]
     [Authorize]
-    public class AddressesController : ControllerBase
+    public class AddressesController : BaseApiController
     {
         private readonly IAddressService _addressService;
 
         public AddressesController(IAddressService addressService)
         {
             _addressService = addressService ?? throw new ArgumentNullException(nameof(addressService));
-        }
-
-        // Helper lấy UserId
-        private Guid GetUserIdFromClaims()
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdClaim, out Guid userId))
-            {
-                throw new UnauthorizedAccessException("User identifier not found in token.");
-            }
-            return userId;
         }
 
         // GET: api/v1/user/addresses

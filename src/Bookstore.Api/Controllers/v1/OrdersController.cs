@@ -3,7 +3,6 @@ using Bookstore.Application.Dtos.Orders;
 using Bookstore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Bookstore.Api.Controllers.v1
 {
@@ -11,7 +10,7 @@ namespace Bookstore.Api.Controllers.v1
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiVersion("1.0")]
     [Authorize]
-    public class OrdersController : ControllerBase
+    public class OrdersController : BaseApiController
     {
         private readonly IOrderService _orderService;
         private readonly ILogger<OrdersController> _logger;
@@ -20,17 +19,6 @@ namespace Bookstore.Api.Controllers.v1
         {
             _orderService = orderService ?? throw new ArgumentNullException(nameof(orderService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-
-        // Helper lấy UserId
-        private Guid GetUserIdFromClaims()
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdClaim, out Guid userId))
-            {
-                throw new UnauthorizedAccessException("User identifier not found in token.");
-            }
-            return userId;
         }
 
         // POST: api/v1/orders
@@ -46,22 +34,18 @@ namespace Bookstore.Api.Controllers.v1
                 var userId = GetUserIdFromClaims();
                 var createdOrder = await _orderService.CreateOnlineOrderAsync(userId, createOrderDto, cancellationToken);
 
-                // Trả về 201 Created với action để lấy đơn hàng vừa tạo
-                // Cần tạo action GetOrderByIdForUser trước (Ngày 25)
                 return CreatedAtAction(nameof(GetMyOrderById), new { orderId = createdOrder.Id, version = "1.0" }, createdOrder);
 
             }
             catch (ValidationException ex)
             {
-                // Lỗi nghiệp vụ (vd: hết hàng, giỏ rỗng)
                 return BadRequest(new { Message = ex.Message });
             }
             catch (NotFoundException ex)
             {
-                // Lỗi không tìm thấy tài nguyên (vd: địa chỉ)
                 return NotFound(new { Message = ex.Message });
             }
-            catch (UnauthorizedAccessException ex) // Lỗi lấy UserId từ token
+            catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Unauthorized access attempt during order creation.");
                 return Unauthorized();
@@ -82,9 +66,9 @@ namespace Bookstore.Api.Controllers.v1
             [FromQuery] int pageSize = 10,
             CancellationToken cancellationToken = default)
         {
-            var userId = GetUserIdFromClaims(); // Lấy userId của người dùng đang đăng nhập
+            var userId = GetUserIdFromClaims();
             var orders = await _orderService.GetUserOrdersAsync(userId, page, pageSize, cancellationToken);
-            // TODO: Thêm thông tin phân trang vào Header hoặc Response Body nếu cần
+
             return Ok(orders);
         }
 

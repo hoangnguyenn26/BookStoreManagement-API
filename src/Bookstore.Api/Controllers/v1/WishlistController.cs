@@ -2,7 +2,6 @@
 using Bookstore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Bookstore.Api.Controllers.v1
 {
@@ -10,24 +9,13 @@ namespace Bookstore.Api.Controllers.v1
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiVersion("1.0")]
     [Authorize]
-    public class WishlistController : ControllerBase
+    public class WishlistController : BaseApiController
     {
         private readonly IWishlistService _wishlistService;
 
         public WishlistController(IWishlistService wishlistService)
         {
             _wishlistService = wishlistService ?? throw new ArgumentNullException(nameof(wishlistService));
-        }
-
-
-        private Guid GetUserIdFromClaims()
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
-            {
-                throw new UnauthorizedAccessException("User identifier not found in token.");
-            }
-            return userId;
         }
 
         // GET: api/v1/wishlist

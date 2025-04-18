@@ -1,10 +1,8 @@
 ﻿
-using Bookstore.Application.Dtos; 
-using Bookstore.Domain.Interfaces.Repositories;
+using Bookstore.Application.Dtos;
+using Bookstore.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Bookstore.Application.Interfaces;
 
 namespace Bookstore.Api.Controllers.v1
 {
@@ -15,7 +13,6 @@ namespace Bookstore.Api.Controllers.v1
     public class UsersController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        // Inject IUserRepository thông qua constructor
         public UsersController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -51,7 +48,7 @@ namespace Bookstore.Api.Controllers.v1
 
             if (user == null)
             {
-                return NotFound(); 
+                return NotFound();
             }
             var userDto = new UserDto
             {
