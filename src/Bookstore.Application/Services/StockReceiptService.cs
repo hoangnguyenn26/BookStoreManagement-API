@@ -109,7 +109,6 @@ namespace Bookstore.Application.Services
         {
             _logger.LogInformation("Fetching all stock receipts. Page: {Page}, PageSize: {PageSize}", page, pageSize);
             var receipts = await _unitOfWork.StockReceiptRepository.GetAllReceiptsAsync(page, pageSize, cancellationToken: cancellationToken);
-            // Repo đã include Supplier
             return _mapper.Map<IEnumerable<StockReceiptDto>>(receipts);
         }
 

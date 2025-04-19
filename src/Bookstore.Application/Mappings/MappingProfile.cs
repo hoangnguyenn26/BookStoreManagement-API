@@ -91,12 +91,17 @@ namespace Bookstore.Application.Mappings
             CreateMap<UpdateSupplierDto, Supplier>();
 
             // ----- Stock Receipt Mappings -----
-            CreateMap<StockReceiptDetail, StockReceiptDetailDto>()
-                .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book != null ? src.Book.Title : null));
-            CreateMap<StockReceipt, StockReceiptDto>();
+            // ----- Stock Receipt Mappings -----
+            CreateMap<StockReceipt, StockReceiptDto>()
+                .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.StockReceiptDetails));
 
             CreateMap<CreateStockReceiptDto, StockReceipt>();
             CreateMap<CreateStockReceiptDetailDto, StockReceiptDetail>();
+
+            CreateMap<StockReceiptDetail, StockReceiptDetailDto>()
+                 .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book != null ? src.Book.Title : null));
+
+
         }
     }
 }

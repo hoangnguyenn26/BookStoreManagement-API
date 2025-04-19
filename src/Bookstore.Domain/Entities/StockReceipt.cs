@@ -10,6 +10,5 @@ namespace Bookstore.Domain.Entities
         // Navigation properties
         public virtual Supplier? Supplier { get; set; }
         public virtual ICollection<StockReceiptDetail> StockReceiptDetails { get; set; } = new List<StockReceiptDetail>();
-        // public virtual ICollection<InventoryLog> InventoryLogs { get; set; } = new List<InventoryLog>(); // Nếu cần xem log từ phiếu nhập
     }
 }

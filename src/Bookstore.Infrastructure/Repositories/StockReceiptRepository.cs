@@ -16,19 +16,13 @@ namespace Bookstore.Infrastructure.Repositories
             if (pageSize < 1) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
 
-            IQueryable<StockReceipt> query = _dbSet.Include(sr => sr.Supplier);
+            var query = _dbSet.Include(sr => sr.Supplier)
+                              .OrderByDescending(sr => sr.ReceiptDate);
 
-            if (!tracking)
-            {
-                query = query.AsNoTracking();
-            }
 
-            var results = await query.OrderByDescending(sr => sr.ReceiptDate)
-                                   .Skip((page - 1) * pageSize)
-                                   .Take(pageSize)
-                                   .ToListAsync(cancellationToken);
-
-            return results;
+            return await query.Skip((page - 1) * pageSize)
+                              .Take(pageSize)
+                              .ToListAsync(cancellationToken);
         }
 
         public async Task<StockReceipt?> GetReceiptWithDetailsByIdAsync(Guid id, bool tracking = false, CancellationToken cancellationToken = default)
