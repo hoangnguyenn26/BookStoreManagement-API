@@ -49,10 +49,14 @@ namespace Bookstore.Infrastructure.Repositories
             {
                 query = orderBy(query);
             }
+            if (page.HasValue && pageSize.HasValue && page > 0 && pageSize > 0)
+            {
+                query = query.Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value);
+            }
 
             return await query.ToListAsync(cancellationToken);
         }
-        public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default, bool isTracking = false)
         {
             return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
         }

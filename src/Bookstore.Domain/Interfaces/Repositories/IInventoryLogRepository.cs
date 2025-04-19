@@ -1,5 +1,4 @@
-﻿
-using Bookstore.Domain.Entities;
+﻿using Bookstore.Domain.Entities;
 
 namespace Bookstore.Domain.Interfaces.Repositories
 {
@@ -7,5 +6,6 @@ namespace Bookstore.Domain.Interfaces.Repositories
     {
         Task<InventoryLog> AddAsync(InventoryLog entity, CancellationToken cancellationToken = default);
         Task<IEnumerable<InventoryLog>> GetHistoryByBookIdAsync(Guid bookId, CancellationToken cancellationToken = default);
+        Task AddRangeAsync(IEnumerable<InventoryLog> entities, CancellationToken cancellationToken = default);
     }
 }

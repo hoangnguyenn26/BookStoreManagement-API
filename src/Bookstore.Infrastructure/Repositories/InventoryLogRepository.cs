@@ -2,10 +2,6 @@
 using Bookstore.Domain.Interfaces.Repositories;
 using Bookstore.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore; // Cần cho ToListAsync, OrderByDescending
-using System.Collections.Generic;
-using System.Linq; // Cần cho Where, OrderByDescending
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Bookstore.Infrastructure.Repositories
 {
@@ -28,9 +24,13 @@ namespace Bookstore.Infrastructure.Repositories
         {
             return await _context.InventoryLogs
                                  .Where(log => log.BookId == bookId)
-                                 .OrderByDescending(log => log.TimestampUtc) 
+                                 .OrderByDescending(log => log.TimestampUtc)
                                  .AsNoTracking()
                                  .ToListAsync(cancellationToken);
+        }
+        public async Task AddRangeAsync(IEnumerable<InventoryLog> entities, CancellationToken cancellationToken = default)
+        {
+            await _context.InventoryLogs.AddRangeAsync(entities, cancellationToken);
         }
     }
 }

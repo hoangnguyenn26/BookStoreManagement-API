@@ -23,7 +23,8 @@ public class UnitOfWork : IUnitOfWork
     private Lazy<IPromotionRepository> _promotionRepository;
     private Lazy<IReviewRepository> _reviewRepository;
     private Lazy<ISupplierRepository> _supplierRepository;
-
+    private Lazy<IStockReceiptRepository> _receiptRepository;
+    private Lazy<IStockReceiptDetailRepository> _stockReceiptDetailRepository;
     public UnitOfWork(ApplicationDbContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -42,6 +43,8 @@ public class UnitOfWork : IUnitOfWork
         _promotionRepository = new Lazy<IPromotionRepository>(() => new PromotionRepository(_context));
         _reviewRepository = new Lazy<IReviewRepository>(() => new ReviewRepository(_context));
         _supplierRepository = new Lazy<ISupplierRepository>(() => new SupplierRepository(_context));
+        _receiptRepository = new Lazy<IStockReceiptRepository>(() => new StockReceiptRepository(_context));
+        _stockReceiptDetailRepository = new Lazy<IStockReceiptDetailRepository>(() => new StockReceiptDetailRepository(_context));
     }
 
     public ICategoryRepository CategoryRepository => _categoryRepository.Value;
@@ -58,6 +61,8 @@ public class UnitOfWork : IUnitOfWork
     public IPromotionRepository PromotionRepository => _promotionRepository.Value;
     public IReviewRepository ReviewRepository => _reviewRepository.Value;
     public ISupplierRepository SupplierRepository => _supplierRepository.Value;
+    public IStockReceiptRepository StockReceiptRepository => _receiptRepository.Value;
+    public IStockReceiptDetailRepository StockReceiptDetailRepository => _stockReceiptDetailRepository.Value;
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.SaveChangesAsync(cancellationToken);

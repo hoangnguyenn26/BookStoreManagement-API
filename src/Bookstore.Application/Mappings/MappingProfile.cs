@@ -9,6 +9,7 @@ using Bookstore.Application.Dtos.Dashboard;
 using Bookstore.Application.Dtos.Orders;
 using Bookstore.Application.Dtos.Promotions;
 using Bookstore.Application.Dtos.Reviews;
+using Bookstore.Application.Dtos.StockReceipts;
 using Bookstore.Application.Dtos.Suppliers;
 using Bookstore.Application.Dtos.Wishlists;
 using Bookstore.Domain.Entities;
@@ -88,6 +89,14 @@ namespace Bookstore.Application.Mappings
             CreateMap<Supplier, SupplierDto>();
             CreateMap<CreateSupplierDto, Supplier>();
             CreateMap<UpdateSupplierDto, Supplier>();
+
+            // ----- Stock Receipt Mappings -----
+            CreateMap<StockReceiptDetail, StockReceiptDetailDto>()
+                .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book != null ? src.Book.Title : null));
+            CreateMap<StockReceipt, StockReceiptDto>();
+
+            CreateMap<CreateStockReceiptDto, StockReceipt>();
+            CreateMap<CreateStockReceiptDetailDto, StockReceiptDetail>();
         }
     }
 }

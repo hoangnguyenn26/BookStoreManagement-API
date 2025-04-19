@@ -6,7 +6,7 @@ namespace Bookstore.Domain.Interfaces.Repositories
 {
     public interface IGenericRepository<T> where T : BaseEntity
     {
-        Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default, bool isTracking = false);
 
         Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<IReadOnlyList<T>> ListAsync(
@@ -14,7 +14,6 @@ namespace Bookstore.Domain.Interfaces.Repositories
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             string? includeProperties = null,
             bool isTracking = false,
-            // ----- Thêm tham số phân trang -----
             int? page = null,
             int? pageSize = null,
             CancellationToken cancellationToken = default);
@@ -29,8 +28,8 @@ namespace Bookstore.Domain.Interfaces.Repositories
         Task DeleteAsync(Guid id, CancellationToken cancellationToken = default); // Xóa theo Id
         Task<int> CountAsync(Expression<Func<T, bool>>? filter = null, CancellationToken cancellationToken = default);
         Task<decimal> SumAsync(
-            Expression<Func<T, decimal>> selector,     // <<-- Đưa tham số bắt buộc lên trước
-            Expression<Func<T, bool>>? filter = null, // <<-- Tham số tùy chọn ra sau
+            Expression<Func<T, decimal>> selector,
+            Expression<Func<T, bool>>? filter = null,
             CancellationToken cancellationToken = default
         );
 
