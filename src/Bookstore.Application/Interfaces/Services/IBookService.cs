@@ -6,6 +6,7 @@ namespace Bookstore.Application.Interfaces.Services
     {
         Task<IEnumerable<BookDto>> GetAllBooksAsync(
             Guid? categoryId = null,
+            string? search = null,
             int page = 1,
             int pageSize = 10,
             CancellationToken cancellationToken = default);

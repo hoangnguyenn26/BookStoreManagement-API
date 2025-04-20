@@ -4,7 +4,7 @@ using Bookstore.Application.Dtos.Books;
 using Bookstore.Application.Interfaces;
 using Bookstore.Application.Interfaces.Services;
 using Bookstore.Domain.Entities;
-using System.Linq.Expressions;
+using LinqKit;
 
 namespace Bookstore.Application.Services
 {
@@ -65,21 +65,32 @@ namespace Bookstore.Application.Services
         }
 
         public async Task<IEnumerable<BookDto>> GetAllBooksAsync(
-            Guid? categoryId = null,
-            int page = 1,
-            int pageSize = 10,
-            CancellationToken cancellationToken = default)
+    Guid? categoryId = null,
+    string? search = null, // <<-- Thêm tham số vào implementation
+    int page = 1,
+    int pageSize = 10,
+    CancellationToken cancellationToken = default)
         {
-            Expression<Func<Book, bool>> filter = b => true;
+            // --- Xây dựng biểu thức lọc (Filter Expression) ---
+            var predicate = PredicateBuilder.New<Book>(true);
 
             if (categoryId.HasValue && categoryId.Value != Guid.Empty)
             {
                 var catId = categoryId.Value;
-                filter = b => b.CategoryId == catId;
+                predicate = predicate.And(b => b.CategoryId == catId);
+            }
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchTerm = search.Trim().ToLower();
+                predicate = predicate.And(b =>
+                    (b.Title != null && b.Title.ToLower().Contains(searchTerm)) ||
+                    (b.Author != null && b.Author.Name != null && b.Author.Name.ToLower().Contains(searchTerm)) ||
+                    (b.ISBN != null && b.ISBN.ToLower().Contains(searchTerm))
+                );
             }
 
             var books = await _unitOfWork.BookRepository.ListAsync(
-                filter: filter,
+                filter: predicate,
                 orderBy: q => q.OrderByDescending(b => b.CreatedAtUtc),
                 includeProperties: "Author,Category",
                 isTracking: false,
