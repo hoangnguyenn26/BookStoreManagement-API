@@ -20,6 +20,6 @@ namespace Bookstore.Application.Interfaces.Services
 
         Task<bool> CancelOrderAsync(Guid userId, Guid orderId, CancellationToken cancellationToken = default);
 
-
+        Task<OrderDto> CreateInStoreOrderAsync(Guid staffUserId, CreateInStoreOrderRequestDto createDto, CancellationToken cancellationToken = default);
     }
 }

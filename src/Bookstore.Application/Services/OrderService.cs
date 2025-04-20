@@ -31,7 +31,7 @@ namespace Bookstore.Application.Services
             var cartItems = (await _unitOfWork.CartRepository.GetCartByUserIdAsync(userId, cancellationToken)).ToList();
             if (!cartItems.Any()) throw new ValidationException("Cannot create order from an empty cart.");
 
-            var shippingAddressEntity = await _unitOfWork.AddressRepository.GetByIdAsync(createOrderDto.ShippingAddressId, cancellationToken);
+            var shippingAddressEntity = await _unitOfWork.AddressRepository.GetByIdAsync(createOrderDto.ShippingAddressId, cancellationToken, isTracking: true);
             if (shippingAddressEntity == null || shippingAddressEntity.UserId != userId) throw new NotFoundException($"Shipping address with Id '{createOrderDto.ShippingAddressId}' not found or does not belong to the user.");
 
             decimal subTotal = 0;
@@ -356,6 +356,109 @@ namespace Bookstore.Application.Services
             {
                 _logger.LogWarning("Payment simulation failed for Order {OrderId}.", orderId);
                 return (false, null);
+            }
+        }
+
+        public async Task<OrderDto> CreateInStoreOrderAsync(Guid staffUserId, CreateInStoreOrderRequestDto createDto, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Staff {StaffUserId} creating new In-Store order. CustomerId: {CustomerId}", staffUserId, createDto.CustomerUserId ?? Guid.Empty);
+            using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                if (createDto.CustomerUserId.HasValue)
+                {
+                    var customerExists = await _unitOfWork.UserRepository.GetByIdAsync(createDto.CustomerUserId.Value, cancellationToken);
+                    if (customerExists == null || !customerExists.IsActive)
+                    {
+                        throw new NotFoundException($"Customer User with Id '{createDto.CustomerUserId.Value}' not found or inactive.");
+                    }
+                }
+
+                decimal totalAmount = 0;
+                var orderDetailsEntities = new List<OrderDetail>();
+                var booksToUpdate = new Dictionary<Guid, Book>();
+                var inventoryLogs = new List<InventoryLog>();
+                var now = DateTime.UtcNow;
+
+                foreach (var detailDto in createDto.OrderDetails)
+                {
+                    Book? book;
+
+                    if (!booksToUpdate.TryGetValue(detailDto.BookId, out book))
+                    {
+                        book = await _unitOfWork.BookRepository.GetByIdAsync(detailDto.BookId, cancellationToken, isTracking: true);
+                        if (book == null || book.IsDeleted)
+                        {
+                            throw new NotFoundException($"Book with Id '{detailDto.BookId}' not found or has been deleted.");
+                        }
+                        booksToUpdate.Add(book.Id, book);
+                    }
+                    else
+                    {
+
+                    }
+
+                    if (detailDto.Quantity > book.StockQuantity)
+                    {
+                        throw new ValidationException($"Insufficient stock for book '{book.Title}'. Available: {book.StockQuantity}, Requested: {detailDto.Quantity}.");
+                    }
+
+                    var orderDetailEntity = new OrderDetail
+                    {
+                        BookId = book.Id,
+                        Quantity = detailDto.Quantity,
+                        UnitPrice = book.Price
+                    };
+                    orderDetailsEntities.Add(orderDetailEntity);
+
+                    totalAmount += orderDetailEntity.Quantity * orderDetailEntity.UnitPrice;
+
+                    book.StockQuantity -= detailDto.Quantity;
+
+                    inventoryLogs.Add(new InventoryLog
+                    {
+                        BookId = book.Id,
+                        ChangeQuantity = -detailDto.Quantity,
+                        Reason = InventoryReason.InStoreSale,
+                        TimestampUtc = now,
+                        UserId = staffUserId
+                    });
+                }
+
+                var order = new Order
+                {
+                    UserId = createDto.CustomerUserId,
+                    OrderDate = now,
+                    Status = OrderStatus.Completed,
+                    TotalAmount = totalAmount,
+                    OrderShippingAddressId = null,
+                    OrderType = OrderType.InStore,
+                    DeliveryMethod = DeliveryMethod.InStorePickup,
+                    PaymentMethod = createDto.PaymentMethod,
+                    PaymentStatus = PaymentStatus.Completed,
+                    InvoiceNumber = $"INV-{now:yyyyMMddHHmmss}-{Guid.NewGuid().ToString().Substring(0, 4).ToUpper()}"
+                };
+                order.OrderDetails = orderDetailsEntities;
+
+                var createdOrder = await _unitOfWork.OrderRepository.AddAsync(order, cancellationToken);
+
+                foreach (var log in inventoryLogs) { log.OrderId = createdOrder.Id; }
+
+                await _unitOfWork.InventoryLogRepository.AddRangeAsync(inventoryLogs, cancellationToken);
+
+                await _unitOfWork.CommitTransactionAsync(transaction, cancellationToken);
+
+                _logger.LogInformation("In-Store order {OrderId} created successfully by Staff {StaffUserId}.", createdOrder.Id, staffUserId);
+
+                var finalOrderDetails = await _unitOfWork.OrderRepository.GetOrderWithDetailsByIdAsync(createdOrder.Id, cancellationToken);
+                if (finalOrderDetails == null) throw new InvalidOperationException("Failed to retrieve the created in-store order details.");
+                return _mapper.Map<OrderDto>(finalOrderDetails);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating In-Store order by Staff {StaffUserId}. CustomerId: {CustomerId}", staffUserId, createDto.CustomerUserId ?? Guid.Empty);
+                throw;
             }
         }
     }
