@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Bookstore.Application.Dtos.Orders;
+using Bookstore.Application.Exceptions;
 using Bookstore.Application.Interfaces;
 using Bookstore.Application.Interfaces.Services;
 using Bookstore.Domain.Entities;
@@ -15,83 +16,60 @@ namespace Bookstore.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<OrderService> _logger;
-
-        public OrderService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<OrderService> logger)
+        private readonly IPromotionService _promotionService;
+        public OrderService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<OrderService> logger, IPromotionService promotionService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _promotionService = promotionService;
         }
 
         public async Task<OrderDto> CreateOnlineOrderAsync(Guid userId, CreateOrderRequestDto createOrderDto, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Attempting to create online order for User: {UserId}", userId);
+            var cartItems = (await _unitOfWork.CartRepository.GetCartByUserIdAsync(userId, cancellationToken)).ToList();
+            if (!cartItems.Any()) throw new ValidationException("Cannot create order from an empty cart.");
 
-            // --- Bắt đầu Transaction ---
+            var shippingAddressEntity = await _unitOfWork.AddressRepository.GetByIdAsync(createOrderDto.ShippingAddressId, cancellationToken);
+            if (shippingAddressEntity == null || shippingAddressEntity.UserId != userId) throw new NotFoundException($"Shipping address with Id '{createOrderDto.ShippingAddressId}' not found or does not belong to the user.");
+
+            decimal subTotal = 0;
+            var bookQuantities = new Dictionary<Guid, int>();
+
+            foreach (var item in cartItems)
+            {
+                var book = item.Book;
+                if (book == null) throw new InvalidOperationException($"Book data is missing for cart item (BookId: {item.BookId}).");
+                if (item.Quantity > book.StockQuantity) throw new ValidationException($"Insufficient stock for book '{book.Title}'. Only {book.StockQuantity} available.");
+
+                subTotal += item.Quantity * book.Price;
+                bookQuantities.Add(book.Id, item.Quantity);
+            }
+
+            decimal discountAmount = 0;
+            Promotion? appliedPromotion = null;
+            if (!string.IsNullOrWhiteSpace(createOrderDto.PromotionCode))
+            {
+                try
+                {
+                    discountAmount = await _promotionService.ValidateAndCalculateDiscountAsync(createOrderDto.PromotionCode, subTotal, cancellationToken);
+                    appliedPromotion = await _unitOfWork.PromotionRepository.GetByCodeAsync(createOrderDto.PromotionCode, cancellationToken);
+                }
+                catch (ValidationException ex) { throw; }
+            }
+            decimal finalTotalAmount = Math.Max(0, subTotal - discountAmount);
+
+            // === TẠO ORDER VÀ XỬ LÝ THANH TOÁN ===
             using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
+            Order? createdOrder = null;
+
             try
             {
-                // 1. Lấy giỏ hàng của User
-                var cartItems = (await _unitOfWork.CartRepository.GetCartByUserIdAsync(userId, cancellationToken)).ToList();
-                if (!cartItems.Any())
-                {
-                    _logger.LogWarning("User {UserId} attempted to create order with an empty cart.", userId);
-                    throw new ValidationException("Cannot create order from an empty cart.");
-                }
-
-                // 2. Lấy địa chỉ giao hàng đã chọn của User
-                var shippingAddress = await _unitOfWork.AddressRepository.GetByIdAsync(createOrderDto.ShippingAddressId, cancellationToken);
-                if (shippingAddress == null || shippingAddress.UserId != userId)
-                {
-                    _logger.LogWarning("Invalid ShippingAddressId {AddressId} provided for User {UserId}.", createOrderDto.ShippingAddressId, userId);
-                    throw new NotFoundException($"Shipping address with Id '{createOrderDto.ShippingAddressId}' not found or does not belong to the user.");
-                }
-
-                // 3. Tạo bản ghi Snapshot địa chỉ giao hàng
-                var orderShippingAddress = _mapper.Map<OrderShippingAddress>(shippingAddress);
-                // **Quan trọng:** Gán Id mới cho bản ghi snapshot
+                var orderShippingAddress = _mapper.Map<OrderShippingAddress>(shippingAddressEntity);
                 orderShippingAddress.Id = Guid.NewGuid();
                 await _unitOfWork.OrderShippingAddressRepository.AddAsync(orderShippingAddress, cancellationToken);
 
-                // 4. Kiểm tra tồn kho và Tính toán ban đầu
-                decimal subTotal = 0;
-                var orderDetails = new List<OrderDetail>();
-                var booksToUpdate = new List<Book>();
-
-                foreach (var item in cartItems)
-                {
-                    var book = item.Book;
-                    if (book == null)
-                    {
-                        _logger.LogError("CartItem for User {UserId} contains invalid BookId {BookId}", userId, item.BookId);
-                        throw new InvalidOperationException($"Book data is missing for cart item (BookId: {item.BookId}).");
-                    }
-
-                    if (item.Quantity > book.StockQuantity)
-                    {
-                        _logger.LogWarning("Insufficient stock for Book {BookId} ('{BookTitle}') for User {UserId}. Requested: {RequestedQty}, Available: {AvailableQty}", book.Id, book.Title, userId, item.Quantity, book.StockQuantity);
-                        throw new ValidationException($"Insufficient stock for book '{book.Title}'. Only {book.StockQuantity} available.");
-                    }
-
-                    // Tạo OrderDetail
-                    var orderDetail = new OrderDetail
-                    {
-                        BookId = book.Id,
-                        Quantity = item.Quantity,
-                        UnitPrice = book.Price
-                    };
-                    orderDetails.Add(orderDetail);
-
-                    subTotal += orderDetail.Quantity * orderDetail.UnitPrice;
-
-                    book.StockQuantity -= item.Quantity;
-                    booksToUpdate.Add(book);
-                }
-
-                // 5. Áp dụng Khuyến mãi
-                decimal discountAmount = 0;
-                decimal finalTotalAmount = subTotal - discountAmount;
-
-                // 6. Tạo bản ghi Order
                 var order = new Order
                 {
                     UserId = userId,
@@ -102,62 +80,98 @@ namespace Bookstore.Application.Services
                     OrderType = OrderType.Online,
                     DeliveryMethod = DeliveryMethod.Shipping,
                     PaymentMethod = PaymentMethod.OnlineGateway,
-                    PaymentStatus = PaymentStatus.Pending,
-                    OrderDetails = orderDetails
+                    PaymentStatus = PaymentStatus.Pending
                 };
 
-                await _unitOfWork.OrderRepository.AddAsync(order, cancellationToken);
-
-                // 7. Cập nhật trạng thái (Modified) cho các sách đã thay đổi tồn kho
-                foreach (var book in booksToUpdate)
+                // Tạo OrderDetails
+                order.OrderDetails = cartItems.Select(item => new OrderDetail
                 {
-                    await _unitOfWork.BookRepository.UpdateAsync(book, cancellationToken);
-                }
+                    BookId = item.BookId,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.Book.Price
+                }).ToList();
 
+                createdOrder = await _unitOfWork.OrderRepository.AddAsync(order, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken); // <<< LƯU ORDER VÀ ADDRESS TRƯỚC KHI THANH TOÁN
 
-                // 8. Xóa Giỏ hàng
-                await _unitOfWork.CartRepository.ClearCartAsync(userId, cancellationToken);
+                _logger.LogInformation("Order {OrderId} created with Pending status for User {UserId}.", createdOrder.Id, userId);
 
-                // 9. Ghi Inventory Logs
-                var orderIdForLog = order.Id;
-                var timestampForLog = order.OrderDate;
-                foreach (var detail in orderDetails)
+                var (isPaymentSuccess, transactionId) = await SimulateOnlinePaymentAsync(createdOrder.Id, createdOrder.TotalAmount, cancellationToken);
+
+                if (isPaymentSuccess)
                 {
-                    var log = new InventoryLog
+                    _logger.LogInformation("Payment successful for Order {OrderId}.", createdOrder.Id);
+
+                    createdOrder.PaymentStatus = PaymentStatus.Completed;
+                    createdOrder.Status = OrderStatus.Confirmed; // Chuyển sang Confirmed (hoặc Processing...)
+                    createdOrder.TransactionId = transactionId;
+                    createdOrder.InvoiceNumber = $"INV-{createdOrder.OrderDate:yyyyMMdd}-{createdOrder.Id.ToString().Substring(0, 4).ToUpper()}"; // Tạo Invoice Number đơn giản
+                    await _unitOfWork.OrderRepository.UpdateAsync(createdOrder, cancellationToken);
+
+                    var inventoryLogs = new List<InventoryLog>();
+                    foreach (var bookIdAndQty in bookQuantities)
                     {
-                        BookId = detail.BookId,
-                        ChangeQuantity = -detail.Quantity,
-                        Reason = InventoryReason.OnlineSale,
-                        TimestampUtc = timestampForLog,
-                        OrderId = orderIdForLog,
-                        UserId = userId
-                    };
-                    await _unitOfWork.InventoryLogRepository.AddAsync(log, cancellationToken);
-                }
+                        var book = await _unitOfWork.BookRepository.GetByIdAsync(bookIdAndQty.Key, cancellationToken);
+                        if (book != null)
+                        {
+                            book.StockQuantity -= bookIdAndQty.Value;
+                            await _unitOfWork.BookRepository.UpdateAsync(book, cancellationToken);
 
-                // 10. Lưu tất cả thay đổi vào CSDL
-                var changesSaved = await _unitOfWork.SaveChangesAsync(cancellationToken);
-                if (changesSaved == 0)
+                            inventoryLogs.Add(new InventoryLog
+                            {
+                                BookId = book.Id,
+                                ChangeQuantity = -bookIdAndQty.Value,
+                                Reason = InventoryReason.OnlineSale,
+                                TimestampUtc = DateTime.UtcNow,
+                                OrderId = createdOrder.Id,
+                                UserId = userId
+                            });
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Book {BookId} not found during stock update for Order {OrderId}", bookIdAndQty.Key, createdOrder.Id);
+                        }
+                    }
+                    if (inventoryLogs.Any())
+                    {
+                        await _unitOfWork.InventoryLogRepository.AddRangeAsync(inventoryLogs, cancellationToken);
+                    }
+
+                    await _unitOfWork.CartRepository.ClearCartAsync(userId, cancellationToken);
+
+                    if (appliedPromotion != null)
+                    {
+                        await _promotionService.IncrementPromotionUsageAsync(appliedPromotion.Code, cancellationToken);
+                    }
+
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                    await _unitOfWork.CommitTransactionAsync(transaction, cancellationToken);
+                    _logger.LogInformation("Order {OrderId} processing completed successfully for User {UserId}.", createdOrder.Id, userId);
+
+                }
+                else
                 {
-                    _logger.LogWarning("No changes were saved to the database for User {UserId} order creation.", userId);
-                    throw new InvalidOperationException("Could not save the order to the database.");
+                    _logger.LogWarning("Payment failed for Order {OrderId}. Setting status to Cancelled.", createdOrder.Id);
+                    createdOrder.PaymentStatus = PaymentStatus.Failed;
+                    createdOrder.Status = OrderStatus.Cancelled;
+                    await _unitOfWork.OrderRepository.UpdateAsync(createdOrder, cancellationToken);
+
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                    await _unitOfWork.CommitTransactionAsync(transaction, cancellationToken);
+
+                    // Ném lỗi để Controller báo cho người dùng
+                    throw new PaymentFailedException($"Online payment failed for Order {createdOrder.Id}.");
                 }
 
-                // 11. Commit Transaction
-                await _unitOfWork.CommitTransactionAsync(transaction, cancellationToken);
-
-                _logger.LogInformation("Successfully created online order {OrderId} for User {UserId}", order.Id, userId);
-
-                // 12. Lấy lại thông tin đầy đủ để trả về DTO (bao gồm cả chi tiết)
-                var createdOrderWithDetails = await _unitOfWork.OrderRepository.GetOrderWithDetailsByIdAsync(order.Id, cancellationToken);
-                return _mapper.Map<OrderDto>(createdOrderWithDetails);
+                var finalOrderDetails = await _unitOfWork.OrderRepository.GetOrderWithDetailsByIdAsync(createdOrder.Id, cancellationToken);
+                return _mapper.Map<OrderDto>(finalOrderDetails);
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while creating online order for User {UserId}", userId);
-                await _unitOfWork.RollbackTransactionAsync(transaction, cancellationToken);
-                throw;
+                _logger.LogError(ex, "Error processing online order for User {UserId}. Rolling back transaction if active.", userId);
+                if (ex is ValidationException || ex is NotFoundException || ex is PaymentFailedException) throw;
+                throw new ApplicationException("An error occurred while processing your order.", ex);
             }
         }
 
@@ -165,8 +179,6 @@ namespace Bookstore.Application.Services
         {
             _logger.LogInformation("Admin {AdminUserId} attempting to update status for Order {OrderId} to {NewStatus}", adminUserId, orderId, newStatus);
 
-            // Lấy order kèm chi tiết để xử lý hoàn kho nếu hủy
-            // **Quan trọng:** Cần bật tracking ở đây vì sẽ cập nhật Order và Book
             var order = await _unitOfWork.OrderRepository.ListAsync(
                             filter: o => o.Id == orderId,
                             includeProperties: "OrderDetails.Book",
@@ -322,6 +334,29 @@ namespace Bookstore.Application.Services
                 return null;
             }
             return _mapper.Map<OrderDto>(order);
+        }
+
+        private async Task<(bool IsSuccess, string? TransactionId)> SimulateOnlinePaymentAsync(Guid orderId, decimal amount, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Simulating online payment for Order {OrderId}, Amount: {Amount}", orderId, amount);
+
+            // --- Logic Giả lập ---
+            await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+
+            bool paymentSuccess = true;
+
+            string? transactionId = null;
+            if (paymentSuccess)
+            {
+                transactionId = $"PMT_{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}"; // Tạo mã giao dịch giả
+                _logger.LogInformation("Payment simulation successful for Order {OrderId}. TransactionId: {TransactionId}", orderId, transactionId);
+                return (true, transactionId);
+            }
+            else
+            {
+                _logger.LogWarning("Payment simulation failed for Order {OrderId}.", orderId);
+                return (false, null);
+            }
         }
     }
 }

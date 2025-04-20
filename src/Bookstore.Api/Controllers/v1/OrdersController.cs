@@ -1,5 +1,6 @@
 ﻿
 using Bookstore.Application.Dtos.Orders;
+using Bookstore.Application.Exceptions;
 using Bookstore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,9 +34,11 @@ namespace Bookstore.Api.Controllers.v1
             {
                 var userId = GetUserIdFromClaims();
                 var createdOrder = await _orderService.CreateOnlineOrderAsync(userId, createOrderDto, cancellationToken);
-
-                return CreatedAtAction(nameof(GetMyOrderById), new { orderId = createdOrder.Id, version = "1.0" }, createdOrder);
-
+                return StatusCode(StatusCodes.Status201Created, createdOrder);
+            }
+            catch (PaymentFailedException ex)
+            {
+                return BadRequest(new { Message = "Payment failed. Please try again or use a different payment method.", Detail = ex.Message });
             }
             catch (ValidationException ex)
             {
