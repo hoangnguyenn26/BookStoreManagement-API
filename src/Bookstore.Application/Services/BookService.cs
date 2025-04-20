@@ -1,9 +1,10 @@
 ﻿
 using AutoMapper;
 using Bookstore.Application.Dtos.Books;
-using Bookstore.Application.Interfaces; // Namespace chứa IUnitOfWork
+using Bookstore.Application.Interfaces;
 using Bookstore.Application.Interfaces.Services;
 using Bookstore.Domain.Entities;
+using System.Linq.Expressions;
 
 namespace Bookstore.Application.Services
 {
@@ -11,7 +12,6 @@ namespace Bookstore.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-
         public BookService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -64,10 +64,29 @@ namespace Bookstore.Application.Services
             return true;
         }
 
-        public async Task<IEnumerable<BookDto>> GetAllBooksAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<BookDto>> GetAllBooksAsync(
+            Guid? categoryId = null,
+            int page = 1,
+            int pageSize = 10,
+            CancellationToken cancellationToken = default)
         {
-            var books = await _unitOfWork.BookRepository.GetAllAsync(
+            Expression<Func<Book, bool>> filter = b => true;
+
+            if (categoryId.HasValue && categoryId.Value != Guid.Empty)
+            {
+                var catId = categoryId.Value;
+                filter = b => b.CategoryId == catId;
+            }
+
+            var books = await _unitOfWork.BookRepository.ListAsync(
+                filter: filter,
+                orderBy: q => q.OrderByDescending(b => b.CreatedAtUtc),
+                includeProperties: "Author,Category",
+                isTracking: false,
+                page: page,
+                pageSize: pageSize,
                 cancellationToken: cancellationToken);
+
             return _mapper.Map<IEnumerable<BookDto>>(books);
         }
 

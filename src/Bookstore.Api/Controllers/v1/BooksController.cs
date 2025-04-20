@@ -19,12 +19,20 @@ namespace Bookstore.Api.Controllers.v1
         }
 
         // GET: api/v1/books
+        // GET: api/v1/books?categoryId={guid}&page=1&pageSize=20
         [HttpGet]
-        [AllowAnonymous]
+        [AllowAnonymous] // Ai cũng xem được sách
         [ProducesResponseType(typeof(IEnumerable<BookDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks(CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks(
+            [FromQuery] Guid? categoryId, // <<-- THÊM THAM SỐ NÀY
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10, // Giữ lại phân trang nếu đã có
+                                           // Thêm các tham số khác nếu cần: sortBy, sortDirection...
+            CancellationToken cancellationToken = default)
         {
-            var books = await _bookService.GetAllBooksAsync(cancellationToken);
+            // Gọi service với tham số categoryId đã thêm
+            var books = await _bookService.GetAllBooksAsync(categoryId, page, pageSize, cancellationToken);
+            // TODO: Xử lý thông tin phân trang trả về (vd: trong Header) nếu cần
             return Ok(books);
         }
 
