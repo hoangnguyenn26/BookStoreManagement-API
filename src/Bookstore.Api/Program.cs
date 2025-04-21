@@ -60,6 +60,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IStockReceiptService, StockReceiptService>();
+builder.Services.AddScoped<IUserService, UserService>();
 // ----- Register AutoMapper -----
 builder.Services.AddAutoMapper(typeof(Bookstore.Application.Mappings.MappingProfile).Assembly);
 

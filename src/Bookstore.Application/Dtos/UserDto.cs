@@ -10,5 +10,7 @@ namespace Bookstore.Application.Dtos
         public string? LastName { get; set; }
         public string? PhoneNumber { get; set; }
         public bool IsActive { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public List<string> Roles { get; set; } = new List<string>();
     }
 }

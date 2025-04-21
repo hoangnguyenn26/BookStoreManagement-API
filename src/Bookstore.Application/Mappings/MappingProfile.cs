@@ -33,6 +33,8 @@ namespace Bookstore.Application.Mappings
 
             // ----- User Mappings -----
             CreateMap<User, UserDto>();
+            CreateMap<User, UserDto>()
+                    .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles != null ? src.UserRoles.Select(ur => ur.Role.Name).ToList() : new List<string>()));
 
             // ----- Wishlist Mappings -----
             CreateMap<WishlistItem, WishlistItemDto>();
