@@ -2,3 +2,206 @@
 2025-04-21 15:06:05.009 +07:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
 2025-04-21 15:06:05.011 +07:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
 2025-04-21 15:06:05.012 +07:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: C:\Users\Nguyn\Desktop\Đồ án tốt nghiệp\BookStoreManagement\src\Bookstore.Api
+2025-04-21 15:06:44.623 +07:00 [WRN] (Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware) Failed to determine the https port for redirect.
+2025-04-21 15:08:02.334 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model) No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'Bookstore.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-04-21 15:08:02.446 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'CartItem'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-21 15:08:02.448 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'InventoryLog'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-21 15:08:02.450 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'OrderDetail'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-21 15:08:02.452 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'Review'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-21 15:08:02.454 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'StockReceiptDetail'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-21 15:08:02.455 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'WishlistItem'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-04-21 15:08:03.364 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (54ms) [Parameters=[@__email_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[Email] = @__email_0
+2025-04-21 15:08:03.404 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (4ms) [Parameters=[@__username_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[UserName] = @__username_0
+2025-04-21 15:08:04.095 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (5ms) [Parameters=[@__userId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Name]
+FROM [UserRoles] AS [u]
+INNER JOIN [Roles] AS [r] ON [u].[RoleId] = [r].[Id]
+WHERE [u].[UserId] = @__userId_0
+2025-04-21 15:08:04.235 +07:00 [INF] (Bookstore.Application.Services.UserService) Fetching all users for admin. Page: 1, PageSize: 10
+2025-04-21 15:08:04.341 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (6ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [u1].[Id], [u1].[CreatedAtUtc], [u1].[Email], [u1].[FirstName], [u1].[IsActive], [u1].[LastName], [u1].[PasswordHash], [u1].[PhoneNumber], [u1].[UpdatedAtUtc], [u1].[UserName], [s].[UserId], [s].[RoleId], [s].[Id], [s].[CreatedAtUtc], [s].[Name], [s].[UpdatedAtUtc]
+FROM (
+    SELECT [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+    FROM [Users] AS [u]
+    ORDER BY [u].[UserName]
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [u1]
+LEFT JOIN (
+    SELECT [u0].[UserId], [u0].[RoleId], [r].[Id], [r].[CreatedAtUtc], [r].[Name], [r].[UpdatedAtUtc]
+    FROM [UserRoles] AS [u0]
+    INNER JOIN [Roles] AS [r] ON [u0].[RoleId] = [r].[Id]
+) AS [s] ON [u1].[Id] = [s].[UserId]
+ORDER BY [u1].[UserName], [u1].[Id], [s].[UserId], [s].[RoleId]
+2025-04-21 15:09:37.407 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (6ms) [Parameters=[@__email_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[Email] = @__email_0
+2025-04-21 15:09:37.413 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__username_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[UserName] = @__username_0
+2025-04-21 15:09:37.800 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[@__userId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Name]
+FROM [UserRoles] AS [u]
+INNER JOIN [Roles] AS [r] ON [u].[RoleId] = [r].[Id]
+WHERE [u].[UserId] = @__userId_0
+2025-04-21 15:09:37.830 +07:00 [INF] (Bookstore.Application.Services.UserService) Fetching all users for admin. Page: 1, PageSize: 10
+2025-04-21 15:09:37.839 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (6ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [u1].[Id], [u1].[CreatedAtUtc], [u1].[Email], [u1].[FirstName], [u1].[IsActive], [u1].[LastName], [u1].[PasswordHash], [u1].[PhoneNumber], [u1].[UpdatedAtUtc], [u1].[UserName], [s].[UserId], [s].[RoleId], [s].[Id], [s].[CreatedAtUtc], [s].[Name], [s].[UpdatedAtUtc]
+FROM (
+    SELECT [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+    FROM [Users] AS [u]
+    ORDER BY [u].[UserName]
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [u1]
+LEFT JOIN (
+    SELECT [u0].[UserId], [u0].[RoleId], [r].[Id], [r].[CreatedAtUtc], [r].[Name], [r].[UpdatedAtUtc]
+    FROM [UserRoles] AS [u0]
+    INNER JOIN [Roles] AS [r] ON [u0].[RoleId] = [r].[Id]
+) AS [s] ON [u1].[Id] = [s].[UserId]
+ORDER BY [u1].[UserName], [u1].[Id], [s].[UserId], [s].[RoleId]
+2025-04-21 15:09:49.308 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (14ms) [Parameters=[@__email_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[Email] = @__email_0
+2025-04-21 15:09:49.317 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__username_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[UserName] = @__username_0
+2025-04-21 15:09:49.589 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (11ms) [Parameters=[@__userId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Name]
+FROM [UserRoles] AS [u]
+INNER JOIN [Roles] AS [r] ON [u].[RoleId] = [r].[Id]
+WHERE [u].[UserId] = @__userId_0
+2025-04-21 15:09:49.631 +07:00 [INF] (Bookstore.Application.Services.UserService) Fetching user details for admin. UserId: "b2c3d4e5-f6a1-4b8c-8d9e-3f4a5b6c7d8e"
+2025-04-21 15:09:49.666 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (13ms) [Parameters=[@__userId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT [u1].[Id], [u1].[CreatedAtUtc], [u1].[Email], [u1].[FirstName], [u1].[IsActive], [u1].[LastName], [u1].[PasswordHash], [u1].[PhoneNumber], [u1].[UpdatedAtUtc], [u1].[UserName], [s].[UserId], [s].[RoleId], [s].[Id], [s].[CreatedAtUtc], [s].[Name], [s].[UpdatedAtUtc]
+FROM (
+    SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+    FROM [Users] AS [u]
+    WHERE [u].[Id] = @__userId_0
+) AS [u1]
+LEFT JOIN (
+    SELECT [u0].[UserId], [u0].[RoleId], [r].[Id], [r].[CreatedAtUtc], [r].[Name], [r].[UpdatedAtUtc]
+    FROM [UserRoles] AS [u0]
+    INNER JOIN [Roles] AS [r] ON [u0].[RoleId] = [r].[Id]
+) AS [s] ON [u1].[Id] = [s].[UserId]
+ORDER BY [u1].[Id], [s].[UserId], [s].[RoleId]
+2025-04-21 15:10:32.316 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (15ms) [Parameters=[@__email_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[Email] = @__email_0
+2025-04-21 15:10:32.325 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__username_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[UserName] = @__username_0
+2025-04-21 15:10:32.588 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (4ms) [Parameters=[@__userId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Name]
+FROM [UserRoles] AS [u]
+INNER JOIN [Roles] AS [r] ON [u].[RoleId] = [r].[Id]
+WHERE [u].[UserId] = @__userId_0
+2025-04-21 15:10:32.620 +07:00 [INF] (Bookstore.Application.Services.UserService) Fetching all users for admin. Page: 1, PageSize: 10
+2025-04-21 15:10:32.630 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (6ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [u1].[Id], [u1].[CreatedAtUtc], [u1].[Email], [u1].[FirstName], [u1].[IsActive], [u1].[LastName], [u1].[PasswordHash], [u1].[PhoneNumber], [u1].[UpdatedAtUtc], [u1].[UserName], [s].[UserId], [s].[RoleId], [s].[Id], [s].[CreatedAtUtc], [s].[Name], [s].[UpdatedAtUtc]
+FROM (
+    SELECT [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+    FROM [Users] AS [u]
+    ORDER BY [u].[UserName]
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [u1]
+LEFT JOIN (
+    SELECT [u0].[UserId], [u0].[RoleId], [r].[Id], [r].[CreatedAtUtc], [r].[Name], [r].[UpdatedAtUtc]
+    FROM [UserRoles] AS [u0]
+    INNER JOIN [Roles] AS [r] ON [u0].[RoleId] = [r].[Id]
+) AS [s] ON [u1].[Id] = [s].[UserId]
+ORDER BY [u1].[UserName], [u1].[Id], [s].[UserId], [s].[RoleId]
+2025-04-21 15:10:45.442 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (0ms) [Parameters=[@__email_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[Email] = @__email_0
+2025-04-21 15:10:45.448 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__username_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[UserName] = @__username_0
+2025-04-21 15:10:45.720 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Name]
+FROM [UserRoles] AS [u]
+INNER JOIN [Roles] AS [r] ON [u].[RoleId] = [r].[Id]
+WHERE [u].[UserId] = @__userId_0
+2025-04-21 15:11:01.116 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (8ms) [Parameters=[@__email_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[Email] = @__email_0
+2025-04-21 15:11:01.125 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__username_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[UserName] = @__username_0
+2025-04-21 15:11:01.395 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (4ms) [Parameters=[@__userId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Name]
+FROM [UserRoles] AS [u]
+INNER JOIN [Roles] AS [r] ON [u].[RoleId] = [r].[Id]
+WHERE [u].[UserId] = @__userId_0
+2025-04-21 15:11:01.447 +07:00 [INF] (Bookstore.Application.Services.UserService) Attempting to update status for user "7a214044-adb3-4b9e-be93-1ff4539c1006" to IsActive=true
+2025-04-21 15:11:01.466 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__p_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[Id] = @__p_0
+2025-04-21 15:11:06.402 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (0ms) [Parameters=[@__email_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[Email] = @__email_0
+2025-04-21 15:11:06.406 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__username_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[UserName] = @__username_0
+2025-04-21 15:11:06.671 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Name]
+FROM [UserRoles] AS [u]
+INNER JOIN [Roles] AS [r] ON [u].[RoleId] = [r].[Id]
+WHERE [u].[UserId] = @__userId_0
+2025-04-21 15:11:06.720 +07:00 [INF] (Bookstore.Application.Services.UserService) Attempting to update status for user "7a214044-adb3-4b9e-be93-1ff4539c1006" to IsActive=false
+2025-04-21 15:11:06.724 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__p_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[Id] = @__p_0
+2025-04-21 15:11:06.836 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (5ms) [Parameters=[@p9='?' (DbType = Guid), @p0='?' (DbType = DateTime2), @p1='?' (Size = 450), @p2='?' (Size = 100), @p3='?' (DbType = Boolean), @p4='?' (Size = 100), @p5='?' (Size = 4000), @p6='?' (Size = 4000), @p7='?' (DbType = DateTime2), @p8='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+UPDATE [Users] SET [CreatedAtUtc] = @p0, [Email] = @p1, [FirstName] = @p2, [IsActive] = @p3, [LastName] = @p4, [PasswordHash] = @p5, [PhoneNumber] = @p6, [UpdatedAtUtc] = @p7, [UserName] = @p8
+OUTPUT 1
+WHERE [Id] = @p9;
+2025-04-21 15:11:06.850 +07:00 [INF] (Bookstore.Application.Services.UserService) Successfully updated status for user "7a214044-adb3-4b9e-be93-1ff4539c1006" to IsActive=false
+2025-04-21 15:11:08.658 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__email_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[Email] = @__email_0
+2025-04-21 15:11:08.663 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__username_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+FROM [Users] AS [u]
+WHERE [u].[UserName] = @__username_0
+2025-04-21 15:11:08.925 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Name]
+FROM [UserRoles] AS [u]
+INNER JOIN [Roles] AS [r] ON [u].[RoleId] = [r].[Id]
+WHERE [u].[UserId] = @__userId_0
+2025-04-21 15:11:08.949 +07:00 [INF] (Bookstore.Application.Services.UserService) Fetching all users for admin. Page: 1, PageSize: 10
+2025-04-21 15:11:08.957 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (5ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [u1].[Id], [u1].[CreatedAtUtc], [u1].[Email], [u1].[FirstName], [u1].[IsActive], [u1].[LastName], [u1].[PasswordHash], [u1].[PhoneNumber], [u1].[UpdatedAtUtc], [u1].[UserName], [s].[UserId], [s].[RoleId], [s].[Id], [s].[CreatedAtUtc], [s].[Name], [s].[UpdatedAtUtc]
+FROM (
+    SELECT [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+    FROM [Users] AS [u]
+    ORDER BY [u].[UserName]
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [u1]
+LEFT JOIN (
+    SELECT [u0].[UserId], [u0].[RoleId], [r].[Id], [r].[CreatedAtUtc], [r].[Name], [r].[UpdatedAtUtc]
+    FROM [UserRoles] AS [u0]
+    INNER JOIN [Roles] AS [r] ON [u0].[RoleId] = [r].[Id]
+) AS [s] ON [u1].[Id] = [s].[UserId]
+ORDER BY [u1].[UserName], [u1].[Id], [s].[UserId], [s].[RoleId]
