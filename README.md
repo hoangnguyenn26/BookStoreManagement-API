@@ -28,7 +28,7 @@ API Backend Mạnh mẽ cho Hệ thống Quản lý Nhà sách
 
 ## **Tổng quan**
 
-**BookStoreManagement-API** cung cấp một giải pháp backend mạnh mẽ được thiết kế để đơn giản hóa và tối ưu hóa hoạt động của nhà sách. API này được xây dựng bằng ASP.NET Core, tuân theo các nguyên tắc thiết kế hiện đại, cho phép các nhà phát triển (bao gồm cả ứng dụng .NET MAUI mà chúng ta đang xây dựng) tạo ra các hệ thống quản lý hiệu quả, dễ mở rộng và bảo trì.
+**BookStoreManagement-API** cung cấp một giải pháp backend mạnh mẽ được thiết kế để đơn giản hóa và tối ưu hóa hoạt động của nhà sách. API này được xây dựng bằng ASP.NET Core, tuân theo các nguyên tắc thiết kế hiện đại, cho phép các nhà phát triển tạo ra các hệ thống quản lý hiệu quả, dễ mở rộng và bảo trì.
 
 ## **Kiến trúc**
 
