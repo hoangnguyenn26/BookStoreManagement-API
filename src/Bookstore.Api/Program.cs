@@ -245,10 +245,10 @@ else
             await context.Response.WriteAsJsonAsync(new { Message = "An unexpected server error occurred. Please try again later." });
         });
     });
+    app.UseHttpsRedirection();
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
 app.UseRouting();
 
 // ----- Áp dụng chính sách CORS -----
