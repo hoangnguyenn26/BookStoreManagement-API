@@ -1,7 +1,6 @@
-﻿
-using Bookstore.Application.Dtos;
+﻿using Bookstore.Application.Dtos.Categories;
 using Bookstore.Application.Interfaces.Services;
-using Microsoft.AspNetCore.Authorization; 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bookstore.Api.Controllers.v1

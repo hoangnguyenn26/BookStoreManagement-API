@@ -1,5 +1,5 @@
 ﻿// src/Bookstore.Application/Dtos/CreateCategoryDto.cs
-namespace Bookstore.Application.Dtos
+namespace Bookstore.Application.Dtos.Categories
 {
     public class CreateCategoryDto
     {

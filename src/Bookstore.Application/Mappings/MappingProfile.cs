@@ -3,8 +3,10 @@ using AutoMapper;
 using Bookstore.Application.Dtos;
 using Bookstore.Application.Dtos.Addresses;
 using Bookstore.Application.Dtos.Admin.Reports;
+using Bookstore.Application.Dtos.Authors;
 using Bookstore.Application.Dtos.Books;
 using Bookstore.Application.Dtos.Carts;
+using Bookstore.Application.Dtos.Categories;
 using Bookstore.Application.Dtos.Dashboard;
 using Bookstore.Application.Dtos.Orders;
 using Bookstore.Application.Dtos.Promotions;
@@ -25,6 +27,10 @@ namespace Bookstore.Application.Mappings
             CreateMap<Category, CategoryDto>();
             CreateMap<CreateCategoryDto, Category>();
             CreateMap<UpdateCategoryDto, Category>();
+            CreateMap<Category, Dtos.Categories.CategorySummaryDto>();
+
+            // ----- Author Mappings -----
+            CreateMap<Author, AuthorSummaryDto>();
 
             // ----- Book Mappings -----
             CreateMap<Book, BookDto>();
@@ -78,7 +84,7 @@ namespace Bookstore.Application.Mappings
             CreateMap<Book, BookSummaryDto>()
                 .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author != null ? src.Author.Name : null));
             CreateMap<Promotion, PromotionSummaryDto>();
-            CreateMap<Category, CategorySummaryDto>();
+            CreateMap<Category, Dtos.Dashboard.CategorySummaryDto>();
 
             // ----- Report Mappings -----
             CreateMap<Book, LowStockBookDto>()

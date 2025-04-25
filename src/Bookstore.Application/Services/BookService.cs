@@ -65,11 +65,11 @@ namespace Bookstore.Application.Services
         }
 
         public async Task<IEnumerable<BookDto>> GetAllBooksAsync(
-    Guid? categoryId = null,
-    string? search = null, // <<-- Thêm tham số vào implementation
-    int page = 1,
-    int pageSize = 10,
-    CancellationToken cancellationToken = default)
+            Guid? categoryId = null,
+            string? search = null,
+            int page = 1,
+            int pageSize = 10,
+            CancellationToken cancellationToken = default)
         {
             // --- Xây dựng biểu thức lọc (Filter Expression) ---
             var predicate = PredicateBuilder.New<Book>(true);
@@ -104,10 +104,11 @@ namespace Bookstore.Application.Services
         public async Task<BookDto?> GetBookByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var book = await _unitOfWork.BookRepository.ListAsync(
-                filter: b => b.Id == id,
-                isTracking: false,
-                cancellationToken: cancellationToken)
-                .ContinueWith(t => t.Result.FirstOrDefault(), cancellationToken);
+                        filter: b => b.Id == id,
+                        includeProperties: "Author,Category",
+                        isTracking: false,
+                        cancellationToken: cancellationToken)
+                        .ContinueWith(t => t.Result.FirstOrDefault(), cancellationToken);
 
             if (book == null)
             {

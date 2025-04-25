@@ -1,6 +1,6 @@
 ﻿
 using AutoMapper;
-using Bookstore.Application.Dtos;
+using Bookstore.Application.Dtos.Categories;
 using Bookstore.Application.Interfaces;
 using Bookstore.Application.Interfaces.Services;
 using Bookstore.Domain.Entities;

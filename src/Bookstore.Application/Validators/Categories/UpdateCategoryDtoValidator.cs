@@ -1,5 +1,4 @@
-﻿
-using Bookstore.Application.Dtos;
+﻿using Bookstore.Application.Dtos.Categories;
 using FluentValidation;
 
 namespace Bookstore.Application.Validators.Categories

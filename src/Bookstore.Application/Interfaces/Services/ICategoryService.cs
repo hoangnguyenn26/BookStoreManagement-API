@@ -1,5 +1,5 @@
 ﻿// src/Bookstore.Application/Interfaces/Services/ICategoryService.cs
-using Bookstore.Application.Dtos; // Namespace chứa DTOs
+using Bookstore.Application.Dtos.Categories; // Namespace chứa DTOs
 
 namespace Bookstore.Application.Interfaces.Services
 {

@@ -1,5 +1,4 @@
-﻿
-namespace Bookstore.Application.Dtos
+﻿namespace Bookstore.Application.Dtos.Categories
 {
     public class CategoryDto
     {
