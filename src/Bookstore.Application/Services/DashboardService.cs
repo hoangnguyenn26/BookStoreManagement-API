@@ -1,4 +1,4 @@
-﻿
+﻿// src/Bookstore.Application/Services/DashboardService.cs
 using AutoMapper;
 using Bookstore.Application.Dtos.Dashboard;
 using Bookstore.Application.Interfaces;
@@ -12,6 +12,8 @@ namespace Bookstore.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<DashboardService> _logger;
+        private const int DefaultTopBestsellers = 5;
+        private const int DaysForBestsellers = 30;
 
         public DashboardService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<DashboardService> logger)
         {
@@ -27,6 +29,7 @@ namespace Bookstore.Application.Services
 
             try
             {
+                // --- 1. Lấy Sách Mới Nhất ---
                 var newestBooksEntities = await _unitOfWork.BookRepository.ListAsync(
                     orderBy: q => q.OrderByDescending(b => b.CreatedAtUtc),
                     includeProperties: "Author",
@@ -35,18 +38,49 @@ namespace Bookstore.Application.Services
                 );
                 dashboardDto.NewestBooks = _mapper.Map<List<BookSummaryDto>>(newestBooksEntities);
 
-                // 2. Lấy Sách Bán Chạy (Tạm thời để trống hoặc lấy featured)
-                // TODO: Implement logic lấy sách bán chạy dựa trên Orders/OrderDetails sau này
-                // Ví dụ tạm: Lấy sách có rating cao (nếu có Reviews) hoặc sách ngẫu nhiên
-                // var featuredBooks = await _unitOfWork.BookRepository.ListAsync(pageSize: 5, cancellationToken: cancellationToken);
-                // dashboardDto.BestSellingBooks = _mapper.Map<List<BookSummaryDto>>(featuredBooks);
+                // --- 2. Lấy Sách Bán Chạy Nhất (Trong 30 ngày gần nhất) ---
+                var startDateBestseller = DateTime.UtcNow.AddDays(-DaysForBestsellers);
+                dashboardDto.BestSellingBooks = new List<BookSummaryDto>(); // Khởi tạo rỗng
+                try
+                {
+                    var bestsellerData = await _unitOfWork.BookRepository.GetBestsellersInfoAsync(
+                        startDateBestseller,
+                        DateTime.UtcNow,
+                        DefaultTopBestsellers,
+                        cancellationToken);
 
+                    if (bestsellerData.Any())
+                    {
+                        var bestsellerBookIds = bestsellerData.Select(b => b.BookId).ToList();
+
+                        var bestsellerBooks = await _unitOfWork.BookRepository.ListAsync(
+                            filter: b => bestsellerBookIds.Contains(b.Id),
+                            includeProperties: "Author",
+                            isTracking: false,
+                            cancellationToken: cancellationToken);
+
+                        dashboardDto.BestSellingBooks = bestsellerData
+                            .Join(bestsellerBooks,
+                                  data => data.BookId,
+                                  book => book.Id,
+                                  (data, book) => _mapper.Map<BookSummaryDto>(book))
+                            .ToList();
+                    }
+                    _logger.LogInformation("Fetched {Count} bestselling books.", dashboardDto.BestSellingBooks.Count);
+                }
+                catch (Exception ex_bestseller)
+                {
+                    _logger.LogError(ex_bestseller, "Error fetching bestselling books.");
+                }
+
+
+                // --- 3. Lấy Khuyến Mãi Đang Hoạt Động ---
                 var activePromotionsEntities = await _unitOfWork.PromotionRepository.GetActivePromotionsAsync(DateTime.UtcNow, cancellationToken);
                 dashboardDto.ActivePromotions = _mapper.Map<List<PromotionSummaryDto>>(activePromotionsEntities);
 
-
+                // --- 4. Lấy Danh Mục Nổi Bật ---
                 var featuredCategoriesEntities = await _unitOfWork.CategoryRepository.ListAsync(
-                    filter: c => c.ParentCategoryId == null,
+                    filter: c => c.ParentCategoryId == null && !c.IsDeleted, // Lấy danh mục gốc và không bị xóa
                     pageSize: 5,
                     cancellationToken: cancellationToken
                 );
