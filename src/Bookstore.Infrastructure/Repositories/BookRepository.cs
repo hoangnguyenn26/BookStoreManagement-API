@@ -21,7 +21,8 @@ namespace Bookstore.Infrastructure.Repositories
             var bestsellersQuery = _context.OrderDetails
                 .Where(od => od.Order.Status == OrderStatus.Completed &&
                              od.Order.OrderDate >= inclusiveStartDate &&
-                             od.Order.OrderDate < inclusiveEndDate)
+                             od.Order.OrderDate < inclusiveEndDate &&
+                             od.Book != null && !od.Book.IsDeleted)
                 .GroupBy(od => od.BookId)
                 .Select(g => new
                 {

@@ -31,11 +31,12 @@ namespace Bookstore.Application.Services
             {
                 // --- 1. Lấy Sách Mới Nhất ---
                 var newestBooksEntities = await _unitOfWork.BookRepository.ListAsync(
-                    orderBy: q => q.OrderByDescending(b => b.CreatedAtUtc),
-                    includeProperties: "Author",
-                    pageSize: 10,
-                    cancellationToken: cancellationToken
-                );
+                     filter: b => !b.IsDeleted, // <<-- Thêm hoặc đảm bảo filter này luôn được áp dụng trong ListAsync
+                     orderBy: q => q.OrderByDescending(b => b.CreatedAtUtc),
+                     includeProperties: "Author",
+                     pageSize: 10,
+                     cancellationToken: cancellationToken
+                 );
                 dashboardDto.NewestBooks = _mapper.Map<List<BookSummaryDto>>(newestBooksEntities);
 
                 // --- 2. Lấy Sách Bán Chạy Nhất (Trong 30 ngày gần nhất) ---
@@ -54,7 +55,7 @@ namespace Bookstore.Application.Services
                         var bestsellerBookIds = bestsellerData.Select(b => b.BookId).ToList();
 
                         var bestsellerBooks = await _unitOfWork.BookRepository.ListAsync(
-                            filter: b => bestsellerBookIds.Contains(b.Id),
+                            filter: b => bestsellerBookIds.Contains(b.Id) && !b.IsDeleted,
                             includeProperties: "Author",
                             isTracking: false,
                             cancellationToken: cancellationToken);
