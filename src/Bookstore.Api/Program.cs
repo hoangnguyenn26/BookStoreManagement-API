@@ -44,6 +44,8 @@ var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSetting
 // ----- Configure DbContext -----
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// configure GCS
+builder.Services.Configure<GoogleCloudStorageSettings>(builder.Configuration.GetSection("GoogleCloudStorageSettings"));
 
 // ----- Register UnitOfWork & Services -----
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -61,6 +63,7 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IStockReceiptService, StockReceiptService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddSingleton<IFileStorageService, GoogleCloudStorageService>();
 // ----- Register AutoMapper -----
 builder.Services.AddAutoMapper(typeof(Bookstore.Application.Mappings.MappingProfile).Assembly);
 
@@ -248,6 +251,7 @@ else
     app.UseHttpsRedirection();
     app.UseHsts();
 }
+app.UseStaticFiles();
 
 app.UseRouting();
 

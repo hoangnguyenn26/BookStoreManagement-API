@@ -53,6 +53,7 @@ namespace Bookstore.Application.Mappings
             CreateMap<CreateAddressDto, Address>();
             CreateMap<UpdateAddressDto, Address>();
 
+
             // ----- OrderShippingAddress Mapping -----
             // Map từ Address (địa chỉ gốc của user) sang OrderShippingAddress
             CreateMap<Address, OrderShippingAddress>()
@@ -85,6 +86,7 @@ namespace Bookstore.Application.Mappings
                 .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author != null ? src.Author.Name : null));
             CreateMap<Promotion, PromotionSummaryDto>();
             CreateMap<Category, Dtos.Dashboard.CategorySummaryDto>();
+
 
             // ----- Report Mappings -----
             CreateMap<Book, LowStockBookDto>()

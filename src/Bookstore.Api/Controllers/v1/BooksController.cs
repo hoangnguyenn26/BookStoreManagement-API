@@ -1,5 +1,4 @@
-﻿
-using Bookstore.Application.Dtos.Books;
+﻿using Bookstore.Application.Dtos.Books;
 using Bookstore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +11,12 @@ namespace Bookstore.Api.Controllers.v1
     public class BooksController : ControllerBase
     {
         private readonly IBookService _bookService;
+        private readonly ILogger<BooksController> _logger;
 
-        public BooksController(IBookService bookService)
+        public BooksController(IBookService bookService, ILogger<BooksController> logger)
         {
             _bookService = bookService ?? throw new ArgumentNullException(nameof(bookService));
+            _logger = logger;
         }
 
         // GET: api/v1/books
@@ -113,6 +114,37 @@ namespace Bookstore.Api.Controllers.v1
                 return NotFound();
             }
             return NoContent();
+        }
+
+        // POST: api/admin/books/{id}/image
+        [HttpPost("{id:guid}/image")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> UploadCoverImage(Guid id, IFormFile imageFile, CancellationToken cancellationToken) // Nhận IFormFile
+        {
+            // Kiểm tra file cơ bản
+            if (imageFile == null || imageFile.Length == 0)
+            {
+                return BadRequest(new { Message = "No image file uploaded." });
+            }
+            try
+            {
+                var success = await _bookService.UpdateBookCoverImageAsync(id, imageFile, cancellationToken);
+                if (!success)
+                {
+                    return NotFound(new { Message = $"Book with Id '{id}' not found or failed to save image." });
+                }
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading cover image for book {BookId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while uploading the image.");
+            }
         }
     }
 }

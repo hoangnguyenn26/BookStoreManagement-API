@@ -5,6 +5,7 @@ using Bookstore.Application.Interfaces;
 using Bookstore.Application.Interfaces.Services;
 using Bookstore.Domain.Entities;
 using LinqKit;
+using Microsoft.AspNetCore.Http;
 
 namespace Bookstore.Application.Services
 {
@@ -12,10 +13,12 @@ namespace Bookstore.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public BookService(IUnitOfWork unitOfWork, IMapper mapper)
+        private readonly IFileStorageService _fileStorageService;
+        public BookService(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageService fileStorageService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _mapper = mapper;
+            _fileStorageService = fileStorageService;
         }
 
         public async Task<BookDto> CreateBookAsync(CreateBookDto createBookDto, CancellationToken cancellationToken = default)
@@ -139,13 +142,12 @@ namespace Bookstore.Application.Services
                 }
             }
 
-            int stockChange = updateBookDto.StockQuantity - bookToUpdate.StockQuantity; // Tính toán sự thay đổi tồn kho
+            int stockChange = updateBookDto.StockQuantity - bookToUpdate.StockQuantity;
 
             _mapper.Map(updateBookDto, bookToUpdate);
 
             await _unitOfWork.BookRepository.UpdateAsync(bookToUpdate, cancellationToken);
 
-            // **Quan trọng:** Ghi log thay đổi tồn kho nếu có
             if (stockChange != 0)
             {
                 var stockLog = new InventoryLog
@@ -163,6 +165,30 @@ namespace Bookstore.Application.Services
             return true;
         }
 
+        public async Task<bool> UpdateBookCoverImageAsync(Guid id, IFormFile imageFile, CancellationToken cancellationToken = default)
+        {
+            var bookToUpdate = await _unitOfWork.BookRepository.GetByIdAsync(id, cancellationToken, isTracking: true);
+            if (bookToUpdate == null || bookToUpdate.IsDeleted)
+            {
+                return false;
+            }
 
+            // Xóa ảnh bìa cũ (nếu có) trước khi lưu ảnh mới
+            _fileStorageService.DeleteFile(bookToUpdate.CoverImageUrl);
+
+            // Lưu file ảnh mới
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" }; // Định nghĩa các đuôi file cho phép
+            var relativePath = await _fileStorageService.SaveFileAsync(imageFile, "images/covers", allowedExtensions, 5, cancellationToken);
+
+            if (string.IsNullOrEmpty(relativePath))
+            {
+                return false;
+            }
+            bookToUpdate.CoverImageUrl = relativePath;
+            await _unitOfWork.BookRepository.UpdateAsync(bookToUpdate, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken); // Lưu thay đổi vào DB
+
+            return true;
+        }
     }
 }

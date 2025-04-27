@@ -1,4 +1,5 @@
 ﻿using Bookstore.Application.Dtos.Books;
+using Microsoft.AspNetCore.Http;
 
 namespace Bookstore.Application.Interfaces.Services
 {
@@ -14,6 +15,6 @@ namespace Bookstore.Application.Interfaces.Services
         Task<BookDto> CreateBookAsync(CreateBookDto createBookDto, CancellationToken cancellationToken = default);
         Task<bool> UpdateBookAsync(Guid id, UpdateBookDto updateBookDto, CancellationToken cancellationToken = default);
         Task<bool> DeleteBookAsync(Guid id, CancellationToken cancellationToken = default);
-
+        Task<bool> UpdateBookCoverImageAsync(Guid id, IFormFile imageFile, CancellationToken cancellationToken = default);
     }
 }
