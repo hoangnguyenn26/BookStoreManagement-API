@@ -8,8 +8,9 @@ namespace Bookstore.Domain.Enums
         InStoreSale = 2,     // Bán hàng tại quầy
         OrderCancellation = 3,// Hủy đơn hàng (hoàn kho)
         Return = 4,          // Khách trả hàng (hoàn kho)
-        Adjustment = 5,      // Điều chỉnh khác (hỏng, mất,...)
-        InitialStock = 6     // Tồn kho ban đầu
+        Adjustment = 5,  // Điều chỉnh Khác
+        InitialStock = 6   // Tồn kho ban đầu
+
     }
 
 }

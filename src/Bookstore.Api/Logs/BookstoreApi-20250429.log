@@ -2900,3 +2900,10 @@ LEFT JOIN (
     LEFT JOIN [Authors] AS [a] ON [b0].[AuthorId] = [a].[Id]
 ) AS [s0] ON [s].[Id] = [s0].[OrderId]
 ORDER BY [s].[Id], [s].[Id0], [s].[Id1], [s0].[Id], [s0].[Id0]
+2025-04-29 16:04:43.133 +07:00 [WRN] (Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware) The WebRootPath was not found: C:\Users\Nguyn\Desktop\Đồ án tốt nghiệp\BookStoreManagement\src\Bookstore.Api\wwwroot. Static files may be unavailable.
+2025-04-29 16:04:43.296 +07:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7264
+2025-04-29 16:04:43.298 +07:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5244
+2025-04-29 16:04:43.392 +07:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-04-29 16:04:43.394 +07:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-04-29 16:04:43.395 +07:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: C:\Users\Nguyn\Desktop\Đồ án tốt nghiệp\BookStoreManagement\src\Bookstore.Api
+2025-04-29 16:06:44.290 +07:00 [INF] (Microsoft.Hosting.Lifetime) Application is shutting down...
