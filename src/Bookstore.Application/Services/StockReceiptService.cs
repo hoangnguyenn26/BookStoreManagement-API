@@ -36,16 +36,8 @@ namespace Bookstore.Application.Services
                         throw new NotFoundException($"Supplier with Id '{createDto.SupplierId.Value}' not found.");
                 }
 
-                var receiptEntity = new StockReceipt
-                {
-                    SupplierId = createDto.SupplierId,
-                    ReceiptDate = createDto.ReceiptDate,
-                    Notes = createDto.Notes
-                };
+                var receiptEntity = _mapper.Map<StockReceipt>(createDto);
                 await _unitOfWork.StockReceiptRepository.AddAsync(receiptEntity, cancellationToken);
-
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
-
 
                 var receiptDetails = new List<StockReceiptDetail>();
                 var booksToUpdate = new Dictionary<Guid, Book>();
@@ -65,13 +57,8 @@ namespace Bookstore.Application.Services
 
 
                     // Tạo StockReceiptDetail Entity
-                    var detailEntity = new StockReceiptDetail
-                    {
-                        StockReceiptId = receiptEntity.Id,
-                        BookId = detailDto.BookId,
-                        QuantityReceived = detailDto.QuantityReceived,
-                        PurchasePrice = detailDto.PurchasePrice
-                    };
+                    var detailEntity = _mapper.Map<StockReceiptDetail>(detailDto);
+                    detailEntity.StockReceiptId = receiptEntity.Id;
                     receiptDetails.Add(detailEntity);
 
                     book.StockQuantity += detailDto.QuantityReceived;
@@ -95,6 +82,7 @@ namespace Bookstore.Application.Services
                 _logger.LogInformation("Stock receipt {ReceiptId} created successfully by User {UserId}.", receiptEntity.Id, userId);
 
                 var createdReceiptWithDetails = await _unitOfWork.StockReceiptRepository.GetReceiptWithDetailsByIdAsync(receiptEntity.Id, cancellationToken: cancellationToken);
+                if (createdReceiptWithDetails == null) throw new InvalidOperationException("Failed to retrieve the created stock receipt details.");
                 return _mapper.Map<StockReceiptDto>(createdReceiptWithDetails);
 
             }

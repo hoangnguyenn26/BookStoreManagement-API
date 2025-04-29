@@ -1,7 +1,7 @@
 ﻿
 namespace Bookstore.Domain.Enums
 {
-    public enum OrderStatus : byte 
+    public enum OrderStatus : byte
     {
         Pending = 0,
         Confirmed = 1,
