@@ -2,7 +2,7 @@
 using Bookstore.Domain.Entities;
 using Bookstore.Domain.Interfaces.Repositories;
 using Bookstore.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore; 
+using Microsoft.EntityFrameworkCore;
 
 
 namespace Bookstore.Infrastructure.Repositories
@@ -31,11 +31,11 @@ namespace Bookstore.Infrastructure.Repositories
         public async Task<IEnumerable<WishlistItem>> GetWishlistByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _dbSet
-                .Where(wi => wi.UserId == userId)
-                .Include(wi => wi.Book) 
-                    .ThenInclude(b => b.Author) 
-                .OrderByDescending(wi => wi.CreatedAtUtc) 
-                .AsNoTracking() 
+                .Where(wi => wi.UserId == userId && wi.Book != null && !wi.Book.IsDeleted)
+                .Include(wi => wi.Book)
+                    .ThenInclude(b => b.Author)
+                .OrderByDescending(wi => wi.CreatedAtUtc)
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
 

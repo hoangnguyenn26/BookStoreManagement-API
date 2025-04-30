@@ -1,18 +1,15 @@
 ﻿
-using Bookstore.Application.Dtos;
-using Bookstore.Domain.Entities;
-using Bookstore.Domain.Interfaces.Repositories;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Bookstore.Infrastructure.Persistence;
-using Bookstore.Domain.Interfaces.Services;
-using Bookstore.Application.Interfaces;
 using AutoMapper;
+using Bookstore.Application.Dtos;
+using Bookstore.Application.Interfaces;
+using Bookstore.Domain.Entities;
+using Bookstore.Domain.Interfaces.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Bookstore.Api.Controllers.v1
 {
     [ApiController]
-    [Route("api/[controller]")] 
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -57,7 +54,7 @@ namespace Bookstore.Api.Controllers.v1
                 FirstName = registerDto.FirstName,
                 LastName = registerDto.LastName,
                 PhoneNumber = registerDto.PhoneNumber,
-                IsActive = true, 
+                IsActive = true,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
                 UserRoles = new List<UserRole> { new UserRole { RoleId = userRole.Id } }
             };
@@ -82,7 +79,7 @@ namespace Bookstore.Api.Controllers.v1
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)] 
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginRequestDto loginDto, CancellationToken cancellationToken)
         {
             // --- Tìm User ---
@@ -94,7 +91,7 @@ namespace Bookstore.Api.Controllers.v1
 
             if (user == null || !user.IsActive)
             {
-                return Unauthorized(new { Message = "Invalid login attempt." }); 
+                return Unauthorized(new { Message = "Invalid login attempt." });
             }
 
 
@@ -106,12 +103,9 @@ namespace Bookstore.Api.Controllers.v1
 
             var userRoles = await _unitOfWork.RoleRepository.GetRolesByUserIdAsync(user.Id, cancellationToken);
 
-            if (userRoles == null || !userRoles.Any())
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "User role configuration error.");
-            }
+            if (userRoles == null) userRoles = new List<string>();
 
-            var tokenString = _tokenService.CreateToken(user, userRoles?.ToList() ?? new List<string>());
+            var tokenString = _tokenService.CreateToken(user, userRoles);
             var expiration = DateTime.UtcNow.AddMinutes(60);
 
             var userDto = _mapper.Map<UserDto>(user);

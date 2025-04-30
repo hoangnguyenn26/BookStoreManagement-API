@@ -15,12 +15,18 @@ namespace Bookstore.Infrastructure.Repositories
         // Implement các phương thức đặc thù của IUserRepository
         public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
         {
-            return await _dbSet.FirstOrDefaultAsync(u => u.UserName == username, cancellationToken);
+            return await _dbSet
+                 .Include(u => u.UserRoles)
+                     .ThenInclude(ur => ur.Role)
+                 .FirstOrDefaultAsync(u => u.UserName == username, cancellationToken);
         }
 
         public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
-            return await _dbSet.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+            return await _dbSet
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
         }
 
         public async Task<User?> GetByIdWithRolesAsync(Guid userId, bool tracking = false, CancellationToken cancellationToken = default)
