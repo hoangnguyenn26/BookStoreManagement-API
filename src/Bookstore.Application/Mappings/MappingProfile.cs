@@ -31,6 +31,9 @@ namespace Bookstore.Application.Mappings
 
             // ----- Author Mappings -----
             CreateMap<Author, AuthorSummaryDto>();
+            CreateMap<Author, AuthorDto>();
+            CreateMap<CreateAuthorDto, Author>();
+            CreateMap<UpdateAuthorDto, Author>();
 
             // ----- Book Mappings -----
             CreateMap<Book, BookDto>();
