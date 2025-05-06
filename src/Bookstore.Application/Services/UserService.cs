@@ -1,11 +1,11 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using Bookstore.Application.Dtos;
 using Bookstore.Application.Dtos.Admin.Users;
 using Bookstore.Application.Interfaces;
 using Bookstore.Application.Interfaces.Services;
+using Bookstore.Domain.Entities;
+using LinqKit;
 using Microsoft.Extensions.Logging;
-
 
 namespace Bookstore.Application.Services
 {
@@ -22,12 +22,28 @@ namespace Bookstore.Application.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllUsersAsync(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync(int page = 1, int pageSize = 10, string? roleFilter = null, bool? statusFilter = null, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Fetching all users for admin. Page: {Page}, PageSize: {PageSize}", page, pageSize);
-            var users = await _unitOfWork.UserRepository.GetAllWithRolesAsync(page, pageSize, cancellationToken: cancellationToken);
+            _logger.LogInformation("Fetching all users for admin. RoleFilter: {Role}, StatusFilter: {Status}, Page: {Page}, PageSize: {PageSize}",
+                roleFilter ?? "All", statusFilter?.ToString() ?? "All", page, pageSize);
+
+            var predicate = PredicateBuilder.New<User>(true); // true để bắt đầu với AND
+
+            if (statusFilter.HasValue)
+            {
+                predicate = predicate.And(u => u.IsActive == statusFilter.Value);
+            }
+
+            var users = await _unitOfWork.UserRepository.GetAllWithRolesAsync(predicate, page, pageSize, cancellationToken: cancellationToken);
+
+            if (!string.IsNullOrWhiteSpace(roleFilter))
+            {
+                users = users.Where(u => u.UserRoles.Any(ur => ur.Role.Name.Equals(roleFilter, StringComparison.OrdinalIgnoreCase)));
+            }
+
             return _mapper.Map<IEnumerable<UserDto>>(users);
         }
+
 
         public async Task<UserDto?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
@@ -51,43 +67,18 @@ namespace Bookstore.Application.Services
                 return false;
             }
 
-            if (user.IsActive == statusDto.IsActive) return true;
+            if (user.IsActive == statusDto.IsActive)
+            {
+                _logger.LogInformation("User {UserId} status already matches. No update needed.", userId);
+                return true;
+            }
 
             user.IsActive = statusDto.IsActive;
-
             await _unitOfWork.UserRepository.UpdateAsync(user, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Successfully updated status for user {UserId} to IsActive={IsActive}", userId, statusDto.IsActive);
             return true;
         }
-
-        //public async Task<bool> UpdateUserRolesAsync(Guid userId, UpdateUserRolesDto rolesDto, CancellationToken cancellationToken = default)
-        //{
-        //    _logger.LogInformation("Attempting to update roles for user {UserId}", userId);
-        //    var user = await _unitOfWork.UserRepository.GetByIdWithRolesAsync(userId, tracking: true, cancellationToken: cancellationToken);
-        //    if (user == null) return false;
-
-        //    var newRoles = new List<Role>();
-        //    foreach (var roleName in rolesDto.RoleNames.Distinct())
-        //    {
-        //        var roleEntity = await _unitOfWork.RoleRepository.GetByNameAsync(roleName, cancellationToken);
-        //        if (roleEntity == null) throw new ValidationException($"Role '{roleName}' not found.");
-        //        newRoles.Add(roleEntity);
-        //    }
-
-        //    var rolesToRemove = user.UserRoles.Where(ur => !newRoles.Any(nr => nr.Id == ur.RoleId)).ToList();
-        //    if (rolesToRemove.Any()) _unitOfWork.Context.UserRoles.RemoveRange(rolesToRemove); // Xóa trực tiếp từ Context DbSet
-
-        //    var rolesToAdd = newRoles.Where(nr => !user.UserRoles.Any(ur => ur.RoleId == nr.Id)).ToList();
-        //    foreach (var roleToAdd in rolesToAdd)
-        //    {
-        //        _unitOfWork.Context.UserRoles.Add(new UserRole { UserId = userId, RoleId = roleToAdd.Id });
-        //    }
-
-        //    await _unitOfWork.SaveChangesAsync(cancellationToken);
-        //    _logger.LogInformation("Successfully updated roles for user {UserId}", userId);
-        //    return true;
-        //}
     }
 }

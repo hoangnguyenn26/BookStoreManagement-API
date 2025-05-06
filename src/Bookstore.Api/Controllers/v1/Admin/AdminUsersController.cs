@@ -27,9 +27,11 @@ namespace Bookstore.Api.Controllers.Admin
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
+            [FromQuery] string? role = null,
+            [FromQuery] bool? isActive = null,
             CancellationToken cancellationToken = default)
         {
-            var users = await _userService.GetAllUsersAsync(page, pageSize, cancellationToken);
+            var users = await _userService.GetAllUsersAsync(page, pageSize, role, isActive, cancellationToken);
             return Ok(users);
         }
 

@@ -2,14 +2,13 @@
 using Bookstore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Bookstore.Api.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/inventory")]
     [Authorize(Roles = "Admin,Staff")]
-    public class AdminInventoryController : ControllerBase
+    public class AdminInventoryController : BaseApiController
     {
         private readonly IInventoryService _inventoryService;
         private readonly ILogger<AdminInventoryController> _logger;
@@ -18,14 +17,6 @@ namespace Bookstore.Api.Controllers.Admin
         {
             _inventoryService = inventoryService;
             _logger = logger;
-        }
-
-        // Helper lấy UserId
-        private Guid GetUserIdFromClaims()
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdClaim, out Guid userId)) { throw new UnauthorizedAccessException("User identifier not found."); }
-            return userId;
         }
 
         // POST: api/admin/inventory/adjust

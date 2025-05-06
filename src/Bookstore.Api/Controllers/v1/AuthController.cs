@@ -56,9 +56,14 @@ namespace Bookstore.Api.Controllers.v1
                 PhoneNumber = registerDto.PhoneNumber,
                 IsActive = true,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
-                UserRoles = new List<UserRole> { new UserRole { RoleId = userRole.Id } }
+                UserRoles = new List<UserRole>
+                {
+                    new UserRole
+                    {
+                        RoleId = userRole.Id
+                    }
+                }
             };
-            newUser.UserRoles.Add(new UserRole { Role = userRole });
 
             try
             {
@@ -66,6 +71,11 @@ namespace Bookstore.Api.Controllers.v1
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 var userDto = _mapper.Map<UserDto>(newUser);
+
+                if (userDto.Roles == null || !userDto.Roles.Any())
+                {
+                    userDto.Roles = new List<string> { userRole.Name };
+                }
 
                 return CreatedAtAction(nameof(UsersController.GetUserById), "Users", new { id = newUser.Id, version = "1.0" }, userDto);
             }

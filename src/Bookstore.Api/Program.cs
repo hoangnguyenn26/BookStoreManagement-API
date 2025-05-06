@@ -43,7 +43,21 @@ var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSetting
 
 // ----- Configure DbContext -----
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlServerOptionsAction: sqlOptions =>
+        {
+        });
+
+    // --- Bật Sensitive Data Logging (CHỈ CHO DEVELOPMENT) ---
+#if DEBUG // Chỉ biên dịch dòng này khi ở chế độ DEBUG
+    options.EnableSensitiveDataLogging();
+#endif
+    // ---------------------------------------------------------
+
+    // (Optional) Có thể thêm các cấu hình khác như Query Tracking Behavior
+    // options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); // Nếu muốn NoTracking là mặc định
+});
 // configure GCS
 builder.Services.Configure<GoogleCloudStorageSettings>(builder.Configuration.GetSection("GoogleCloudStorageSettings"));
 

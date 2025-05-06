@@ -116,7 +116,7 @@ namespace Bookstore.Api.Controllers.v1
             return NoContent();
         }
 
-        // POST: api/admin/books/{id}/image
+        // POST:
         [HttpPost("{id:guid}/image")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -124,7 +124,7 @@ namespace Bookstore.Api.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> UploadCoverImage(Guid id, IFormFile imageFile, CancellationToken cancellationToken) // Nhận IFormFile
+        public async Task<IActionResult> UploadCoverImage(Guid id, IFormFile imageFile, CancellationToken cancellationToken)
         {
             // Kiểm tra file cơ bản
             if (imageFile == null || imageFile.Length == 0)

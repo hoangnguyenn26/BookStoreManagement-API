@@ -2,7 +2,8 @@
 using Bookstore.Domain.Entities;
 using Bookstore.Domain.Interfaces.Repositories;
 using Bookstore.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore; // Cần cho FirstOrDefaultAsync
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions; // Cần cho FirstOrDefaultAsync
 
 namespace Bookstore.Infrastructure.Repositories
 {
@@ -18,6 +19,7 @@ namespace Bookstore.Infrastructure.Repositories
             return await _dbSet
                  .Include(u => u.UserRoles)
                      .ThenInclude(ur => ur.Role)
+                     .AsNoTracking()
                  .FirstOrDefaultAsync(u => u.UserName == username, cancellationToken);
         }
 
@@ -25,7 +27,8 @@ namespace Bookstore.Infrastructure.Repositories
         {
             return await _dbSet
                 .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
+                .ThenInclude(ur => ur.Role)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
         }
 
@@ -41,7 +44,7 @@ namespace Bookstore.Infrastructure.Repositories
             return await query.FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<User>> GetAllWithRolesAsync(int page = 1, int pageSize = 10, bool tracking = false, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<User>> GetAllWithRolesAsync(Expression<Func<User, bool>>? filter = null, int page = 1, int pageSize = 10, bool tracking = false, CancellationToken cancellationToken = default)
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;
@@ -49,8 +52,14 @@ namespace Bookstore.Infrastructure.Repositories
 
             IQueryable<User> query = _dbSet
                  .Include(u => u.UserRoles)
-                     .ThenInclude(ur => ur.Role)
-                 .OrderBy(u => u.UserName);
+                     .ThenInclude(ur => ur.Role);
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            query = query.OrderBy(u => u.UserName);
 
             if (!tracking) query = query.AsNoTracking();
 
