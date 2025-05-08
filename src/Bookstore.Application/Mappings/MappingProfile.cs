@@ -15,6 +15,7 @@ using Bookstore.Application.Dtos.StockReceipts;
 using Bookstore.Application.Dtos.Suppliers;
 using Bookstore.Application.Dtos.Wishlists;
 using Bookstore.Domain.Entities;
+using Bookstore.Domain.Queries;
 
 
 namespace Bookstore.Application.Mappings
@@ -108,7 +109,8 @@ namespace Bookstore.Application.Mappings
             CreateMap<CreateSupplierDto, Supplier>();
             CreateMap<UpdateSupplierDto, Supplier>();
 
-            // ----- Stock Receipt Mappings -----
+            // ----- Report Mappings -----
+            CreateMap<BestsellerInfo, BestsellerDto>();
             // ----- Stock Receipt Mappings -----
             CreateMap<StockReceipt, StockReceiptDto>()
                 .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.StockReceiptDetails));
