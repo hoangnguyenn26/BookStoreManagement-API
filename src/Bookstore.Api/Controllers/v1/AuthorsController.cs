@@ -18,9 +18,12 @@ namespace Bookstore.Api.Controllers.v1
         [HttpGet]
         [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<AuthorDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthors(CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthors(
+                    [FromQuery] int page = 1,
+                    [FromQuery] int pageSize = 10,
+                    CancellationToken cancellationToken = default)
         {
-            return Ok(await _authorService.GetAllAuthorsAsync(cancellationToken));
+            return Ok(await _authorService.GetAllAuthorsAsync(page, pageSize, cancellationToken));
         }
 
         // GET: api/v1/authors/{id}

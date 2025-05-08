@@ -65,11 +65,15 @@ namespace Bookstore.Application.Services
             return true;
         }
 
-        public async Task<IEnumerable<AuthorDto>> GetAllAuthorsAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<AuthorDto>> GetAllAuthorsAsync(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Fetching all authors.");
-            // Sắp xếp theo tên, không cần tracking
-            var authors = await _unitOfWork.AuthorRepository.ListAsync(orderBy: q => q.OrderBy(a => a.Name), isTracking: false, cancellationToken: cancellationToken);
+            _logger.LogInformation("Fetching all authors. Page: {Page}, PageSize: {PageSize}", page, pageSize);
+            var authors = await _unitOfWork.AuthorRepository.ListAsync(
+                orderBy: q => q.OrderBy(a => a.Name),
+                isTracking: false,
+                page: page,
+                pageSize: pageSize,
+                cancellationToken: cancellationToken);
             return _mapper.Map<IEnumerable<AuthorDto>>(authors);
         }
 

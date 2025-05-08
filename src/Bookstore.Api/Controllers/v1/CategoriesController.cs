@@ -19,17 +19,19 @@ namespace Bookstore.Api.Controllers.v1
 
         // GET: api/v1/categories
         [HttpGet]
-        [AllowAnonymous] 
+        [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories(CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories(
+                     [FromQuery] int page = 1,
+                     [FromQuery] int pageSize = 10,
+                     CancellationToken cancellationToken = default)
         {
-            var categories = await _categoryService.GetAllCategoriesAsync(cancellationToken);
-            return Ok(categories);
+            return Ok(await _categoryService.GetAllCategoriesAsync(page, pageSize, cancellationToken));
         }
 
         // GET: api/v1/categories/{id}
         [HttpGet("{id:guid}")]
-        [AllowAnonymous] 
+        [AllowAnonymous]
         [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CategoryDto>> GetCategoryById(Guid id, CancellationToken cancellationToken)
@@ -44,7 +46,7 @@ namespace Bookstore.Api.Controllers.v1
 
         // POST: api/v1/categories
         [HttpPost]
-        [Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -57,7 +59,7 @@ namespace Bookstore.Api.Controllers.v1
 
         // PUT: api/v1/categories/{id}
         [HttpPut("{id:guid}")]
-        [Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -70,7 +72,7 @@ namespace Bookstore.Api.Controllers.v1
             {
                 return NotFound();
             }
-            return NoContent(); 
+            return NoContent();
         }
 
         // DELETE: api/v1/categories/{id}
@@ -85,9 +87,9 @@ namespace Bookstore.Api.Controllers.v1
             var success = await _categoryService.DeleteCategoryAsync(id, cancellationToken);
             if (!success)
             {
-                return NotFound(); 
+                return NotFound();
             }
-            return NoContent(); 
+            return NoContent();
         }
     }
 }

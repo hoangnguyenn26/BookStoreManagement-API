@@ -33,15 +33,20 @@ namespace Bookstore.Application.Services
             var categoryToDelete = await _unitOfWork.CategoryRepository.GetByIdAsync(id, cancellationToken);
             if (categoryToDelete == null) return false;
 
-            await _unitOfWork.CategoryRepository.DeleteAsync(categoryToDelete, cancellationToken); // Repo xử lý soft delete
-            await _unitOfWork.SaveChangesAsync(cancellationToken); // <-- Gọi SaveChanges ở đây
+            await _unitOfWork.CategoryRepository.DeleteAsync(categoryToDelete, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return true;
         }
 
-        public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            var categories = await _unitOfWork.CategoryRepository.ListAsync(cancellationToken: cancellationToken);
+            var categories = await _unitOfWork.CategoryRepository.ListAsync(
+                orderBy: q => q.OrderBy(c => c.Name),
+                isTracking: false,
+                page: page,
+                pageSize: pageSize,
+                cancellationToken: cancellationToken);
             return _mapper.Map<IEnumerable<CategoryDto>>(categories);
         }
 
