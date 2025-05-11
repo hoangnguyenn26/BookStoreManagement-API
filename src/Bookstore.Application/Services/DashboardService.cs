@@ -35,9 +35,11 @@ namespace Bookstore.Application.Services
                      orderBy: q => q.OrderByDescending(b => b.CreatedAtUtc),
                      includeProperties: "Author",
                      pageSize: 10,
+                     isTracking: false,
                      cancellationToken: cancellationToken
                  );
                 dashboardDto.NewestBooks = _mapper.Map<List<BookSummaryDto>>(newestBooksEntities);
+                _logger.LogInformation("Fetched {Count} newest books.", dashboardDto.NewestBooks.Count);
 
                 // --- 2. Lấy Sách Bán Chạy Nhất (Trong 30 ngày gần nhất) ---
                 var startDateBestseller = DateTime.UtcNow.AddDays(-DaysForBestsellers);
@@ -65,6 +67,7 @@ namespace Bookstore.Application.Services
                                   data => data.BookId,
                                   book => book.Id,
                                   (data, book) => _mapper.Map<BookSummaryDto>(book))
+                            .OrderByDescending(b => bestsellerData.First(d => d.BookId == b.Id).TotalQuantitySold)
                             .ToList();
                     }
                     _logger.LogInformation("Fetched {Count} bestselling books.", dashboardDto.BestSellingBooks.Count);
@@ -82,7 +85,9 @@ namespace Bookstore.Application.Services
                 // --- 4. Lấy Danh Mục Nổi Bật ---
                 var featuredCategoriesEntities = await _unitOfWork.CategoryRepository.ListAsync(
                     filter: c => c.ParentCategoryId == null && !c.IsDeleted, // Lấy danh mục gốc và không bị xóa
+                    orderBy: q => q.OrderBy(c => c.Name),
                     pageSize: 5,
+                    isTracking: false,
                     cancellationToken: cancellationToken
                 );
                 dashboardDto.FeaturedCategories = _mapper.Map<List<CategorySummaryDto>>(featuredCategoriesEntities);
