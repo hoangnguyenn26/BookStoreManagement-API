@@ -1,0 +1,681 @@
+2025-05-15 23:18:19.406 +07:00 [WRN] (Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware) The WebRootPath was not found: C:\Users\Nguyn\Desktop\Đồ án tốt nghiệp\BookStoreManagement\src\Bookstore.Api\wwwroot. Static files may be unavailable.
+2025-05-15 23:18:19.593 +07:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7264
+2025-05-15 23:18:19.595 +07:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5244
+2025-05-15 23:18:19.704 +07:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-15 23:18:19.706 +07:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-15 23:18:19.708 +07:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: C:\Users\Nguyn\Desktop\Đồ án tốt nghiệp\BookStoreManagement\src\Bookstore.Api
+2025-05-15 23:18:25.464 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetching home dashboard data.
+2025-05-15 23:18:26.835 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model) No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'Bookstore.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-05-15 23:18:27.016 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'CartItem'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-05-15 23:18:27.018 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'InventoryLog'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-05-15 23:18:27.020 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'OrderDetail'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-05-15 23:18:27.022 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'Review'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-05-15 23:18:27.024 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'StockReceiptDetail'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-05-15 23:18:27.026 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Entity 'Book' has a global query filter defined and is the required end of a relationship with the entity 'WishlistItem'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+2025-05-15 23:18:27.036 +07:00 [WRN] (Microsoft.EntityFrameworkCore.Model.Validation) Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-05-15 23:18:28.233 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (77ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [b].[CreatedAtUtc] DESC
+2025-05-15 23:18:28.295 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 10 newest books.
+2025-05-15 23:18:28.447 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (51ms) [Parameters=[@__p_2='5', @__inclusiveStartDate_0='2025-04-15T00:00:00.0000000Z', @__inclusiveEndDate_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[BookId], [b2].[Title] AS [BookTitle], [s].[TotalQuantitySold]
+FROM (
+    SELECT TOP(@__p_2) [o].[BookId], COALESCE(SUM([o].[Quantity]), 0) AS [TotalQuantitySold]
+    FROM [OrderDetails] AS [o]
+    INNER JOIN [Orders] AS [o0] ON [o].[OrderId] = [o0].[Id]
+    INNER JOIN (
+        SELECT [b].[Id], [b].[IsDeleted]
+        FROM [Books] AS [b]
+        WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ) AS [b0] ON [o].[BookId] = [b0].[Id]
+    WHERE [o0].[Status] = CAST(3 AS tinyint) AND [o0].[OrderDate] >= @__inclusiveStartDate_0 AND [o0].[OrderDate] < @__inclusiveEndDate_1 AND [b0].[IsDeleted] = CAST(0 AS bit)
+    GROUP BY [o].[BookId]
+    ORDER BY COALESCE(SUM([o].[Quantity]), 0) DESC
+) AS [s]
+INNER JOIN (
+    SELECT [b1].[Id], [b1].[Title]
+    FROM [Books] AS [b1]
+    WHERE [b1].[IsDeleted] = CAST(0 AS bit)
+) AS [b2] ON [s].[BookId] = [b2].[Id]
+ORDER BY [s].[TotalQuantitySold] DESC
+2025-05-15 23:18:28.523 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (10ms) [Parameters=[@__bestsellerBookIds_0='["ba80e2b5-b426-44eb-acfa-06315f9fcb6b","c191919e-e763-4e03-9e2b-24d944f4d401","39f2e54f-3480-424d-9611-a9b9097314a9","6c50f852-d8c7-4ef9-a26a-c9d292ef9108","1ed59d04-83f1-4624-8739-3de94c30e54b"]' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit) AND [b].[Id] IN (
+    SELECT [b0].[value]
+    FROM OPENJSON(@__bestsellerBookIds_0) WITH ([value] uniqueidentifier '$') AS [b0]
+) AND [b].[IsDeleted] = CAST(0 AS bit)
+2025-05-15 23:18:28.534 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 5 bestselling books.
+2025-05-15 23:18:28.555 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (7ms) [Parameters=[@__currentDate_0='2025-05-15T16:18:28.5364944Z', @__currentDate_1='2025-05-15T16:18:28.5364944Z' (Nullable = true)], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Code], [p].[CreatedAtUtc], [p].[CurrentUsage], [p].[Description], [p].[DiscountAmount], [p].[DiscountPercentage], [p].[EndDate], [p].[IsActive], [p].[MaxUsage], [p].[StartDate], [p].[UpdatedAtUtc]
+FROM [Promotions] AS [p]
+WHERE [p].[IsActive] = CAST(1 AS bit) AND [p].[StartDate] <= @__currentDate_0 AND ([p].[EndDate] IS NULL OR [p].[EndDate] >= @__currentDate_1) AND ([p].[MaxUsage] IS NULL OR [p].[CurrentUsage] < [p].[MaxUsage])
+ORDER BY [p].[EndDate]
+2025-05-15 23:18:28.574 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+FROM [Categories] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[ParentCategoryId] IS NULL AND [c].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [c].[Name]
+2025-05-15 23:18:28.582 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Successfully fetched home dashboard data.
+2025-05-15 23:25:51.912 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetching home dashboard data.
+2025-05-15 23:25:52.032 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (14ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [b].[CreatedAtUtc] DESC
+2025-05-15 23:25:52.036 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 10 newest books.
+2025-05-15 23:25:52.049 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (9ms) [Parameters=[@__p_2='5', @__inclusiveStartDate_0='2025-04-15T00:00:00.0000000Z', @__inclusiveEndDate_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[BookId], [b2].[Title] AS [BookTitle], [s].[TotalQuantitySold]
+FROM (
+    SELECT TOP(@__p_2) [o].[BookId], COALESCE(SUM([o].[Quantity]), 0) AS [TotalQuantitySold]
+    FROM [OrderDetails] AS [o]
+    INNER JOIN [Orders] AS [o0] ON [o].[OrderId] = [o0].[Id]
+    INNER JOIN (
+        SELECT [b].[Id], [b].[IsDeleted]
+        FROM [Books] AS [b]
+        WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ) AS [b0] ON [o].[BookId] = [b0].[Id]
+    WHERE [o0].[Status] = CAST(3 AS tinyint) AND [o0].[OrderDate] >= @__inclusiveStartDate_0 AND [o0].[OrderDate] < @__inclusiveEndDate_1 AND [b0].[IsDeleted] = CAST(0 AS bit)
+    GROUP BY [o].[BookId]
+    ORDER BY COALESCE(SUM([o].[Quantity]), 0) DESC
+) AS [s]
+INNER JOIN (
+    SELECT [b1].[Id], [b1].[Title]
+    FROM [Books] AS [b1]
+    WHERE [b1].[IsDeleted] = CAST(0 AS bit)
+) AS [b2] ON [s].[BookId] = [b2].[Id]
+ORDER BY [s].[TotalQuantitySold] DESC
+2025-05-15 23:25:52.057 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (4ms) [Parameters=[@__bestsellerBookIds_0='["ba80e2b5-b426-44eb-acfa-06315f9fcb6b","c191919e-e763-4e03-9e2b-24d944f4d401","39f2e54f-3480-424d-9611-a9b9097314a9","6c50f852-d8c7-4ef9-a26a-c9d292ef9108","1ed59d04-83f1-4624-8739-3de94c30e54b"]' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit) AND [b].[Id] IN (
+    SELECT [b0].[value]
+    FROM OPENJSON(@__bestsellerBookIds_0) WITH ([value] uniqueidentifier '$') AS [b0]
+) AND [b].[IsDeleted] = CAST(0 AS bit)
+2025-05-15 23:25:52.061 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 5 bestselling books.
+2025-05-15 23:25:52.066 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[@__currentDate_0='2025-05-15T16:25:52.0629334Z', @__currentDate_1='2025-05-15T16:25:52.0629334Z' (Nullable = true)], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Code], [p].[CreatedAtUtc], [p].[CurrentUsage], [p].[Description], [p].[DiscountAmount], [p].[DiscountPercentage], [p].[EndDate], [p].[IsActive], [p].[MaxUsage], [p].[StartDate], [p].[UpdatedAtUtc]
+FROM [Promotions] AS [p]
+WHERE [p].[IsActive] = CAST(1 AS bit) AND [p].[StartDate] <= @__currentDate_0 AND ([p].[EndDate] IS NULL OR [p].[EndDate] >= @__currentDate_1) AND ([p].[MaxUsage] IS NULL OR [p].[CurrentUsage] < [p].[MaxUsage])
+ORDER BY [p].[EndDate]
+2025-05-15 23:25:52.074 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+FROM [Categories] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[ParentCategoryId] IS NULL AND [c].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [c].[Name]
+2025-05-15 23:25:52.077 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Successfully fetched home dashboard data.
+2025-05-15 23:26:22.206 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetching home dashboard data.
+2025-05-15 23:26:22.220 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [b].[CreatedAtUtc] DESC
+2025-05-15 23:26:22.224 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 10 newest books.
+2025-05-15 23:26:22.233 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (7ms) [Parameters=[@__p_2='5', @__inclusiveStartDate_0='2025-04-15T00:00:00.0000000Z', @__inclusiveEndDate_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[BookId], [b2].[Title] AS [BookTitle], [s].[TotalQuantitySold]
+FROM (
+    SELECT TOP(@__p_2) [o].[BookId], COALESCE(SUM([o].[Quantity]), 0) AS [TotalQuantitySold]
+    FROM [OrderDetails] AS [o]
+    INNER JOIN [Orders] AS [o0] ON [o].[OrderId] = [o0].[Id]
+    INNER JOIN (
+        SELECT [b].[Id], [b].[IsDeleted]
+        FROM [Books] AS [b]
+        WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ) AS [b0] ON [o].[BookId] = [b0].[Id]
+    WHERE [o0].[Status] = CAST(3 AS tinyint) AND [o0].[OrderDate] >= @__inclusiveStartDate_0 AND [o0].[OrderDate] < @__inclusiveEndDate_1 AND [b0].[IsDeleted] = CAST(0 AS bit)
+    GROUP BY [o].[BookId]
+    ORDER BY COALESCE(SUM([o].[Quantity]), 0) DESC
+) AS [s]
+INNER JOIN (
+    SELECT [b1].[Id], [b1].[Title]
+    FROM [Books] AS [b1]
+    WHERE [b1].[IsDeleted] = CAST(0 AS bit)
+) AS [b2] ON [s].[BookId] = [b2].[Id]
+ORDER BY [s].[TotalQuantitySold] DESC
+2025-05-15 23:26:22.244 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (5ms) [Parameters=[@__bestsellerBookIds_0='["ba80e2b5-b426-44eb-acfa-06315f9fcb6b","c191919e-e763-4e03-9e2b-24d944f4d401","39f2e54f-3480-424d-9611-a9b9097314a9","6c50f852-d8c7-4ef9-a26a-c9d292ef9108","1ed59d04-83f1-4624-8739-3de94c30e54b"]' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit) AND [b].[Id] IN (
+    SELECT [b0].[value]
+    FROM OPENJSON(@__bestsellerBookIds_0) WITH ([value] uniqueidentifier '$') AS [b0]
+) AND [b].[IsDeleted] = CAST(0 AS bit)
+2025-05-15 23:26:22.252 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 5 bestselling books.
+2025-05-15 23:26:22.256 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__currentDate_0='2025-05-15T16:26:22.2534095Z', @__currentDate_1='2025-05-15T16:26:22.2534095Z' (Nullable = true)], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Code], [p].[CreatedAtUtc], [p].[CurrentUsage], [p].[Description], [p].[DiscountAmount], [p].[DiscountPercentage], [p].[EndDate], [p].[IsActive], [p].[MaxUsage], [p].[StartDate], [p].[UpdatedAtUtc]
+FROM [Promotions] AS [p]
+WHERE [p].[IsActive] = CAST(1 AS bit) AND [p].[StartDate] <= @__currentDate_0 AND ([p].[EndDate] IS NULL OR [p].[EndDate] >= @__currentDate_1) AND ([p].[MaxUsage] IS NULL OR [p].[CurrentUsage] < [p].[MaxUsage])
+ORDER BY [p].[EndDate]
+2025-05-15 23:26:22.263 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+FROM [Categories] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[ParentCategoryId] IS NULL AND [c].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [c].[Name]
+2025-05-15 23:26:22.268 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Successfully fetched home dashboard data.
+2025-05-15 23:40:00.232 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetching home dashboard data.
+2025-05-15 23:40:00.286 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [b].[CreatedAtUtc] DESC
+2025-05-15 23:40:00.289 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 10 newest books.
+2025-05-15 23:40:00.298 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (7ms) [Parameters=[@__p_2='5', @__inclusiveStartDate_0='2025-04-15T00:00:00.0000000Z', @__inclusiveEndDate_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[BookId], [b2].[Title] AS [BookTitle], [s].[TotalQuantitySold]
+FROM (
+    SELECT TOP(@__p_2) [o].[BookId], COALESCE(SUM([o].[Quantity]), 0) AS [TotalQuantitySold]
+    FROM [OrderDetails] AS [o]
+    INNER JOIN [Orders] AS [o0] ON [o].[OrderId] = [o0].[Id]
+    INNER JOIN (
+        SELECT [b].[Id], [b].[IsDeleted]
+        FROM [Books] AS [b]
+        WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ) AS [b0] ON [o].[BookId] = [b0].[Id]
+    WHERE [o0].[Status] = CAST(3 AS tinyint) AND [o0].[OrderDate] >= @__inclusiveStartDate_0 AND [o0].[OrderDate] < @__inclusiveEndDate_1 AND [b0].[IsDeleted] = CAST(0 AS bit)
+    GROUP BY [o].[BookId]
+    ORDER BY COALESCE(SUM([o].[Quantity]), 0) DESC
+) AS [s]
+INNER JOIN (
+    SELECT [b1].[Id], [b1].[Title]
+    FROM [Books] AS [b1]
+    WHERE [b1].[IsDeleted] = CAST(0 AS bit)
+) AS [b2] ON [s].[BookId] = [b2].[Id]
+ORDER BY [s].[TotalQuantitySold] DESC
+2025-05-15 23:40:00.310 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (5ms) [Parameters=[@__bestsellerBookIds_0='["ba80e2b5-b426-44eb-acfa-06315f9fcb6b","c191919e-e763-4e03-9e2b-24d944f4d401","39f2e54f-3480-424d-9611-a9b9097314a9","6c50f852-d8c7-4ef9-a26a-c9d292ef9108","1ed59d04-83f1-4624-8739-3de94c30e54b"]' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit) AND [b].[Id] IN (
+    SELECT [b0].[value]
+    FROM OPENJSON(@__bestsellerBookIds_0) WITH ([value] uniqueidentifier '$') AS [b0]
+) AND [b].[IsDeleted] = CAST(0 AS bit)
+2025-05-15 23:40:00.313 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 5 bestselling books.
+2025-05-15 23:40:00.319 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (5ms) [Parameters=[@__currentDate_0='2025-05-15T16:40:00.3146673Z', @__currentDate_1='2025-05-15T16:40:00.3146673Z' (Nullable = true)], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Code], [p].[CreatedAtUtc], [p].[CurrentUsage], [p].[Description], [p].[DiscountAmount], [p].[DiscountPercentage], [p].[EndDate], [p].[IsActive], [p].[MaxUsage], [p].[StartDate], [p].[UpdatedAtUtc]
+FROM [Promotions] AS [p]
+WHERE [p].[IsActive] = CAST(1 AS bit) AND [p].[StartDate] <= @__currentDate_0 AND ([p].[EndDate] IS NULL OR [p].[EndDate] >= @__currentDate_1) AND ([p].[MaxUsage] IS NULL OR [p].[CurrentUsage] < [p].[MaxUsage])
+ORDER BY [p].[EndDate]
+2025-05-15 23:40:00.326 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+FROM [Categories] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[ParentCategoryId] IS NULL AND [c].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [c].[Name]
+2025-05-15 23:40:00.329 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Successfully fetched home dashboard data.
+2025-05-15 23:40:08.617 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (6ms) [Parameters=[@__email_0='Admin' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [u1].[Id], [u1].[CreatedAtUtc], [u1].[Email], [u1].[FirstName], [u1].[IsActive], [u1].[LastName], [u1].[PasswordHash], [u1].[PhoneNumber], [u1].[UpdatedAtUtc], [u1].[UserName], [s].[UserId], [s].[RoleId], [s].[Id], [s].[CreatedAtUtc], [s].[Name], [s].[UpdatedAtUtc]
+FROM (
+    SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+    FROM [Users] AS [u]
+    WHERE [u].[Email] = @__email_0
+) AS [u1]
+LEFT JOIN (
+    SELECT [u0].[UserId], [u0].[RoleId], [r].[Id], [r].[CreatedAtUtc], [r].[Name], [r].[UpdatedAtUtc]
+    FROM [UserRoles] AS [u0]
+    INNER JOIN [Roles] AS [r] ON [u0].[RoleId] = [r].[Id]
+) AS [s] ON [u1].[Id] = [s].[UserId]
+ORDER BY [u1].[Id], [s].[UserId], [s].[RoleId]
+2025-05-15 23:40:08.658 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (6ms) [Parameters=[@__username_0='Admin' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [u1].[Id], [u1].[CreatedAtUtc], [u1].[Email], [u1].[FirstName], [u1].[IsActive], [u1].[LastName], [u1].[PasswordHash], [u1].[PhoneNumber], [u1].[UpdatedAtUtc], [u1].[UserName], [s].[UserId], [s].[RoleId], [s].[Id], [s].[CreatedAtUtc], [s].[Name], [s].[UpdatedAtUtc]
+FROM (
+    SELECT TOP(1) [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+    FROM [Users] AS [u]
+    WHERE [u].[UserName] = @__username_0
+) AS [u1]
+LEFT JOIN (
+    SELECT [u0].[UserId], [u0].[RoleId], [r].[Id], [r].[CreatedAtUtc], [r].[Name], [r].[UpdatedAtUtc]
+    FROM [UserRoles] AS [u0]
+    INNER JOIN [Roles] AS [r] ON [u0].[RoleId] = [r].[Id]
+) AS [s] ON [u1].[Id] = [s].[UserId]
+ORDER BY [u1].[Id], [s].[UserId], [s].[RoleId]
+2025-05-15 23:40:09.245 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[@__userId_0='f54527eb-f806-40db-bf76-c7b0e5fa6d39'], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Name]
+FROM [UserRoles] AS [u]
+INNER JOIN [Roles] AS [r] ON [u].[RoleId] = [r].[Id]
+WHERE [u].[UserId] = @__userId_0
+2025-05-15 23:40:09.490 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetching home dashboard data.
+2025-05-15 23:40:09.494 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [b].[CreatedAtUtc] DESC
+2025-05-15 23:40:09.497 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 10 newest books.
+2025-05-15 23:40:09.500 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__p_2='5', @__inclusiveStartDate_0='2025-04-15T00:00:00.0000000Z', @__inclusiveEndDate_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[BookId], [b2].[Title] AS [BookTitle], [s].[TotalQuantitySold]
+FROM (
+    SELECT TOP(@__p_2) [o].[BookId], COALESCE(SUM([o].[Quantity]), 0) AS [TotalQuantitySold]
+    FROM [OrderDetails] AS [o]
+    INNER JOIN [Orders] AS [o0] ON [o].[OrderId] = [o0].[Id]
+    INNER JOIN (
+        SELECT [b].[Id], [b].[IsDeleted]
+        FROM [Books] AS [b]
+        WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ) AS [b0] ON [o].[BookId] = [b0].[Id]
+    WHERE [o0].[Status] = CAST(3 AS tinyint) AND [o0].[OrderDate] >= @__inclusiveStartDate_0 AND [o0].[OrderDate] < @__inclusiveEndDate_1 AND [b0].[IsDeleted] = CAST(0 AS bit)
+    GROUP BY [o].[BookId]
+    ORDER BY COALESCE(SUM([o].[Quantity]), 0) DESC
+) AS [s]
+INNER JOIN (
+    SELECT [b1].[Id], [b1].[Title]
+    FROM [Books] AS [b1]
+    WHERE [b1].[IsDeleted] = CAST(0 AS bit)
+) AS [b2] ON [s].[BookId] = [b2].[Id]
+ORDER BY [s].[TotalQuantitySold] DESC
+2025-05-15 23:40:09.505 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__bestsellerBookIds_0='["ba80e2b5-b426-44eb-acfa-06315f9fcb6b","c191919e-e763-4e03-9e2b-24d944f4d401","39f2e54f-3480-424d-9611-a9b9097314a9","6c50f852-d8c7-4ef9-a26a-c9d292ef9108","1ed59d04-83f1-4624-8739-3de94c30e54b"]' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit) AND [b].[Id] IN (
+    SELECT [b0].[value]
+    FROM OPENJSON(@__bestsellerBookIds_0) WITH ([value] uniqueidentifier '$') AS [b0]
+) AND [b].[IsDeleted] = CAST(0 AS bit)
+2025-05-15 23:40:09.509 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 5 bestselling books.
+2025-05-15 23:40:09.513 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__currentDate_0='2025-05-15T16:40:09.5114049Z', @__currentDate_1='2025-05-15T16:40:09.5114049Z' (Nullable = true)], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Code], [p].[CreatedAtUtc], [p].[CurrentUsage], [p].[Description], [p].[DiscountAmount], [p].[DiscountPercentage], [p].[EndDate], [p].[IsActive], [p].[MaxUsage], [p].[StartDate], [p].[UpdatedAtUtc]
+FROM [Promotions] AS [p]
+WHERE [p].[IsActive] = CAST(1 AS bit) AND [p].[StartDate] <= @__currentDate_0 AND ([p].[EndDate] IS NULL OR [p].[EndDate] >= @__currentDate_1) AND ([p].[MaxUsage] IS NULL OR [p].[CurrentUsage] < [p].[MaxUsage])
+ORDER BY [p].[EndDate]
+2025-05-15 23:40:09.520 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+FROM [Categories] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[ParentCategoryId] IS NULL AND [c].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [c].[Name]
+2025-05-15 23:40:09.523 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Successfully fetched home dashboard data.
+2025-05-15 23:40:19.007 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (8ms) [Parameters=[@__p_0='0', @__p_1='10'], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+FROM [Categories] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [c].[Name]
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2025-05-15 23:40:21.878 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (9ms) [Parameters=[@__userId_0='f54527eb-f806-40db-bf76-c7b0e5fa6d39'], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[UserId], [c].[BookId], [c].[CreatedAtUtc], [c].[Quantity], [c].[UpdatedAtUtc], [b0].[Id], [b0].[AuthorId], [b0].[CategoryId], [b0].[CoverImageUrl], [b0].[CreatedAtUtc], [b0].[Description], [b0].[ISBN], [b0].[IsDeleted], [b0].[Price], [b0].[PublicationYear], [b0].[Publisher], [b0].[StockQuantity], [b0].[Title], [b0].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [CartItems] AS [c]
+INNER JOIN (
+    SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc]
+    FROM [Books] AS [b]
+    WHERE [b].[IsDeleted] = CAST(0 AS bit)
+) AS [b0] ON [c].[BookId] = [b0].[Id]
+LEFT JOIN [Authors] AS [a] ON [b0].[AuthorId] = [a].[Id]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b0].[Title]
+2025-05-15 23:40:23.737 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (6ms) [Parameters=[@__userId_0='f54527eb-f806-40db-bf76-c7b0e5fa6d39'], CommandType='"Text"', CommandTimeout='30']
+SELECT [w].[Id], [w].[BookId], [w].[CreatedAtUtc], [w].[UserId], [b0].[Id], [b0].[AuthorId], [b0].[CategoryId], [b0].[CoverImageUrl], [b0].[CreatedAtUtc], [b0].[Description], [b0].[ISBN], [b0].[IsDeleted], [b0].[Price], [b0].[PublicationYear], [b0].[Publisher], [b0].[StockQuantity], [b0].[Title], [b0].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [WishlistItems] AS [w]
+INNER JOIN (
+    SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc]
+    FROM [Books] AS [b]
+    WHERE [b].[IsDeleted] = CAST(0 AS bit)
+) AS [b0] ON [w].[BookId] = [b0].[Id]
+LEFT JOIN [Authors] AS [a] ON [b0].[AuthorId] = [a].[Id]
+WHERE [w].[UserId] = @__userId_0 AND [b0].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [w].[CreatedAtUtc] DESC
+2025-05-15 23:40:33.267 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (4ms) [Parameters=[@__userId_0='f54527eb-f806-40db-bf76-c7b0e5fa6d39'], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[City], [a].[CreatedAtUtc], [a].[District], [a].[IsDefault], [a].[Street], [a].[UpdatedAtUtc], [a].[UserId], [a].[Village]
+FROM [Addresses] AS [a]
+WHERE [a].[UserId] = @__userId_0
+ORDER BY [a].[IsDefault] DESC, [a].[UpdatedAtUtc] DESC
+2025-05-15 23:40:34.617 +07:00 [INF] (Bookstore.Application.Services.OrderService) Fetching orders for User: "f54527eb-f806-40db-bf76-c7b0e5fa6d39", Page: 1, PageSize: 15
+2025-05-15 23:40:34.617 +07:00 [INF] (Bookstore.Application.Services.OrderService) Fetching orders for User: "f54527eb-f806-40db-bf76-c7b0e5fa6d39", Page: 1, PageSize: 15
+2025-05-15 23:40:34.647 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (7ms) [Parameters=[@__userId_0='f54527eb-f806-40db-bf76-c7b0e5fa6d39' (Nullable = true), @__p_1='0', @__p_2='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [o1].[Id], [o1].[CreatedAtUtc], [o1].[DeliveryMethod], [o1].[InvoiceNumber], [o1].[OrderDate], [o1].[OrderShippingAddressId], [o1].[OrderType], [o1].[PaymentMethod], [o1].[PaymentStatus], [o1].[Status], [o1].[TotalAmount], [o1].[TransactionId], [o1].[UpdatedAtUtc], [o1].[UserId], [o0].[Id], [o0].[BookId], [o0].[OrderId], [o0].[Quantity], [o0].[UnitPrice]
+FROM (
+    SELECT [o].[Id], [o].[CreatedAtUtc], [o].[DeliveryMethod], [o].[InvoiceNumber], [o].[OrderDate], [o].[OrderShippingAddressId], [o].[OrderType], [o].[PaymentMethod], [o].[PaymentStatus], [o].[Status], [o].[TotalAmount], [o].[TransactionId], [o].[UpdatedAtUtc], [o].[UserId]
+    FROM [Orders] AS [o]
+    WHERE [o].[UserId] = @__userId_0
+    ORDER BY [o].[OrderDate] DESC
+    OFFSET @__p_1 ROWS FETCH NEXT @__p_2 ROWS ONLY
+) AS [o1]
+LEFT JOIN [OrderDetails] AS [o0] ON [o1].[Id] = [o0].[OrderId]
+ORDER BY [o1].[OrderDate] DESC, [o1].[Id]
+2025-05-15 23:40:34.653 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__userId_0='f54527eb-f806-40db-bf76-c7b0e5fa6d39' (Nullable = true), @__p_1='0', @__p_2='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [o1].[Id], [o1].[CreatedAtUtc], [o1].[DeliveryMethod], [o1].[InvoiceNumber], [o1].[OrderDate], [o1].[OrderShippingAddressId], [o1].[OrderType], [o1].[PaymentMethod], [o1].[PaymentStatus], [o1].[Status], [o1].[TotalAmount], [o1].[TransactionId], [o1].[UpdatedAtUtc], [o1].[UserId], [o0].[Id], [o0].[BookId], [o0].[OrderId], [o0].[Quantity], [o0].[UnitPrice]
+FROM (
+    SELECT [o].[Id], [o].[CreatedAtUtc], [o].[DeliveryMethod], [o].[InvoiceNumber], [o].[OrderDate], [o].[OrderShippingAddressId], [o].[OrderType], [o].[PaymentMethod], [o].[PaymentStatus], [o].[Status], [o].[TotalAmount], [o].[TransactionId], [o].[UpdatedAtUtc], [o].[UserId]
+    FROM [Orders] AS [o]
+    WHERE [o].[UserId] = @__userId_0
+    ORDER BY [o].[OrderDate] DESC
+    OFFSET @__p_1 ROWS FETCH NEXT @__p_2 ROWS ONLY
+) AS [o1]
+LEFT JOIN [OrderDetails] AS [o0] ON [o1].[Id] = [o0].[OrderId]
+ORDER BY [o1].[OrderDate] DESC, [o1].[Id]
+2025-05-15 23:40:36.882 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[@__userId_0='f54527eb-f806-40db-bf76-c7b0e5fa6d39'], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[City], [a].[CreatedAtUtc], [a].[District], [a].[IsDefault], [a].[Street], [a].[UpdatedAtUtc], [a].[UserId], [a].[Village]
+FROM [Addresses] AS [a]
+WHERE [a].[UserId] = @__userId_0
+ORDER BY [a].[IsDefault] DESC, [a].[UpdatedAtUtc] DESC
+2025-05-15 23:40:40.834 +07:00 [INF] (Bookstore.Application.Services.UserService) Fetching all users for admin. RoleFilter: All, StatusFilter: All, Page: 1, PageSize: 20
+2025-05-15 23:40:40.861 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (8ms) [Parameters=[@__p_0='0', @__p_1='20'], CommandType='"Text"', CommandTimeout='30']
+SELECT [u1].[Id], [u1].[CreatedAtUtc], [u1].[Email], [u1].[FirstName], [u1].[IsActive], [u1].[LastName], [u1].[PasswordHash], [u1].[PhoneNumber], [u1].[UpdatedAtUtc], [u1].[UserName], [s].[UserId], [s].[RoleId], [s].[Id], [s].[CreatedAtUtc], [s].[Name], [s].[UpdatedAtUtc]
+FROM (
+    SELECT [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName]
+    FROM [Users] AS [u]
+    ORDER BY [u].[UserName]
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [u1]
+LEFT JOIN (
+    SELECT [u0].[UserId], [u0].[RoleId], [r].[Id], [r].[CreatedAtUtc], [r].[Name], [r].[UpdatedAtUtc]
+    FROM [UserRoles] AS [u0]
+    INNER JOIN [Roles] AS [r] ON [u0].[RoleId] = [r].[Id]
+) AS [s] ON [u1].[Id] = [s].[UserId]
+ORDER BY [u1].[UserName], [u1].[Id], [s].[UserId], [s].[RoleId]
+2025-05-15 23:40:42.941 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Code], [p].[CreatedAtUtc], [p].[CurrentUsage], [p].[Description], [p].[DiscountAmount], [p].[DiscountPercentage], [p].[EndDate], [p].[IsActive], [p].[MaxUsage], [p].[StartDate], [p].[UpdatedAtUtc]
+FROM [Promotions] AS [p]
+ORDER BY [p].[CreatedAtUtc] DESC
+2025-05-15 23:40:44.965 +07:00 [INF] (Bookstore.Application.Services.ReportService) Generating revenue report from "2025-05-09T00:00:00.0000000" to "2025-05-15T00:00:00.0000000"
+2025-05-15 23:40:44.967 +07:00 [INF] (Bookstore.Application.Services.ReportService) Generating bestsellers report from "2025-05-09T00:00:00.0000000" to "2025-05-15T00:00:00.0000000", top 7
+2025-05-15 23:40:44.972 +07:00 [INF] (Bookstore.Application.Services.ReportService) Generating low stock report with threshold 5
+2025-05-15 23:40:44.978 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (5ms) [Parameters=[@__inclusiveStartDate_0='2025-05-09T00:00:00.0000000', @__inclusiveEndDate_1='2025-05-16T00:00:00.0000000'], CommandType='"Text"', CommandTimeout='30']
+SELECT [o].[Id], [o].[CreatedAtUtc], [o].[DeliveryMethod], [o].[InvoiceNumber], [o].[OrderDate], [o].[OrderShippingAddressId], [o].[OrderType], [o].[PaymentMethod], [o].[PaymentStatus], [o].[Status], [o].[TotalAmount], [o].[TransactionId], [o].[UpdatedAtUtc], [o].[UserId]
+FROM [Orders] AS [o]
+WHERE [o].[Status] = CAST(3 AS tinyint) AND [o].[OrderDate] >= @__inclusiveStartDate_0 AND [o].[OrderDate] < @__inclusiveEndDate_1
+2025-05-15 23:40:44.979 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (9ms) [Parameters=[@__p_2='7', @__inclusiveStartDate_0='2025-05-09T00:00:00.0000000', @__inclusiveEndDate_1='2025-05-16T00:00:00.0000000'], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[BookId], [b2].[Title] AS [BookTitle], [s].[TotalQuantitySold]
+FROM (
+    SELECT TOP(@__p_2) [o].[BookId], COALESCE(SUM([o].[Quantity]), 0) AS [TotalQuantitySold]
+    FROM [OrderDetails] AS [o]
+    INNER JOIN [Orders] AS [o0] ON [o].[OrderId] = [o0].[Id]
+    INNER JOIN (
+        SELECT [b].[Id], [b].[IsDeleted]
+        FROM [Books] AS [b]
+        WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ) AS [b0] ON [o].[BookId] = [b0].[Id]
+    WHERE [o0].[Status] = CAST(3 AS tinyint) AND [o0].[OrderDate] >= @__inclusiveStartDate_0 AND [o0].[OrderDate] < @__inclusiveEndDate_1 AND [b0].[IsDeleted] = CAST(0 AS bit)
+    GROUP BY [o].[BookId]
+    ORDER BY COALESCE(SUM([o].[Quantity]), 0) DESC
+) AS [s]
+INNER JOIN (
+    SELECT [b1].[Id], [b1].[Title]
+    FROM [Books] AS [b1]
+    WHERE [b1].[IsDeleted] = CAST(0 AS bit)
+) AS [b2] ON [s].[BookId] = [b2].[Id]
+ORDER BY [s].[TotalQuantitySold] DESC
+2025-05-15 23:40:44.990 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[@__lowStockThreshold_0='5'], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit) AND [b].[StockQuantity] > 0 AND [b].[StockQuantity] <= @__lowStockThreshold_0
+ORDER BY [b].[StockQuantity]
+2025-05-15 23:40:44.992 +07:00 [INF] (Bookstore.Application.Services.ReportService) Bestsellers report generated successfully.
+2025-05-15 23:40:44.992 +07:00 [INF] (Bookstore.Application.Services.ReportService) Revenue report generated successfully.
+2025-05-15 23:40:52.870 +07:00 [INF] (Bookstore.Application.Services.ReportService) Fetching admin dashboard summary.
+2025-05-15 23:40:52.885 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[@__todayStart_0='2025-05-15T00:00:00.0000000Z', @__tomorrowStart_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Orders] AS [o]
+WHERE [o].[OrderDate] >= @__todayStart_0 AND [o].[OrderDate] < @__tomorrowStart_1 AND [o].[Status] <> CAST(4 AS tinyint)
+2025-05-15 23:40:52.901 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[@__todayStart_0='2025-05-15T00:00:00.0000000Z', @__tomorrowStart_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([o].[TotalAmount]), 0.0)
+FROM [Orders] AS [o]
+WHERE [o].[OrderDate] >= @__todayStart_0 AND [o].[OrderDate] < @__tomorrowStart_1 AND [o].[Status] = CAST(3 AS tinyint)
+2025-05-15 23:40:52.911 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__todayStart_0='2025-05-15T00:00:00.0000000Z', @__tomorrowStart_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Users] AS [u]
+WHERE [u].[CreatedAtUtc] >= @__todayStart_0 AND [u].[CreatedAtUtc] < @__tomorrowStart_1
+2025-05-15 23:40:52.921 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[@__lowStockThreshold_0='5'], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Books] AS [b]
+WHERE [b].[IsDeleted] = CAST(0 AS bit) AND [b].[IsDeleted] = CAST(0 AS bit) AND [b].[StockQuantity] > 0 AND [b].[StockQuantity] <= @__lowStockThreshold_0
+2025-05-15 23:40:52.926 +07:00 [INF] (Bookstore.Application.Services.ReportService) Admin dashboard summary fetched successfully.
+2025-05-15 23:40:54.095 +07:00 [INF] (Bookstore.Application.Services.OrderService) Fetching all orders for Admin. Page: 1, PageSize: 15, StatusFilter: None
+2025-05-15 23:40:54.095 +07:00 [INF] (Bookstore.Application.Services.OrderService) Fetching all orders for Admin. Page: 1, PageSize: 15, StatusFilter: None
+2025-05-15 23:40:54.122 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (6ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [o0].[Id], [o0].[CreatedAtUtc], [o0].[DeliveryMethod], [o0].[InvoiceNumber], [o0].[OrderDate], [o0].[OrderShippingAddressId], [o0].[OrderType], [o0].[PaymentMethod], [o0].[PaymentStatus], [o0].[Status], [o0].[TotalAmount], [o0].[TransactionId], [o0].[UpdatedAtUtc], [o0].[UserId], [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName], [o1].[Id], [o1].[BookId], [o1].[OrderId], [o1].[Quantity], [o1].[UnitPrice]
+FROM (
+    SELECT [o].[Id], [o].[CreatedAtUtc], [o].[DeliveryMethod], [o].[InvoiceNumber], [o].[OrderDate], [o].[OrderShippingAddressId], [o].[OrderType], [o].[PaymentMethod], [o].[PaymentStatus], [o].[Status], [o].[TotalAmount], [o].[TransactionId], [o].[UpdatedAtUtc], [o].[UserId]
+    FROM [Orders] AS [o]
+    ORDER BY [o].[OrderDate] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [o0]
+LEFT JOIN [Users] AS [u] ON [o0].[UserId] = [u].[Id]
+LEFT JOIN [OrderDetails] AS [o1] ON [o0].[Id] = [o1].[OrderId]
+ORDER BY [o0].[OrderDate] DESC, [o0].[Id], [u].[Id]
+2025-05-15 23:40:54.128 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (12ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [o0].[Id], [o0].[CreatedAtUtc], [o0].[DeliveryMethod], [o0].[InvoiceNumber], [o0].[OrderDate], [o0].[OrderShippingAddressId], [o0].[OrderType], [o0].[PaymentMethod], [o0].[PaymentStatus], [o0].[Status], [o0].[TotalAmount], [o0].[TransactionId], [o0].[UpdatedAtUtc], [o0].[UserId], [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName], [o1].[Id], [o1].[BookId], [o1].[OrderId], [o1].[Quantity], [o1].[UnitPrice]
+FROM (
+    SELECT [o].[Id], [o].[CreatedAtUtc], [o].[DeliveryMethod], [o].[InvoiceNumber], [o].[OrderDate], [o].[OrderShippingAddressId], [o].[OrderType], [o].[PaymentMethod], [o].[PaymentStatus], [o].[Status], [o].[TotalAmount], [o].[TransactionId], [o].[UpdatedAtUtc], [o].[UserId]
+    FROM [Orders] AS [o]
+    ORDER BY [o].[OrderDate] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [o0]
+LEFT JOIN [Users] AS [u] ON [o0].[UserId] = [u].[Id]
+LEFT JOIN [OrderDetails] AS [o1] ON [o0].[Id] = [o1].[OrderId]
+ORDER BY [o0].[OrderDate] DESC, [o0].[Id], [u].[Id]
+2025-05-15 23:40:56.289 +07:00 [INF] (Bookstore.Application.Services.OrderService) Fetching order details "5fae6e4d-32be-4162-a68b-0e1c7325ecf1" for Admin
+2025-05-15 23:40:56.327 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (10ms) [Parameters=[@__orderId_0='5fae6e4d-32be-4162-a68b-0e1c7325ecf1'], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[Id], [s].[CreatedAtUtc], [s].[DeliveryMethod], [s].[InvoiceNumber], [s].[OrderDate], [s].[OrderShippingAddressId], [s].[OrderType], [s].[PaymentMethod], [s].[PaymentStatus], [s].[Status], [s].[TotalAmount], [s].[TransactionId], [s].[UpdatedAtUtc], [s].[UserId], [s].[Id0], [s].[CreatedAtUtc0], [s].[Email], [s].[FirstName], [s].[IsActive], [s].[LastName], [s].[PasswordHash], [s].[PhoneNumber], [s].[UpdatedAtUtc0], [s].[UserName], [s].[Id1], [s].[City], [s].[District], [s].[PhoneNumber0], [s].[RecipientName], [s].[Street], [s].[Village], [s0].[Id], [s0].[BookId], [s0].[OrderId], [s0].[Quantity], [s0].[UnitPrice], [s0].[Id0], [s0].[AuthorId], [s0].[CategoryId], [s0].[CoverImageUrl], [s0].[CreatedAtUtc], [s0].[Description], [s0].[ISBN], [s0].[IsDeleted], [s0].[Price], [s0].[PublicationYear], [s0].[Publisher], [s0].[StockQuantity], [s0].[Title], [s0].[UpdatedAtUtc], [s0].[Id1], [s0].[Biography], [s0].[CreatedAtUtc0], [s0].[Name], [s0].[UpdatedAtUtc0]
+FROM (
+    SELECT TOP(1) [o].[Id], [o].[CreatedAtUtc], [o].[DeliveryMethod], [o].[InvoiceNumber], [o].[OrderDate], [o].[OrderShippingAddressId], [o].[OrderType], [o].[PaymentMethod], [o].[PaymentStatus], [o].[Status], [o].[TotalAmount], [o].[TransactionId], [o].[UpdatedAtUtc], [o].[UserId], [u].[Id] AS [Id0], [u].[CreatedAtUtc] AS [CreatedAtUtc0], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc] AS [UpdatedAtUtc0], [u].[UserName], [o0].[Id] AS [Id1], [o0].[City], [o0].[District], [o0].[PhoneNumber] AS [PhoneNumber0], [o0].[RecipientName], [o0].[Street], [o0].[Village]
+    FROM [Orders] AS [o]
+    LEFT JOIN [Users] AS [u] ON [o].[UserId] = [u].[Id]
+    LEFT JOIN [OrderShippingAddresses] AS [o0] ON [o].[OrderShippingAddressId] = [o0].[Id]
+    WHERE [o].[Id] = @__orderId_0
+) AS [s]
+LEFT JOIN (
+    SELECT [o1].[Id], [o1].[BookId], [o1].[OrderId], [o1].[Quantity], [o1].[UnitPrice], [b0].[Id] AS [Id0], [b0].[AuthorId], [b0].[CategoryId], [b0].[CoverImageUrl], [b0].[CreatedAtUtc], [b0].[Description], [b0].[ISBN], [b0].[IsDeleted], [b0].[Price], [b0].[PublicationYear], [b0].[Publisher], [b0].[StockQuantity], [b0].[Title], [b0].[UpdatedAtUtc], [a].[Id] AS [Id1], [a].[Biography], [a].[CreatedAtUtc] AS [CreatedAtUtc0], [a].[Name], [a].[UpdatedAtUtc] AS [UpdatedAtUtc0]
+    FROM [OrderDetails] AS [o1]
+    INNER JOIN (
+        SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc]
+        FROM [Books] AS [b]
+        WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ) AS [b0] ON [o1].[BookId] = [b0].[Id]
+    LEFT JOIN [Authors] AS [a] ON [b0].[AuthorId] = [a].[Id]
+) AS [s0] ON [s].[Id] = [s0].[OrderId]
+ORDER BY [s].[Id], [s].[Id0], [s].[Id1], [s0].[Id], [s0].[Id0]
+2025-05-15 23:40:58.388 +07:00 [INF] (Bookstore.Application.Services.OrderService) Fetching all orders for Admin. Page: 1, PageSize: 15, StatusFilter: None
+2025-05-15 23:40:58.392 +07:00 [INF] (Bookstore.Application.Services.OrderService) Fetching all orders for Admin. Page: 1, PageSize: 15, StatusFilter: None
+2025-05-15 23:40:58.396 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (5ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [o0].[Id], [o0].[CreatedAtUtc], [o0].[DeliveryMethod], [o0].[InvoiceNumber], [o0].[OrderDate], [o0].[OrderShippingAddressId], [o0].[OrderType], [o0].[PaymentMethod], [o0].[PaymentStatus], [o0].[Status], [o0].[TotalAmount], [o0].[TransactionId], [o0].[UpdatedAtUtc], [o0].[UserId], [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName], [o1].[Id], [o1].[BookId], [o1].[OrderId], [o1].[Quantity], [o1].[UnitPrice]
+FROM (
+    SELECT [o].[Id], [o].[CreatedAtUtc], [o].[DeliveryMethod], [o].[InvoiceNumber], [o].[OrderDate], [o].[OrderShippingAddressId], [o].[OrderType], [o].[PaymentMethod], [o].[PaymentStatus], [o].[Status], [o].[TotalAmount], [o].[TransactionId], [o].[UpdatedAtUtc], [o].[UserId]
+    FROM [Orders] AS [o]
+    ORDER BY [o].[OrderDate] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [o0]
+LEFT JOIN [Users] AS [u] ON [o0].[UserId] = [u].[Id]
+LEFT JOIN [OrderDetails] AS [o1] ON [o0].[Id] = [o1].[OrderId]
+ORDER BY [o0].[OrderDate] DESC, [o0].[Id], [u].[Id]
+2025-05-15 23:40:58.396 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [o0].[Id], [o0].[CreatedAtUtc], [o0].[DeliveryMethod], [o0].[InvoiceNumber], [o0].[OrderDate], [o0].[OrderShippingAddressId], [o0].[OrderType], [o0].[PaymentMethod], [o0].[PaymentStatus], [o0].[Status], [o0].[TotalAmount], [o0].[TransactionId], [o0].[UpdatedAtUtc], [o0].[UserId], [u].[Id], [u].[CreatedAtUtc], [u].[Email], [u].[FirstName], [u].[IsActive], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[UpdatedAtUtc], [u].[UserName], [o1].[Id], [o1].[BookId], [o1].[OrderId], [o1].[Quantity], [o1].[UnitPrice]
+FROM (
+    SELECT [o].[Id], [o].[CreatedAtUtc], [o].[DeliveryMethod], [o].[InvoiceNumber], [o].[OrderDate], [o].[OrderShippingAddressId], [o].[OrderType], [o].[PaymentMethod], [o].[PaymentStatus], [o].[Status], [o].[TotalAmount], [o].[TransactionId], [o].[UpdatedAtUtc], [o].[UserId]
+    FROM [Orders] AS [o]
+    ORDER BY [o].[OrderDate] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [o0]
+LEFT JOIN [Users] AS [u] ON [o0].[UserId] = [u].[Id]
+LEFT JOIN [OrderDetails] AS [o1] ON [o0].[Id] = [o1].[OrderId]
+ORDER BY [o0].[OrderDate] DESC, [o0].[Id], [u].[Id]
+2025-05-15 23:40:59.647 +07:00 [INF] (Bookstore.Application.Services.StockReceiptService) Fetching all stock receipts. Page: 1, PageSize: 15
+2025-05-15 23:40:59.665 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (5ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [s1].[Id], [s1].[CreatedAtUtc], [s1].[Notes], [s1].[ReceiptDate], [s1].[SupplierId], [s1].[UpdatedAtUtc], [s0].[Id], [s0].[Address], [s0].[ContactPerson], [s0].[CreatedAtUtc], [s0].[Email], [s0].[Name], [s0].[Phone], [s0].[UpdatedAtUtc]
+FROM (
+    SELECT [s].[Id], [s].[CreatedAtUtc], [s].[Notes], [s].[ReceiptDate], [s].[SupplierId], [s].[UpdatedAtUtc]
+    FROM [StockReceipts] AS [s]
+    ORDER BY [s].[ReceiptDate] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [s1]
+LEFT JOIN [Suppliers] AS [s0] ON [s1].[SupplierId] = [s0].[Id]
+ORDER BY [s1].[ReceiptDate] DESC
+2025-05-15 23:41:02.250 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (4ms) [Parameters=[@__p_0='0', @__p_1='10'], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+FROM [Categories] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [c].[Name]
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2025-05-15 23:41:02.386 +07:00 [WRN] (Bookstore.Infrastructure.Services.GoogleCloudStorageService) DEBUG: GOOGLE_APPLICATION_CREDENTIALS value read: 'D:\imagekey\imagestorage-458109-d1f00cf95c5c.json'
+2025-05-15 23:41:02.388 +07:00 [WRN] (Bookstore.Infrastructure.Services.GoogleCloudStorageService) DEBUG: Checking if file exists at path: 'true'
+2025-05-15 23:41:02.390 +07:00 [WRN] (Bookstore.Infrastructure.Services.GoogleCloudStorageService) DEBUG: Parsed Path as URI successfully: D:\imagekey\imagestorage-458109-d1f00cf95c5c.json
+2025-05-15 23:41:02.405 +07:00 [WRN] (Bookstore.Infrastructure.Services.GoogleCloudStorageService) DEBUG: Successfully read content from credential file.
+2025-05-15 23:41:02.430 +07:00 [INF] (Bookstore.Application.Services.AuthorService) Fetching all authors. Page: 1, PageSize: 10
+2025-05-15 23:41:02.440 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__p_0='0', @__p_1='10'], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Authors] AS [a]
+ORDER BY [a].[Name]
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2025-05-15 23:41:03.016 +07:00 [INF] (Bookstore.Infrastructure.Services.GoogleCloudStorageService) Google Cloud Storage client created successfully using Application Default Credentials or Environment Variable.
+2025-05-15 23:41:03.038 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (6ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [b0].[Id], [b0].[AuthorId], [b0].[CategoryId], [b0].[CoverImageUrl], [b0].[CreatedAtUtc], [b0].[Description], [b0].[ISBN], [b0].[IsDeleted], [b0].[Price], [b0].[PublicationYear], [b0].[Publisher], [b0].[StockQuantity], [b0].[Title], [b0].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc], [c0].[Id], [c0].[CreatedAtUtc], [c0].[Description], [c0].[IsDeleted], [c0].[Name], [c0].[ParentCategoryId], [c0].[UpdatedAtUtc]
+FROM (
+    SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc]
+    FROM [Books] AS [b]
+    WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [b].[CreatedAtUtc] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [b0]
+LEFT JOIN [Authors] AS [a] ON [b0].[AuthorId] = [a].[Id]
+INNER JOIN (
+    SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+    FROM [Categories] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+) AS [c0] ON [b0].[CategoryId] = [c0].[Id]
+ORDER BY [b0].[CreatedAtUtc] DESC
+2025-05-15 23:41:03.042 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (9ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [b0].[Id], [b0].[AuthorId], [b0].[CategoryId], [b0].[CoverImageUrl], [b0].[CreatedAtUtc], [b0].[Description], [b0].[ISBN], [b0].[IsDeleted], [b0].[Price], [b0].[PublicationYear], [b0].[Publisher], [b0].[StockQuantity], [b0].[Title], [b0].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc], [c0].[Id], [c0].[CreatedAtUtc], [c0].[Description], [c0].[IsDeleted], [c0].[Name], [c0].[ParentCategoryId], [c0].[UpdatedAtUtc]
+FROM (
+    SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc]
+    FROM [Books] AS [b]
+    WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [b].[CreatedAtUtc] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [b0]
+LEFT JOIN [Authors] AS [a] ON [b0].[AuthorId] = [a].[Id]
+INNER JOIN (
+    SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+    FROM [Categories] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+) AS [c0] ON [b0].[CategoryId] = [c0].[Id]
+ORDER BY [b0].[CreatedAtUtc] DESC
+2025-05-15 23:41:05.476 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (5ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [b0].[Id], [b0].[AuthorId], [b0].[CategoryId], [b0].[CoverImageUrl], [b0].[CreatedAtUtc], [b0].[Description], [b0].[ISBN], [b0].[IsDeleted], [b0].[Price], [b0].[PublicationYear], [b0].[Publisher], [b0].[StockQuantity], [b0].[Title], [b0].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc], [c0].[Id], [c0].[CreatedAtUtc], [c0].[Description], [c0].[IsDeleted], [c0].[Name], [c0].[ParentCategoryId], [c0].[UpdatedAtUtc]
+FROM (
+    SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc]
+    FROM [Books] AS [b]
+    WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [b].[CreatedAtUtc] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [b0]
+LEFT JOIN [Authors] AS [a] ON [b0].[AuthorId] = [a].[Id]
+INNER JOIN (
+    SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+    FROM [Categories] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+) AS [c0] ON [b0].[CategoryId] = [c0].[Id]
+ORDER BY [b0].[CreatedAtUtc] DESC
+2025-05-15 23:41:05.477 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [b0].[Id], [b0].[AuthorId], [b0].[CategoryId], [b0].[CoverImageUrl], [b0].[CreatedAtUtc], [b0].[Description], [b0].[ISBN], [b0].[IsDeleted], [b0].[Price], [b0].[PublicationYear], [b0].[Publisher], [b0].[StockQuantity], [b0].[Title], [b0].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc], [c0].[Id], [c0].[CreatedAtUtc], [c0].[Description], [c0].[IsDeleted], [c0].[Name], [c0].[ParentCategoryId], [c0].[UpdatedAtUtc]
+FROM (
+    SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc]
+    FROM [Books] AS [b]
+    WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [b].[CreatedAtUtc] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [b0]
+LEFT JOIN [Authors] AS [a] ON [b0].[AuthorId] = [a].[Id]
+INNER JOIN (
+    SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+    FROM [Categories] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+) AS [c0] ON [b0].[CategoryId] = [c0].[Id]
+ORDER BY [b0].[CreatedAtUtc] DESC
+2025-05-15 23:41:05.482 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (1ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [b0].[Id], [b0].[AuthorId], [b0].[CategoryId], [b0].[CoverImageUrl], [b0].[CreatedAtUtc], [b0].[Description], [b0].[ISBN], [b0].[IsDeleted], [b0].[Price], [b0].[PublicationYear], [b0].[Publisher], [b0].[StockQuantity], [b0].[Title], [b0].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc], [c0].[Id], [c0].[CreatedAtUtc], [c0].[Description], [c0].[IsDeleted], [c0].[Name], [c0].[ParentCategoryId], [c0].[UpdatedAtUtc]
+FROM (
+    SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc]
+    FROM [Books] AS [b]
+    WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ORDER BY [b].[CreatedAtUtc] DESC
+    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+) AS [b0]
+LEFT JOIN [Authors] AS [a] ON [b0].[AuthorId] = [a].[Id]
+INNER JOIN (
+    SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+    FROM [Categories] AS [c]
+    WHERE [c].[IsDeleted] = CAST(0 AS bit)
+) AS [c0] ON [b0].[CategoryId] = [c0].[Id]
+ORDER BY [b0].[CreatedAtUtc] DESC
+2025-05-15 23:41:06.730 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+FROM [Categories] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [c].[Name]
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2025-05-15 23:41:08.707 +07:00 [INF] (Bookstore.Application.Services.AuthorService) Fetching all authors. Page: 1, PageSize: 15
+2025-05-15 23:41:08.711 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__p_0='0', @__p_1='15'], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Authors] AS [a]
+ORDER BY [a].[Name]
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2025-05-15 23:41:12.285 +07:00 [INF] (Bookstore.Application.Services.ReportService) Fetching admin dashboard summary.
+2025-05-15 23:41:12.297 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (10ms) [Parameters=[@__todayStart_0='2025-05-15T00:00:00.0000000Z', @__tomorrowStart_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Orders] AS [o]
+WHERE [o].[OrderDate] >= @__todayStart_0 AND [o].[OrderDate] < @__tomorrowStart_1 AND [o].[Status] <> CAST(4 AS tinyint)
+2025-05-15 23:41:12.304 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__todayStart_0='2025-05-15T00:00:00.0000000Z', @__tomorrowStart_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(SUM([o].[TotalAmount]), 0.0)
+FROM [Orders] AS [o]
+WHERE [o].[OrderDate] >= @__todayStart_0 AND [o].[OrderDate] < @__tomorrowStart_1 AND [o].[Status] = CAST(3 AS tinyint)
+2025-05-15 23:41:12.309 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__todayStart_0='2025-05-15T00:00:00.0000000Z', @__tomorrowStart_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Users] AS [u]
+WHERE [u].[CreatedAtUtc] >= @__todayStart_0 AND [u].[CreatedAtUtc] < @__tomorrowStart_1
+2025-05-15 23:41:12.314 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (2ms) [Parameters=[@__lowStockThreshold_0='5'], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Books] AS [b]
+WHERE [b].[IsDeleted] = CAST(0 AS bit) AND [b].[IsDeleted] = CAST(0 AS bit) AND [b].[StockQuantity] > 0 AND [b].[StockQuantity] <= @__lowStockThreshold_0
+2025-05-15 23:41:12.317 +07:00 [INF] (Bookstore.Application.Services.ReportService) Admin dashboard summary fetched successfully.
+2025-05-15 23:41:13.514 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetching home dashboard data.
+2025-05-15 23:41:13.519 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [b].[CreatedAtUtc] DESC
+2025-05-15 23:41:13.521 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 10 newest books.
+2025-05-15 23:41:13.531 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (8ms) [Parameters=[@__p_2='5', @__inclusiveStartDate_0='2025-04-15T00:00:00.0000000Z', @__inclusiveEndDate_1='2025-05-16T00:00:00.0000000Z'], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[BookId], [b2].[Title] AS [BookTitle], [s].[TotalQuantitySold]
+FROM (
+    SELECT TOP(@__p_2) [o].[BookId], COALESCE(SUM([o].[Quantity]), 0) AS [TotalQuantitySold]
+    FROM [OrderDetails] AS [o]
+    INNER JOIN [Orders] AS [o0] ON [o].[OrderId] = [o0].[Id]
+    INNER JOIN (
+        SELECT [b].[Id], [b].[IsDeleted]
+        FROM [Books] AS [b]
+        WHERE [b].[IsDeleted] = CAST(0 AS bit)
+    ) AS [b0] ON [o].[BookId] = [b0].[Id]
+    WHERE [o0].[Status] = CAST(3 AS tinyint) AND [o0].[OrderDate] >= @__inclusiveStartDate_0 AND [o0].[OrderDate] < @__inclusiveEndDate_1 AND [b0].[IsDeleted] = CAST(0 AS bit)
+    GROUP BY [o].[BookId]
+    ORDER BY COALESCE(SUM([o].[Quantity]), 0) DESC
+) AS [s]
+INNER JOIN (
+    SELECT [b1].[Id], [b1].[Title]
+    FROM [Books] AS [b1]
+    WHERE [b1].[IsDeleted] = CAST(0 AS bit)
+) AS [b2] ON [s].[BookId] = [b2].[Id]
+ORDER BY [s].[TotalQuantitySold] DESC
+2025-05-15 23:41:13.539 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (4ms) [Parameters=[@__bestsellerBookIds_0='["ba80e2b5-b426-44eb-acfa-06315f9fcb6b","c191919e-e763-4e03-9e2b-24d944f4d401","39f2e54f-3480-424d-9611-a9b9097314a9","6c50f852-d8c7-4ef9-a26a-c9d292ef9108","1ed59d04-83f1-4624-8739-3de94c30e54b"]' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[AuthorId], [b].[CategoryId], [b].[CoverImageUrl], [b].[CreatedAtUtc], [b].[Description], [b].[ISBN], [b].[IsDeleted], [b].[Price], [b].[PublicationYear], [b].[Publisher], [b].[StockQuantity], [b].[Title], [b].[UpdatedAtUtc], [a].[Id], [a].[Biography], [a].[CreatedAtUtc], [a].[Name], [a].[UpdatedAtUtc]
+FROM [Books] AS [b]
+LEFT JOIN [Authors] AS [a] ON [b].[AuthorId] = [a].[Id]
+WHERE [b].[IsDeleted] = CAST(0 AS bit) AND [b].[Id] IN (
+    SELECT [b0].[value]
+    FROM OPENJSON(@__bestsellerBookIds_0) WITH ([value] uniqueidentifier '$') AS [b0]
+) AND [b].[IsDeleted] = CAST(0 AS bit)
+2025-05-15 23:41:13.542 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Fetched 5 bestselling books.
+2025-05-15 23:41:13.547 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[@__currentDate_0='2025-05-15T16:41:13.5439885Z', @__currentDate_1='2025-05-15T16:41:13.5439885Z' (Nullable = true)], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Code], [p].[CreatedAtUtc], [p].[CurrentUsage], [p].[Description], [p].[DiscountAmount], [p].[DiscountPercentage], [p].[EndDate], [p].[IsActive], [p].[MaxUsage], [p].[StartDate], [p].[UpdatedAtUtc]
+FROM [Promotions] AS [p]
+WHERE [p].[IsActive] = CAST(1 AS bit) AND [p].[StartDate] <= @__currentDate_0 AND ([p].[EndDate] IS NULL OR [p].[EndDate] >= @__currentDate_1) AND ([p].[MaxUsage] IS NULL OR [p].[CurrentUsage] < [p].[MaxUsage])
+ORDER BY [p].[EndDate]
+2025-05-15 23:41:13.554 +07:00 [INF] (Microsoft.EntityFrameworkCore.Database.Command) Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[CreatedAtUtc], [c].[Description], [c].[IsDeleted], [c].[Name], [c].[ParentCategoryId], [c].[UpdatedAtUtc]
+FROM [Categories] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit) AND [c].[ParentCategoryId] IS NULL AND [c].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [c].[Name]
+2025-05-15 23:41:13.558 +07:00 [INF] (Bookstore.Application.Services.DashboardService) Successfully fetched home dashboard data.

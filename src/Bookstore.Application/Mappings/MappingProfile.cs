@@ -8,6 +8,7 @@ using Bookstore.Application.Dtos.Books;
 using Bookstore.Application.Dtos.Carts;
 using Bookstore.Application.Dtos.Categories;
 using Bookstore.Application.Dtos.Dashboard;
+using Bookstore.Application.Dtos.Inventory;
 using Bookstore.Application.Dtos.Orders;
 using Bookstore.Application.Dtos.Promotions;
 using Bookstore.Application.Dtos.Reviews;
@@ -121,7 +122,9 @@ namespace Bookstore.Application.Mappings
             CreateMap<StockReceiptDetail, StockReceiptDetailDto>()
                  .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book != null ? src.Book.Title : null));
 
-
+            CreateMap<InventoryLog, InventoryLogDto>()
+                .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book != null ? src.Book.Title : "N/A"))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "N/A"));
         }
     }
 }
