@@ -65,10 +65,11 @@ namespace Bookstore.Application.Services
             return true;
         }
 
-        public async Task<IEnumerable<AuthorDto>> GetAllAuthorsAsync(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<AuthorDto>> GetAllAuthorsAsync(string? search, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Fetching all authors. Page: {Page}, PageSize: {PageSize}", page, pageSize);
+            _logger.LogInformation("Fetching all authors. Page: {Page}, PageSize: {PageSize}, Search: {Search}", page, pageSize, search);
             var authors = await _unitOfWork.AuthorRepository.ListAsync(
+                filter: a => string.IsNullOrEmpty(search) || a.Name.Contains(search),
                 orderBy: q => q.OrderBy(a => a.Name),
                 isTracking: false,
                 page: page,

@@ -22,11 +22,12 @@ namespace Bookstore.Api.Controllers.v1
         [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories(
+                     [FromQuery] string? search,
                      [FromQuery] int page = 1,
                      [FromQuery] int pageSize = 10,
                      CancellationToken cancellationToken = default)
         {
-            return Ok(await _categoryService.GetAllCategoriesAsync(page, pageSize, cancellationToken));
+            return Ok(await _categoryService.GetAllCategoriesAsync(search, page, pageSize, cancellationToken));
         }
 
         // GET: api/v1/categories/{id}

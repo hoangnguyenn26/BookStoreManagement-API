@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using Bookstore.Application.Dtos.Categories;
 using Bookstore.Application.Interfaces;
 using Bookstore.Application.Interfaces.Services;
@@ -39,9 +38,10 @@ namespace Bookstore.Application.Services
             return true;
         }
 
-        public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync(string? search, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
             var categories = await _unitOfWork.CategoryRepository.ListAsync(
+                filter: c => string.IsNullOrEmpty(search) || c.Name.Contains(search),
                 orderBy: q => q.OrderBy(c => c.Name),
                 isTracking: false,
                 page: page,

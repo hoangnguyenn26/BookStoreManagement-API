@@ -5,7 +5,7 @@ namespace Bookstore.Application.Interfaces.Services
 {
     public interface ICategoryService
     {
-        Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default);
+        Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync(string? search, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default);
         Task<CategoryDto?> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto createCategoryDto, CancellationToken cancellationToken = default);
         Task<bool> UpdateCategoryAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken cancellationToken = default);
