@@ -29,9 +29,10 @@ namespace Bookstore.Api.Controllers.Admin
             [FromQuery] int pageSize = 10,
             [FromQuery] string? role = null,
             [FromQuery] bool? isActive = null,
+            [FromQuery] string? search = null,
             CancellationToken cancellationToken = default)
         {
-            var users = await _userService.GetAllUsersAsync(page, pageSize, role, isActive, cancellationToken);
+            var users = await _userService.GetAllUsersAsync(page, pageSize, role, isActive, search, cancellationToken);
             return Ok(users);
         }
 

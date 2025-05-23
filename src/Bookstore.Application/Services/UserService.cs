@@ -22,28 +22,55 @@ namespace Bookstore.Application.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllUsersAsync(int page = 1, int pageSize = 10, string? roleFilter = null, bool? statusFilter = null, CancellationToken cancellationToken = default)
+        // src/Bookstore.Application/Services/UserService.cs
+        // ... (using, constructor, các phương thức khác) ...
+
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync(
+            int page = 1,
+            int pageSize = 10,
+            string? roleFilter = null,
+            bool? isActiveFilter = null,
+            string? searchQuery = null,
+            CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Fetching all users for admin. RoleFilter: {Role}, StatusFilter: {Status}, Page: {Page}, PageSize: {PageSize}",
-                roleFilter ?? "All", statusFilter?.ToString() ?? "All", page, pageSize);
+            _logger.LogInformation("Fetching users for admin. Page: {Page}, PageSize: {PageSize}, Role: {Role}, Active: {Active}, Search: {Search}",
+                page, pageSize, roleFilter ?? "All", isActiveFilter?.ToString() ?? "All", searchQuery ?? "None");
 
-            var predicate = PredicateBuilder.New<User>(true); // true để bắt đầu với AND
+            // --- Xây dựng Filter Expression ---
+            var predicate = PredicateBuilder.New<User>(true);
 
-            if (statusFilter.HasValue)
+            if (!string.IsNullOrWhiteSpace(roleFilter) && roleFilter.ToLower() != "all")
             {
-                predicate = predicate.And(u => u.IsActive == statusFilter.Value);
+                _logger.LogWarning("Role filter in GetAllUsersAsync is complex and not fully implemented without specific repository method for roles.");
             }
 
-            var users = await _unitOfWork.UserRepository.GetAllWithRolesAsync(predicate, page, pageSize, cancellationToken: cancellationToken);
-
-            if (!string.IsNullOrWhiteSpace(roleFilter))
+            if (isActiveFilter.HasValue)
             {
-                users = users.Where(u => u.UserRoles.Any(ur => ur.Role.Name.Equals(roleFilter, StringComparison.OrdinalIgnoreCase)));
+                predicate = predicate.And(u => u.IsActive == isActiveFilter.Value);
             }
+
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                var term = searchQuery.Trim().ToLower();
+                predicate = predicate.And(u =>
+                    (u.UserName != null && u.UserName.ToLower().Contains(term)) ||
+                    (u.Email != null && u.Email.ToLower().Contains(term)) ||
+                    (u.FirstName != null && u.FirstName.ToLower().Contains(term)) ||
+                    (u.LastName != null && u.LastName.ToLower().Contains(term))
+                );
+            }
+            var users = await _unitOfWork.UserRepository.ListAsync(
+                filter: predicate,
+                orderBy: q => q.OrderBy(u => u.UserName),
+                includeProperties: "UserRoles.Role",
+                page: page,
+                pageSize: pageSize,
+                isTracking: false,
+                cancellationToken: cancellationToken
+            );
 
             return _mapper.Map<IEnumerable<UserDto>>(users);
         }
-
 
         public async Task<UserDto?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
