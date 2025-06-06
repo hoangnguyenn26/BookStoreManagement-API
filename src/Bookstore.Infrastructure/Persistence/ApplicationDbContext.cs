@@ -367,39 +367,88 @@ namespace Bookstore.Infrastructure.Persistence
 
         private static void SeedData(ModelBuilder builder)
         {
-            // --- Định nghĩa các Guid tĩnh cho Seed Data ---
+            // --- 1. ĐỊNH NGHĨA CÁC GIÁ TRỊ CỐ ĐỊNH ---
+            // GUIDs
             Guid adminRoleId = new Guid("E1F3E5D4-1111-4F6F-9C5C-9B8D3A5B2A01");
+            Guid staffRoleId = new Guid("C3D5E7B9-3333-4A9A-9B5C-7B6D1A3E0F03");
             Guid userRoleId = new Guid("A2E4F6A8-2222-4D8E-8A4B-8A7C2B4E1F02");
-            Guid adminUserId = new Guid("F54527EB-F806-40DB-BF76-C7B0E5FA6D39");
 
-            // --- Định nghĩa một DateTime tĩnh ---
+            Guid adminId = new Guid("F54527EB-F806-40DB-BF76-C7B0E5FA6D39");
+            Guid staffId = new Guid("D8A8E7C6-9F0A-4B1C-8A5B-9C7E6D5B4A02");
+            Guid customerId1 = new Guid("C7B6A5E4-8E1D-4C9C-9F2E-8B1D0564F01B");
+            Guid customerId2 = new Guid("A6E5D4C3-7D2C-4B8B-8A3F-7C3F5A7B9D2C");
+
+            Guid catFictionId = new Guid("DA2A34A1-F94B-4610-818A-8B1D0564F01B");
+            Guid catSciFiId = new Guid("B8D7B4E0-5A3E-4C9C-8E1D-9A1C3F5B7E0A");
+            Guid catNonFictionId = new Guid("C9E8D5F1-6B4F-4D8D-9F2E-8B2E4F6A8C1B");
+            Guid catTechId = new Guid("E0F9E6A2-7C5A-4E7E-8A3F-7C3F5A7B9D2C");
+
+            Guid authorAsimovId = new Guid("B2C3D4E5-F6A1-4B2C-9D3E-8F1A2B3C4D5E");
+            Guid authorHarariId = new Guid("C3D4E5F6-A1B2-4C3D-8E4F-7A2B3C4D5E6F");
+            Guid authorHuntId = new Guid("E5F6A1B2-C3D4-4E5F-8A6B-5C4D5E6F7A8B");
+
+            Guid supplierFahasaId = new Guid("F1A2B3C4-D5E6-4A1B-8C2D-9E0F1A2B3C4D");
+            Guid supplierTikiId = new Guid("A2B3C4D5-E6F1-4B2C-9D3E-8F1A2B3C4D5E");
+
+            Guid bookFoundationId = new Guid("B1A2C3D4-E5F6-4A1B-8C2D-9E0F1A2B3C4D");
+            Guid bookSapiensId = new Guid("B2C3D4E5-F6A1-4B2C-9D3E-8F1A2B3C4D5E");
+            Guid bookPragmaticId = new Guid("C3D4E5F6-A1B2-4C3D-8E4F-7A2B3C4D5E6F");
+            Guid bookOutOfStockId = new Guid("D4E5F6A1-B2C3-4D4E-9F5A-6B3C4D5E6F7A");
+            Guid bookLowStockId = new Guid("E5F6A1B2-C3D4-4E5F-8A6B-5C4D5E6F7A8B");
+
+            // Password Hash cho "Password123!"
+            string passwordHash = "$2a$11$hBqPh187JFDfmgUxrk4ZJeq7IyuBoLtOPugz.Di9Mc6weUeSDLYcy"; // Hash bạn đã cung cấp
+
+            // Ngày cố định
             var seedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-            // Seed Roles 
+            // --- 2. SEED ROLES ---
             builder.Entity<Role>().HasData(
                 new Role { Id = adminRoleId, Name = "Admin", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new Role { Id = staffRoleId, Name = "Staff", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
                 new Role { Id = userRoleId, Name = "User", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate }
             );
 
-            // --- Seed Admin User ---
+            // --- 3. SEED USERS ---
             builder.Entity<User>().HasData(
-                new User
-                {
-                    Id = adminUserId,
-                    UserName = "admin",
-                    Email = "admin@bookstore.com",
-                    PasswordHash = "$2a$12$PCb6JuQsMqxNkxzSLh1EaOaQBbtDy0wwOdu5xkSu7nbJ31KB8yRAe",
-                    FirstName = "Admin",
-                    LastName = "User",
-                    IsActive = true,
-                    CreatedAtUtc = seedDate,
-                    UpdatedAtUtc = seedDate
-                }
+                new User { Id = adminId, UserName = "adminuser", Email = "admin@example.com", PasswordHash = passwordHash, FirstName = "Admin", LastName = "User", PhoneNumber = "0123456780", IsActive = true, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new User { Id = staffId, UserName = "staffuser", Email = "staff@example.com", PasswordHash = passwordHash, FirstName = "Staff", LastName = "Member", PhoneNumber = "0123456781", IsActive = true, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new User { Id = customerId1, UserName = "customer1", Email = "customer1@example.com", PasswordHash = passwordHash, FirstName = "An", LastName = "Nguyễn", PhoneNumber = "0901234567", IsActive = true, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new User { Id = customerId2, UserName = "customer2", Email = "customer2@example.com", PasswordHash = passwordHash, FirstName = "Bình", LastName = "Trần", PhoneNumber = "0907654321", IsActive = true, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate }
             );
 
-            // --- Seed UserRole cho Admin User ---
+            // --- 4. SEED USERROLES ---
             builder.Entity<UserRole>().HasData(
-                new UserRole { UserId = adminUserId, RoleId = adminRoleId }
+                new UserRole { UserId = adminId, RoleId = adminRoleId },
+                new UserRole { UserId = staffId, RoleId = staffRoleId },
+                new UserRole { UserId = customerId1, RoleId = userRoleId },
+                new UserRole { UserId = customerId2, RoleId = userRoleId }
+            );
+
+            // --- 5. SEED CATEGORIES, AUTHORS, SUPPLIERS ---
+            builder.Entity<Category>().HasData(
+                new { Id = catFictionId, Name = "Tiểu thuyết", Description = "Các tác phẩm hư cấu.", ParentCategoryId = (Guid?)null, IsDeleted = false, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new { Id = catSciFiId, Name = "Khoa học Viễn tưởng", Description = "Tiểu thuyết dựa trên các tiến bộ khoa học công nghệ.", ParentCategoryId = catFictionId, IsDeleted = false, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new { Id = catNonFictionId, Name = "Phi hư cấu", Description = "Dựa trên sự thật và sự kiện có thật.", ParentCategoryId = (Guid?)null, IsDeleted = false, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new { Id = catTechId, Name = "Công nghệ", Description = "Sách về lập trình và phần mềm.", ParentCategoryId = catNonFictionId, IsDeleted = false, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate }
+            );
+            builder.Entity<Author>().HasData(
+                new { Id = authorAsimovId, Name = "Isaac Asimov", Biography = "Nhà văn và giáo sư hóa sinh người Mỹ.", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new { Id = authorHarariId, Name = "Yuval Noah Harari", Biography = "Nhà sử học và giáo sư người Israel.", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new { Id = authorHuntId, Name = "Andrew Hunt", Biography = "Đồng tác giả cuốn The Pragmatic Programmer.", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate }
+            );
+            builder.Entity<Supplier>().HasData(
+                new { Id = supplierFahasaId, Name = "FAHASA", ContactPerson = "Mr. An", Email = "contact@fahasa.com.vn", Phone = "1900636467", Address = "TP.HCM", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new { Id = supplierTikiId, Name = "Tiki Trading", ContactPerson = "Ms. Bình", Email = "trading@tiki.vn", Phone = "19006035", Address = "TP.HCM", CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate }
+            );
+
+            // --- 6. SEED BOOKS ---
+            builder.Entity<Book>().HasData(
+                new { Id = bookFoundationId, Title = "Foundation", Description = "Cuốn tiểu thuyết đầu tiên trong series Foundation.", ISBN = "978-0553293357", AuthorId = authorAsimovId, Publisher = "Spectra", PublicationYear = 1951, CoverImageUrl = "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1417942793l/29579.jpg", Price = 150000.00m, StockQuantity = 50, CategoryId = catSciFiId, IsDeleted = false, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new { Id = bookSapiensId, Title = "Sapiens: Lược sử loài người", Description = "Khám phá lịch sử loài người từ thời Đồ đá.", ISBN = "978-0062316097", AuthorId = authorHarariId, Publisher = "NXB Tri Thức", PublicationYear = 2015, CoverImageUrl = "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1420585954l/23692271.jpg", Price = 250000.00m, StockQuantity = 100, CategoryId = catNonFictionId, IsDeleted = false, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new { Id = bookPragmaticId, Title = "The Pragmatic Programmer", Description = "Hành trình trở thành lập trình viên bậc thầy.", ISBN = "978-0135957059", AuthorId = authorHuntId, Publisher = "Addison-Wesley", PublicationYear = 2019, CoverImageUrl = "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1584551142l/4099.jpg", Price = 350000.00m, StockQuantity = 75, CategoryId = catTechId, IsDeleted = false, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new { Id = bookOutOfStockId, Title = "I, Robot", Description = "Tuyển tập truyện ngắn khoa học viễn tưởng.", ISBN = "978-0553382563", AuthorId = authorAsimovId, Publisher = "Spectra", PublicationYear = 1950, CoverImageUrl = "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1550997314l/41804.jpg", Price = 120000.00m, StockQuantity = 0, CategoryId = catSciFiId, IsDeleted = false, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate },
+                new { Id = bookLowStockId, Title = "Homo Deus: Lược sử Tương lai", Description = "Khám phá tương lai của loài người.", ISBN = "978-0062464316", AuthorId = authorHarariId, Publisher = "NXB Tri Thức", PublicationYear = 2017, CoverImageUrl = "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1473453322l/31138556.jpg", Price = 260000.00m, StockQuantity = 3, CategoryId = catNonFictionId, IsDeleted = false, CreatedAtUtc = seedDate, UpdatedAtUtc = seedDate }
             );
         }
     }

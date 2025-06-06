@@ -1,0 +1,6 @@
+2025-06-06 23:35:43.263 +07:00 [WRN] (Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware) The WebRootPath was not found: C:\Users\Nguyn\Desktop\Đồ án tốt nghiệp\BookStoreManagement\src\Bookstore.Api\wwwroot. Static files may be unavailable.
+2025-06-06 23:35:43.562 +07:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7264
+2025-06-06 23:35:43.564 +07:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5244
+2025-06-06 23:35:43.835 +07:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-06-06 23:35:43.944 +07:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-06-06 23:35:43.949 +07:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: C:\Users\Nguyn\Desktop\Đồ án tốt nghiệp\BookStoreManagement\src\Bookstore.Api
