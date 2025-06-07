@@ -8,9 +8,6 @@ namespace Bookstore.Infrastructure.Persistence
 {
     public class ApplicationDbContext : DbContext
     {
-        private static readonly Guid AdminRoleId = new Guid("E1F3E5D4-1111-4F6F-9C5C-9B8D3A5B2A01");
-        private static readonly Guid UserRoleId = new Guid("A2E4F6A8-2222-4D8E-8A4B-8A7C2B4E1F02");
-
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
