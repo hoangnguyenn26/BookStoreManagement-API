@@ -203,7 +203,7 @@ void ConfigurePipeline(WebApplication app, IWebHostEnvironment env, IServiceProv
     {
         app.UseHsts();
     }
-    app.UseHttpsRedirection();
+    //app.UseHttpsRedirection();
 
     app.UseStaticFiles();
     app.UseRouting();
