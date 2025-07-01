@@ -18,12 +18,6 @@ API Backend Mạnh mẽ cho Hệ thống Quản lý Nhà sách
 - [Kiến trúc](#kiến-trúc)
 - [Tính năng Chính](#tính-năng-chính)
 - [Công nghệ Sử dụng](#công-nghệ-sử-dụng)
-- [Bắt đầu](#bắt-đầu)
-  - [Điều kiện Tiên quyết](#điều-kiện-tiên-quyết)
-  - [Cài đặt & Thiết lập](#cài-đặt--thiết-lập)
-  - [Chạy API](#chạy-api)
-  - [Tài liệu API (Swagger)](#tài-liệu-api-swagger)
-  - [Cấu hình](#cấu-hình)
 - [Kiểm thử (Testing)](#kiểm-thử-testing)
 
 ## **Tổng quan**
@@ -71,94 +65,6 @@ Dự án áp dụng **Layered Architecture (Kiến trúc Phân lớp)** để đ
 -   **Testing:** xUnit, Moq, `Microsoft.AspNetCore.Mvc.Testing`
 -   **API Versioning:** `Microsoft.AspNetCore.Mvc.Versioning`
 
-## **Bắt đầu**
-
-### **Điều kiện Tiên quyết**
-
-Trước khi bắt đầu, hãy đảm bảo bạn đã cài đặt:
-
--   **.NET SDK 8.0** (Hoặc phiên bản tương ứng với dự án) - [Tải tại đây](https://dotnet.microsoft.com/download)
--   **Microsoft SQL Server:** Phiên bản nào cũng được (SQL Server Express miễn phí là đủ) - [Tải SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
--   **Công cụ quản lý CSDL:**
-    -   SQL Server Management Studio (SSMS) - [Tải SSMS](https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms)
-    -   Hoặc Azure Data Studio - [Tải Azure Data Studio](https://learn.microsoft.com/en-us/sql/azure-data-studio/download-azure-data-studio)
--   **IDE / Code Editor:**
-    -   Visual Studio 2022 (Recommended) - [Tải Visual Studio](https://visualstudio.microsoft.com/vs/)
-    -   Hoặc Visual Studio Code - [Tải VS Code](https://code.visualstudio.com/)
--   **Git:** - [Tải Git](https://git-scm.com/downloads)
--   **(Tùy chọn) Postman hoặc công cụ tương tự:** Để kiểm thử API endpoints.
-
-### **Cài đặt & Thiết lập**
-
-1.  **Clone Repository:**
-    ```bash
-    git clone https://github.com/hoangnguyenn26/BookStoreManagement-API.git
-    cd BookStoreManagement-API
-    ```
-
-2.  **Cấu hình Secrets:**
-    API này cần các thông tin cấu hình nhạy cảm như Chuỗi kết nối CSDL và Khóa bí mật JWT. **Không** lưu trữ các giá trị này trực tiếp trong `appsettings.json` khi commit lên Git. Sử dụng **User Secrets** cho môi trường Development:
-    *   Mở Terminal/Command Prompt tại thư mục `src/Bookstore.Api`.
-    *   Chạy lệnh `dotnet user-secrets init` (nếu chưa khởi tạo).
-    *   Thiết lập Connection String (thay thế bằng thông tin của bạn):
-        ```bash
-        dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=YOUR_SERVER;Database=BookstoreDb;User ID=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True;MultipleActiveResultSets=true"
-        # Hoặc dùng Windows Auth:
-        # dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=YOUR_SERVER;Database=BookstoreDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
-        ```
-    *   Thiết lập JWT Settings (thay thế Key bằng chuỗi bí mật mạnh, dài của bạn):
-        ```bash
-        dotnet user-secrets set "JwtSettings:Key" "Your_Super_Secret_And_Long_Key_Goes_Here_Replace_This_Immediately"
-        dotnet user-secrets set "JwtSettings:Issuer" "BookstoreManagementApi"
-        dotnet user-secrets set "JwtSettings:Audience" "BookstoreManagementApiClient"
-        dotnet user-secrets set "JwtSettings:DurationInMinutes" "60"
-        ```
-    *   *(Xem thêm phần [Cấu hình](#cấu-hình) bên dưới)*
-
-3.  **Restore Dependencies:**
-    Tại thư mục gốc của solution (chứa file `.sln`), chạy:
-    ```bash
-    dotnet restore
-    ```
-
-4.  **Áp dụng Database Migrations:**
-    Đảm bảo chuỗi kết nối trong User Secrets đã đúng và SQL Server đang chạy. Sau đó chạy lệnh sau từ thư mục gốc của solution:
-    ```bash
-    dotnet ef database update --project src/Bookstore.Infrastructure --startup-project src/Bookstore.Api
-    ```
-    Lệnh này sẽ tạo CSDL `BookstoreDb` (nếu chưa có) và tất cả các bảng cần thiết dựa trên EF Core Migrations.
-
-### **Chạy API**
-
-1.  **Cách 1 (Dùng .NET CLI):**
-    *   Mở Terminal/Command Prompt tại thư mục `src/Bookstore.Api`.
-    *   Chạy lệnh:
-        ```bash
-        dotnet run
-        ```
-2.  **Cách 2 (Dùng Visual Studio):**
-    *   Mở file `BookstoreManagement.sln` bằng Visual Studio 2022.
-    *   Chọn project `Bookstore.Api` làm Startup Project.
-    *   Nhấn `F5` hoặc nút Start Debugging.
-
-API sẽ khởi chạy và lắng nghe trên các cổng được cấu hình trong `launchSettings.json` (ví dụ: `https://localhost:7264` và `http://localhost:5244`).
-
-### **Tài liệu API (Swagger)**
-
-Sau khi API khởi chạy, bạn có thể truy cập giao diện Swagger UI tương tác để xem tất cả các endpoints, mô tả, và thử nghiệm trực tiếp:
-
-*   Mở trình duyệt và truy cập URL gốc của API (thường là địa chỉ HTTPS), ví dụ: **`https://localhost:7264`** (port có thể khác trên máy bạn).
-*   Giao diện Swagger UI sẽ hiển thị. Bạn có thể chọn phiên bản API (v1), xem các Controllers, Endpoints, Schemas (DTOs) và thực hiện các request thử nghiệm. Để test các endpoint yêu cầu xác thực, hãy dùng endpoint `/api/auth/login` để lấy token, sau đó nhấn nút "Authorize" trên Swagger và nhập token theo định dạng `Bearer your_token`.
-
-### **Cấu hình**
-
-*   **Chuỗi Kết nối (Connection String):**
-    *   **Development:** Nên được đặt trong **User Secrets** (xem phần Cài đặt).
-    *   **Production:** Sử dụng biến môi trường (Environment Variables), Azure Key Vault, hoặc các cơ chế quản lý cấu hình an toàn khác. Cấu hình đọc từ `appsettings.Production.json` (nếu có) hoặc biến môi trường sẽ ghi đè `appsettings.json`.
-*   **Cài đặt JWT (JwtSettings):**
-    *   **Development:** `Key`, `Issuer`, `Audience`, `DurationInMinutes` nên được đặt trong **User Secrets**. Đặc biệt `Key` phải là một chuỗi dài, phức tạp và bí mật.
-    *   **Production:** Tương tự Connection String, sử dụng biến môi trường hoặc Key Vault cho `Key`. `Issuer`, `Audience`, `DurationInMinutes` có thể đặt trong `appsettings.Production.json` hoặc biến môi trường.
-
 ## **Kiểm thử (Testing)**
 
 Dự án sử dụng xUnit làm framework kiểm thử. Bạn có thể chạy các Unit Test và Integration Test bằng các cách sau:
@@ -168,3 +74,5 @@ Dự án sử dụng xUnit làm framework kiểm thử. Bạn có thể chạy c
     ```bash
     dotnet test
     ```
+- Kiểm tra đánh giá chất lượng API (by K6 - javascripts)
+  ![image](https://github.com/user-attachments/assets/78a1fb47-1878-4ca2-a59f-ec6807960a9c)
