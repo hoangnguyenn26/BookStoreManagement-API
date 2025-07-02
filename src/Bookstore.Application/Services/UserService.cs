@@ -107,5 +107,49 @@ namespace Bookstore.Application.Services
             _logger.LogInformation("Successfully updated status for user {UserId} to IsActive={IsActive}", userId, statusDto.IsActive);
             return true;
         }
+
+        public async Task<PagedResult<UserDto>> GetAllUsersPagedAsync(
+            int page = 1,
+            int pageSize = 10,
+            string? roleFilter = null,
+            bool? isActiveFilter = null,
+            string? searchQuery = null,
+            CancellationToken cancellationToken = default)
+        {
+            var predicate = PredicateBuilder.New<User>(true);
+            if (!string.IsNullOrWhiteSpace(roleFilter) && roleFilter.ToLower() != "all")
+            {
+                _logger.LogWarning("Role filter in GetAllUsersPagedAsync is complex and not fully implemented without specific repository method for roles.");
+            }
+            if (isActiveFilter.HasValue)
+            {
+                predicate = predicate.And(u => u.IsActive == isActiveFilter.Value);
+            }
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                var term = searchQuery.Trim().ToLower();
+                predicate = predicate.And(u =>
+                    (u.UserName != null && u.UserName.ToLower().Contains(term)) ||
+                    (u.Email != null && u.Email.ToLower().Contains(term)) ||
+                    (u.FirstName != null && u.FirstName.ToLower().Contains(term)) ||
+                    (u.LastName != null && u.LastName.ToLower().Contains(term))
+                );
+            }
+            var users = await _unitOfWork.UserRepository.ListAsync(
+                filter: predicate,
+                orderBy: q => q.OrderBy(u => u.UserName),
+                includeProperties: "UserRoles.Role",
+                page: page,
+                pageSize: pageSize,
+                isTracking: false,
+                cancellationToken: cancellationToken
+            );
+            var totalCount = await _unitOfWork.UserRepository.CountAsync(predicate, cancellationToken);
+            return new PagedResult<UserDto>
+            {
+                Items = _mapper.Map<List<UserDto>>(users),
+                TotalCount = totalCount
+            };
+        }
     }
 }

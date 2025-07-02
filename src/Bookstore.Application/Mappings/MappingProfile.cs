@@ -87,9 +87,9 @@ namespace Bookstore.Application.Mappings
             CreateMap<UpdatePromotionDto, Promotion>();
 
             // ----- Review Mappings -----
-            CreateMap<Review, ReviewDto>()
+            CreateMap<Reviews, ReviewDto>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Unknown User"));
-            CreateMap<CreateReviewDto, Review>();
+            CreateMap<CreateReviewDto, Reviews>();
 
             // ----- Dashboard Mappings -----
             CreateMap<Book, BookSummaryDto>()

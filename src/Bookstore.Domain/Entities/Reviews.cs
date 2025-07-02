@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Bookstore.Domain.Entities
 {
-    public class Review : BaseEntity
+    public class Reviews : BaseEntity
     {
         public Guid BookId { get; set; }
         public Guid UserId { get; set; }

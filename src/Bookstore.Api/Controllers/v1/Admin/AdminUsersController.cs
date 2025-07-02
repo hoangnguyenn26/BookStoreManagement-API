@@ -1,5 +1,4 @@
-﻿
-using Bookstore.Application.Dtos;
+﻿using Bookstore.Application.Dtos;
 using Bookstore.Application.Dtos.Admin.Users;
 using Bookstore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -23,8 +22,8 @@ namespace Bookstore.Api.Controllers.Admin
 
         // GET: api/admin/users
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<UserDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers(
+        [ProducesResponseType(typeof(PagedResult<UserDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<PagedResult<UserDto>>> GetUsers(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] string? role = null,
@@ -32,8 +31,8 @@ namespace Bookstore.Api.Controllers.Admin
             [FromQuery] string? search = null,
             CancellationToken cancellationToken = default)
         {
-            var users = await _userService.GetAllUsersAsync(page, pageSize, role, isActive, search, cancellationToken);
-            return Ok(users);
+            var result = await _userService.GetAllUsersPagedAsync(page, pageSize, role, isActive, search, cancellationToken);
+            return Ok(result);
         }
 
         // GET: api/admin/users/{userId}

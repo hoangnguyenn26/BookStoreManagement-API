@@ -36,7 +36,7 @@ namespace Bookstore.Application.Services
                 throw new ValidationException("You have already reviewed this book.");
             }
 
-            var reviewEntity = _mapper.Map<Review>(createDto);
+            var reviewEntity = _mapper.Map<Reviews>(createDto);
             reviewEntity.UserId = userId;
             reviewEntity.BookId = bookId;
             reviewEntity.IsApproved = true;

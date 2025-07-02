@@ -311,7 +311,7 @@ namespace Bookstore.Infrastructure.Persistence
             });
 
             // ----- Cấu hình Review -----
-            builder.Entity<Review>(entity =>
+            builder.Entity<Reviews>(entity =>
             {
                 // Ràng buộc UNIQUE để mỗi User chỉ đánh giá 1 Book 1 lần
                 entity.HasIndex(r => new { r.UserId, r.BookId }).IsUnique();

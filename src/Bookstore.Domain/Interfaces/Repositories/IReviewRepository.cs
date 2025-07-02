@@ -2,9 +2,9 @@
 
 namespace Bookstore.Domain.Interfaces.Repositories
 {
-    public interface IReviewRepository : IGenericRepository<Review>
+    public interface IReviewRepository : IGenericRepository<Reviews>
     {
-        Task<IEnumerable<Review>> GetReviewsByBookIdAsync(Guid bookId, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default);
-        Task<Review?> GetByUserIdAndBookIdAsync(Guid userId, Guid bookId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Reviews>> GetReviewsByBookIdAsync(Guid bookId, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default);
+        Task<Reviews?> GetByUserIdAndBookIdAsync(Guid userId, Guid bookId, CancellationToken cancellationToken = default);
     }
 }
