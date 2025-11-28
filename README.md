@@ -1,78 +1,150 @@
 <div align="center">
 
 # **BookStoreManagement-API**
+### **ASP.NET Core Clean Architecture Bookstore Management API**
 
-API Backend Mạnh mẽ cho Hệ thống Quản lý Nhà sách
-*(Empowering Bookstores, Simplifying Management Efforts)*
+A powerful and scalable backend API for modern bookstore management systems.  
+*(Empowering Bookstores – Simplifying Operations)*
 
-[![phiên bản .NET](https://img.shields.io/badge/.NET-8.0-blueviolet)](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
-[![last commit](https://img.shields.io/github/last-commit/hoangnguyenn26/BookStoreManagement-API)](https://github.com/hoangnguyenn26/BookStoreManagement-API/commits/main)
-[![languages](https://img.shields.io/github/languages/count/hoangnguyenn26/BookStoreManagement-API)](https://github.com/hoangnguyenn26/BookStoreManagement-API)
-[![license](https://img.shields.io/github/license/hoangnguyenn26/BookStoreManagement-API)](https://github.com/hoangnguyenn26/BookStoreManagement-API/blob/main/LICENSE) <!-- Thêm License nếu có -->
+[![.NET Version](https://img.shields.io/badge/.NET-8.0-blueviolet)](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+[![Last Commit](https://img.shields.io/github/last-commit/hoangnguyenn26/BookStoreManagement-API)](https://github.com/hoangnguyenn26/BookStoreManagement-API/commits/main)
+[![Languages](https://img.shields.io/github/languages/count/hoangnguyenn26/BookStoreManagement-API)](https://github.com/hoangnguyenn26/BookStoreManagement-API)
+[![License](https://img.shields.io/github/license/hoangnguyenn26/BookStoreManagement-API)](https://github.com/hoangnguyenn26/BookStoreManagement-API/blob/main/LICENSE)
+
+---
+
+### 🔍 **Keywords**
+`Bookstore Management API`, `ASP.NET Core Web API`, `Bookstore Backend`,  
+`Book Management System`, `Clean Architecture API`, `EF Core Bookstore`,  
+`Inventory Management API`, `Order Management API`
 
 </div>
 
-## **Mục lục**
+---
 
-- [Tổng quan](#tổng-quan)
-- [Kiến trúc](#kiến-trúc)
-- [Tính năng Chính](#tính-năng-chính)
-- [Công nghệ Sử dụng](#công-nghệ-sử-dụng)
-- [Kiểm thử (Testing)](#kiểm-thử-testing)
+## 📘 **Overview**
 
-## **Tổng quan**
+**BookStoreManagement-API** is a robust **ASP.NET Core Bookstore Management API** built with **Clean Architecture**, designed to support modern bookstore operations.  
+The project focuses on:
 
-**BookStoreManagement-API** cung cấp một giải pháp backend mạnh mẽ được thiết kế để đơn giản hóa và tối ưu hóa hoạt động của nhà sách. API này được xây dựng bằng ASP.NET Core, tuân theo các nguyên tắc thiết kế hiện đại, cho phép các nhà phát triển tạo ra các hệ thống quản lý hiệu quả, dễ mở rộng và bảo trì.
+- High performance  
+- Security  
+- Extensibility  
+- Ease of maintenance  
 
-## **Kiến trúc**
+It serves as an excellent foundation for building bookstore systems, retail management platforms, or scalable e-commerce backends.
 
-Dự án áp dụng **Layered Architecture (Kiến trúc Phân lớp)** để đảm bảo sự phân tách rõ ràng các mối quan tâm (Separation of Concerns):
+---
 
--   **Domain:** Chứa các Entities, Enums, Interfaces (Repositories, Domain Services), logic nghiệp vụ cốt lõi.
--   **Application:** Chứa logic ứng dụng (Use Cases), DTOs, Interfaces (Application Services, Infrastructure Services), Validators, Mappers.
--   **Infrastructure:** Chứa các triển khai cụ thể liên quan đến kỹ thuật bên ngoài: Truy cập CSDL (EF Core DbContext, Repositories, UnitOfWork), triển khai Services bên ngoài (Email, Token...).
--   **Api:** Lớp trình bày (Presentation Layer), chứa Controllers, Middleware, cấu hình DI, Authentication, Authorization, Swagger...
+## 🏛️ **Architecture (Clean / Layered Architecture)**
 
-## **Tính năng Chính**
+The project follows a clean separation of concerns across four layers:
 
--   📦 **Kiến trúc Module Phân lớp:** Tăng cường khả năng bảo trì, mở rộng và kiểm thử.
--   👤 **Quản lý Người dùng Toàn diện:** Xác thực (JWT), Phân quyền theo Vai trò (User, Admin, Staff), Quản lý Hồ sơ và Địa chỉ.
--   📚 **Quản lý Danh mục Sản phẩm:** CRUD cho Sách, Danh mục (hỗ trợ phân cấp), Tác giả.
--   🛒 **Xử lý Giỏ hàng & Đơn hàng:** Quản lý giỏ hàng phía server, quy trình Checkout, tạo đơn hàng online và tại cửa hàng (In-Store), quản lý trạng thái đơn hàng, snapshot địa chỉ/giá.
-*   **Quản lý Nhà Cung cấp & Nhập kho:** Theo dõi Nhà cung cấp, ghi nhận Phiếu nhập kho và cập nhật tồn kho tự động.
-*   📊 **Quản lý Tồn kho & Nhật ký:** Theo dõi `StockQuantity`, ghi `InventoryLogs` chi tiết cho các thay đổi.
-*   🏷️ **Quản lý Khuyến mãi:** Tạo và áp dụng mã khuyến mãi, theo dõi lượt sử dụng.
-*   ⭐ **Quản lý Đánh giá:** Cho phép User đánh giá sách và Admin kiểm duyệt.
-*   📈 **Báo cáo & Dashboard:** Cung cấp thông tin tổng quan (Admin/User Dashboard), báo cáo Doanh thu, Sách bán chạy, Tồn kho thấp.
-*   🔬 **Kiểm thử (Testing):** Hỗ trợ Unit Test (xUnit, Moq) và Integration Test (`Microsoft.AspNetCore.Mvc.Testing`).
-*   ⚠️ **Middleware Xử lý lỗi:** Cơ chế bắt lỗi tập trung, trả về lỗi chuẩn hóa và logging chi tiết.
-*   📄 **Tài liệu API Tự động (Swagger):** Tích hợp Swagger (OpenAPI) để dễ dàng khám phá và kiểm thử endpoints.
-*   🔐 **Bảo mật:** JWT Authentication, Password Hashing (BCrypt), Authorization theo Role.
-*   🚀 **API Versioning:** Hỗ trợ quản lý các phiên bản API.
+### **1. Domain Layer – Core Business Model**
+- Entities and Value Objects  
+- Domain Services  
+- Business rules and domain logic  
+- Domain Interfaces (Repositories, Services)
 
-## **Công nghệ Sử dụng**
+### **2. Application Layer – Use Cases**
+- DTOs and Validators (FluentValidation)  
+- Application Services  
+- AutoMapper Profiles  
+- Business workflows  
 
--   **Framework:** ASP.NET Core 8.0 (Hoặc phiên bản cụ thể bạn dùng)
--   **Ngôn ngữ:** C# 12 (Hoặc phiên bản cụ thể bạn dùng)
--   **Database:** Microsoft SQL Server (Có thể dùng bản Express)
--   **ORM:** Entity Framework Core 8.0 (Code-First)
--   **API Documentation:** Swashbuckle.AspNetCore (Swagger UI)
--   **Authentication:** JWT Bearer Tokens (`Microsoft.AspNetCore.Authentication.JwtBearer`)
--   **Mapping:** AutoMapper (`AutoMapper.Extensions.Microsoft.DependencyInjection`)
--   **Validation:** FluentValidation (`FluentValidation.AspNetCore`)
--   **Password Hashing:** BCrypt.Net (`BCrypt.Net-Next`)
--   **Logging:** Serilog (với Sinks Console, File...)
--   **Testing:** xUnit, Moq, `Microsoft.AspNetCore.Mvc.Testing`
--   **API Versioning:** `Microsoft.AspNetCore.Mvc.Versioning`
+### **3. Infrastructure Layer – Technical Implementations**
+- EF Core DbContext (Code-First)  
+- Repository + Unit of Work patterns  
+- Email / Token services  
+- Logging, caching, integrations
 
-## **Kiểm thử (Testing)**
+### **4. API Layer – Presentation**
+- Controllers  
+- Custom Middleware (Exception Handling, Logging)  
+- Dependency Injection setup  
+- Authentication & Authorization  
+- Swagger / OpenAPI documentation  
+- API Versioning  
 
-Dự án sử dụng xUnit làm framework kiểm thử. Bạn có thể chạy các Unit Test và Integration Test bằng các cách sau:
+---
 
-*   **Visual Studio Test Explorer:** Mở Test Explorer (Test -> Test Explorer) và chạy các test từ đó.
-*   **.NET CLI:** Tại thư mục gốc của solution, chạy lệnh:
-    ```bash
-    dotnet test
-    ```
-- Kiểm tra đánh giá chất lượng API (by K6 - javascripts)
-  ![image](https://github.com/user-attachments/assets/78a1fb47-1878-4ca2-a59f-ec6807960a9c)
+## 🚀 **Key Features**
+
+### 👤 **User Management**
+- Registration & Login  
+- JWT Authentication  
+- Role-based Authorization (Admin, Staff, User)  
+- User profiles & addresses  
+
+### 📚 **Book & Catalog Management**
+- CRUD for Books, Authors, and Categories  
+- Nested category hierarchy  
+- Automatic stock updates  
+
+### 🛒 **Cart & Order Management**
+- Server-side shopping cart  
+- Checkout workflow  
+- Online & In-store order creation  
+- Order state tracking  
+- Snapshot pricing/address per order  
+
+### 🏷️ **Coupon & Promotion System**
+- Discount code generation  
+- Usage tracking  
+- Configurable conditions  
+
+### ⭐ **Book Reviews**
+- User reviews  
+- Admin moderation  
+
+### 📊 **Dashboard & Reports**
+- Revenue analytics  
+- Top-selling books  
+- Low-stock tracking  
+- User activity insights  
+
+### ⚠️ **Centralized Error Handling**
+- Unified error responses  
+- Detailed request logging  
+- Handled via custom middleware  
+
+### 🔐 **Security**
+- JWT Authentication  
+- BCrypt password hashing  
+- Role-based access control  
+
+### 🔬 **Testing**
+- Unit tests (xUnit + Moq)  
+- Integration tests using `Microsoft.AspNetCore.Mvc.Testing`  
+- Performance tests via **K6**
+
+---
+
+## 🛠️ **Tech Stack**
+
+| Technology | Purpose |
+|------------|---------|
+| **ASP.NET Core 8** | Main backend framework |
+| **C# 12** | Programming language |
+| **Entity Framework Core 8** | ORM (Code-First) |
+| **SQL Server** | Primary database |
+| **AutoMapper** | Object mapping |
+| **FluentValidation** | Request validation |
+| **BCrypt.Net** | Password hashing |
+| **JWT Bearer** | Authentication |
+| **Serilog** | Logging |
+| **Swagger / OpenAPI** | API documentation |
+| **xUnit + Moq** | Testing |
+| **API Versioning** | Manage API versions |
+
+---
+
+## 🧪 **Testing**
+
+Run all tests:
+
+```bash
+dotnet test
+```
+### 🔥 **K6-performance Testing**
+<img width="974" height="639" alt="image" src="https://github.com/user-attachments/assets/39755fb4-6e7c-49aa-8d1c-8b0466f27963" />
